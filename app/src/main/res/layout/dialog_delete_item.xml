@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.dong.baselib.widget.layout.UiLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/_12sdp"
+    android:backgroundTint="@color/white"
+    android:orientation="vertical"
+    android:padding="@dimen/_16sdp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rb_600"
+            android:includeFontPadding="false"
+            android:text="@string/deleted_file_from_device"
+            android:textAlignment="textStart"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_16sdp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/file_will_be_deleted_permanently"
+            android:textAlignment="textStart"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_12sdp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <com.dong.baselib.widget.view.UiTextView
+            android:id="@+id/btnCancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:padding="@dimen/_10sdp"
+            android:text="@string/cancels"
+            android:textAlignment="center"
+            android:textColor="@color/color_595959"
+            android:textSize="@dimen/_13sdp"
+            app:bgColorDark="@color/color_F2F2F7"
+            app:bgColorLight="@color/color_F2F2F7"
+            app:cornerRadius="@dimen/_8sdp" />
+
+        <com.dong.baselib.widget.view.UiTextView
+            android:id="@+id/btnAgree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_600"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:padding="@dimen/_10sdp"
+            android:text="@string/delete"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_13sdp"
+            app:bgColorDark="@color/mainColor"
+            app:bgColorLight="@color/mainColor"
+            app:cornerRadius="@dimen/_8sdp" />
+    </LinearLayout>
+</com.dong.baselib.widget.layout.UiLinearLayout>

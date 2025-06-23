@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -17,50 +16,55 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
-            style="@style/Text_500"
+
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_12sdp"
             android:layout_weight="1"
             android:text="@string/feature_that_fits_your_needs"
             android:textColor="@color/black"
-            android:textSize="@dimen/_13ssp" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/btnDone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/_7sdp"
-            android:background="@color/transfer"
-            android:padding="@dimen/_5sdp"
-            android:src="@drawable/ic_done"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:textSize="@dimen/_13sdp" />
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rcvFeature"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:orientation="vertical"
         android:padding="@dimen/_12sdp"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toTopOf="@+id/txtContinue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llAppBar"
+        app:layout_constraintVertical_bias="0.0">
+
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtContinue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:padding="@dimen/_8sdp"
+        android:text="@string/continues"
+        android:fontFamily="@font/rb_500"
+        android:layout_marginBottom="@dimen/_18sdp"
+        android:textColor="#C9CDD4"
+        android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toTopOf="@id/flNativeAd"
-        app:layout_constraintTop_toBottomOf="@id/llAppBar"
-        app:spanCount="3"
-        tools:listitem="@layout/item_feature" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
     <FrameLayout
         android:id="@+id/flNativeAd"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_3sdp"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <include
-            android:id="@+id/shimmerAd"
-            layout="@layout/shimmer_native_common" />
 
     </FrameLayout>
 

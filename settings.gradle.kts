@@ -30,5 +30,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sample Ads First Flow"
+rootProject.name = "AS005 PDF 8"
 include(":app")
+include(":lib")

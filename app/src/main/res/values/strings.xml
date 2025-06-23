@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name" translatable="false">Sample Ads First Flow</string>
+    <string name="fb_app_id" translatable="false">1111111111</string>
+    <string name="fb_client_token" translatable="false">2222222222222222222222</string>
+
+    <string name="this_action_may_contain_advertising">This action may contain advertising</string>
+    <string name="skip">Skip</string>
+    <string name="language">Language</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="get_started">Get Started</string>
+    <string name="swipe_to_next">Swipe to Next</string>
+    <string name="title_onboarding_1">Fast Scan and Recover Lost Data</string>
+    <string name="title_onboarding_2">Safely Recover Lost Photos, Videos, Audios and more</string>
+    <string name="title_onboarding_3">Recover Deleted Messages Instantly</string>
+    <string name="title_onboarding_4">Simply enable notification access, and %s does the rest!</string>
+    <string name="feature_that_fits_your_needs">Feature that fits your needs</string>
+</resources>

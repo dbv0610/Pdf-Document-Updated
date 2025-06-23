@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SVGImageView">
+        <attr name="svg" format="reference|string" />
+        <attr name="css" format="string" />
+    </declare-styleable>
+
+
+    <declare-styleable name="DashPathView">
+        <attr name="dpColor"  format="color"/>
+        <attr name="dpWidth" format="dimension"/>
+        <attr name="dpSDistance" format="dimension"/>
+        <attr name="dpSLength" format="dimension"/>
+        <attr name="dpStrokeCap" format="enum">
+            <enum name="round" value="1"/>
+            <enum name="square" value="2"/>
+            <enum name="butter" value="3"/>
+        </attr>
+        <attr name="dpOrientation" format="enum">
+            <enum value="1" name="horizontal"/>
+            <enum value="2" name="vertical"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="RatingBar">
+        <attr name="maxRating" format="integer" />
+        <attr name="emptyStarDrawable" format="reference" />
+        <attr name="filledStarDrawable" format="reference" />
+        <attr name="emptyLastStarDrawable" format="reference" />
+        <attr name="filledLastStarDrawable" format="reference" />
+        <attr name="starSpacing" format="dimension" />
+        <attr name="defaultRate" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="IndicatorView">
+        <attr name="max_count" format="integer" />
+        <attr name="spacing" format="dimension" />
+        <attr name="radius" format="dimension" />
+        <attr name="active_color" format="color" />
+        <attr name="default_color" format="color" />
+        <attr name="active_count" format="integer" />
+        <attr name="scale_value" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="BaseView">
+        <attr name="cornerRadius" format="dimension" />
+        <attr name="strokeWidth" format="dimension" />
+        <attr name="stColorDark" format="color|reference" />
+        <attr name="stColorLight" format="color|reference" />
+        <attr name="bgColorDark" format="color|reference" />
+        <attr name="bgIsGradient" format="boolean" />
+        <attr name="bgColorAll" format="color|reference"/>
+        <attr name="stColorAll" format="color|reference"/>
+        <attr name="bgColorLight" format="color|reference" />
+        <attr name="bgGradientStart" format="color|reference" />
+        <attr name="bgGradientCenter" format="color|reference" />
+        <attr name="bgGradientEnd" format="color|reference" />
+        <attr name="clipContent" format="boolean" />
+        <attr name="strokeGradient" format="string" />
+        <attr name="strokeDistance" format="boolean" />
+        <attr name="distanceSpace" format="dimension" />
+        <attr name="shadowColor" format="color" />
+        <attr name="shadowRadius" format="dimension" />
+        <attr name="shadowDx" format="dimension" />
+        <attr name="shadowDy" format="dimension" />
+        <attr name="justifyContent" format="integer">
+            <enum name="flex_start" value="0" />
+            <enum name="center" value="1" />
+            <enum name="flex_end" value="2" />
+            <enum name="space_between" value="3" />
+            <enum name="space_around" value="4" />
+            <enum name="space_evenly" value="5" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="StyleView">
+        <attr name="cornerRadius" />
+        <attr name="strokeWidth" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="bgColorAll"/>
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="stColorAll"/>
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="clipContent" />
+        <attr name="strokeGradient" />
+        <attr name="textGdOrientation" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+    </declare-styleable>
+    <declare-styleable name="RoundImageView">
+        <attr name="cornerRadius" />
+        <attr name="strokeWidth" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="stColorAll"/>
+        <attr name="bgGradientEnd" />
+        <attr name="clipContent" />
+        <attr name="bgColorAll"/>
+        <attr name="strokeGradient" />
+        <attr name="textGdOrientation" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+        <attr name="android:src" format="integer|reference" />
+        <attr name="android:padding" format="reference|dimension" />
+        <attr name="android:adjustViewBounds" format="boolean" />
+        <attr name="gradientIcons" format="string" />
+        <attr name="imageGdOrientation" />
+        <attr name="ri_scaleType">
+            <enum name="matrix" value="0" />
+            <enum name="fitXY" value="1" />
+            <enum name="fitStart" value="2" />
+            <enum name="fitCenter" value="3" />
+            <enum name="fitEnd" value="4" />
+            <enum name="center" value="5" />
+            <enum name="centerCrop" value="6" />
+            <enum name="centerInside" value="7" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="Orientation">
+        <attr name="textGdOrientation" format="enum">
+            <enum name="top_bottom" value="0" />
+            <enum name="tr_bl" value="1" />
+            <enum name="right_left" value="2" />
+            <enum name="br_tl" value="3" />
+            <enum name="bottom_top" value="4" />
+            <enum name="bl_tr" value="5" />
+            <enum name="left_right" value="6" />
+            <enum name="tl_br" value="7" />
+        </attr>
+        <attr name="bgGdOrientation" format="enum">
+            <enum name="top_bottom" value="0" />
+            <enum name="tr_bl" value="1" />
+            <enum name="right_left" value="2" />
+            <enum name="br_tl" value="3" />
+            <enum name="bottom_top" value="4" />
+            <enum name="bl_tr" value="5" />
+            <enum name="left_right" value="6" />
+            <enum name="tl_br" value="7" />
+        </attr>
+        <attr name="strokeGdOrientation" format="enum">
+            <enum name="top_bottom" value="0" />
+            <enum name="tr_bl" value="1" />
+            <enum name="right_left" value="2" />
+            <enum name="br_tl" value="3" />
+            <enum name="bottom_top" value="4" />
+            <enum name="bl_tr" value="5" />
+            <enum name="left_right" value="6" />
+            <enum name="tl_br" value="7" />
+        </attr>
+        <attr name="imageGdOrientation" format="enum">
+            <enum name="top_bottom" value="0" />
+            <enum name="tr_bl" value="1" />
+            <enum name="right_left" value="2" />
+            <enum name="br_tl" value="3" />
+            <enum name="bottom_top" value="4" />
+            <enum name="bl_tr" value="5" />
+            <enum name="left_right" value="6" />
+            <enum name="tl_br" value="7" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="UiTextView">
+        <attr name="cornerRadius" />
+        <attr name="strokeWidth" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="bgIsGradient" />
+        <attr name="bgColorAll"/>
+        <attr name="stColorAll"/>
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="clipContent" />
+        <attr name="strokeGradient" />
+        <attr name="textGdOrientation" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+        <attr name="tvColor" format="color|reference" />
+        <attr name="tvColorDark" format="color|reference" />
+        <attr name="tvColorLight" format="color|reference" />
+        <attr name="tvColorHint" format="color|reference" />
+        <attr name="underLine" format="boolean" />
+        <attr name="textGradientStart" format="color|reference" />
+        <attr name="textGradientEnd" format="color|reference" />
+        <attr name="textGradient" format="boolean" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+    </declare-styleable>
+
+    <attr name="radiusView" format="float" />
+
+
+    <declare-styleable name="DotsIndicator">
+        <attr name="dotsColor" format="color" />
+        <attr name="selectedDotColor" format="color" />
+        <attr name="dotsSize" format="dimension" />
+        <attr name="dotsWidthFactor" format="float" />
+        <attr name="dotsSpacing" format="dimension" />
+        <attr name="dotsCornerRadius" format="dimension" />
+        <attr name="progressMode" format="boolean" />
+        <attr name="dotsClickable" format="boolean" />
+        <attr name="dotsElevation" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="UiLinearLayout">
+        <attr name="cornerRadius" />
+        <attr name="strokeWidth" />
+        <attr name="bgIsGradient" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="bgColorAll"/>
+        <attr name="stColorAll"/>
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+        <attr name="strokeGradient" />
+        <attr name="shadowColor" />
+        <attr name="shadowRadius" />
+        <attr name="shadowDx" />
+        <attr name="shadowDy" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+    </declare-styleable>
+    <declare-styleable name="UiConstraintLayout">
+        <attr name="cornerRadius" />
+        <attr name="bgIsGradient" />
+        <attr name="strokeWidth" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="stColorAll"/>
+        <attr name="bgColorAll"/>
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+        <attr name="strokeGradient" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+    </declare-styleable>
+    <declare-styleable name="UiFrameLayout">
+        <attr name="cornerRadius" />
+        <attr name="strokeWidth" />
+        <attr name="bgIsGradient" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="bgColorAll"/>
+        <attr name="stColorAll"/>
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+        <attr name="strokeGradient" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+    </declare-styleable>
+    <declare-styleable name="UiRelativeLayout">
+        <attr name="cornerRadius" />
+        <attr name="strokeWidth" />
+        <attr name="stColorAll"/>
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="bgColorAll"/>
+        <attr name="bgIsGradient" />
+        <attr name="bgColorDark" />
+        <attr name="bgColorLight" />
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+        <attr name="strokeGradient" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+    </declare-styleable>
+    <declare-styleable name="UiRowLayout">
+        <attr name="cornerRadius" />
+        <attr name="bgIsGradient" />
+        <attr name="strokeWidth" />
+        <attr name="stColorDark" />
+        <attr name="stColorLight" />
+        <attr name="stColorAll"/>
+        <attr name="bgColorDark" />
+        <attr name="bgColorAll"/>
+        <attr name="bgColorLight" />
+        <attr name="bgGradientStart" />
+        <attr name="bgGradientCenter" />
+        <attr name="bgGradientEnd" />
+        <attr name="strokeDistance" />
+        <attr name="distanceSpace" />
+        <attr name="strokeGradient" />
+        <attr name="bgGdOrientation" />
+        <attr name="strokeGdOrientation" />
+        <attr name="justifyContent" />
+    </declare-styleable>
+</resources>
+

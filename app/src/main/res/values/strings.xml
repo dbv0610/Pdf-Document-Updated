@@ -1,18 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Sample Ads First Flow</string>
+    <string name="app_name" translatable="false">PDF 8</string>
     <string name="fb_app_id" translatable="false">1111111111</string>
     <string name="fb_client_token" translatable="false">2222222222222222222222</string>
 
-    <string name="this_action_may_contain_advertising">This action may contain advertising</string>
-    <string name="skip">Skip</string>
+
     <string name="language">Language</string>
-    <string name="back">Back</string>
-    <string name="next">Next</string>
-    <string name="get_started">Get Started</string>
+    <string name="changes_applied">Changes applied!</string>
+    <string name="applying_language">Applying language…</string>
+    <string name="settings">Setting</string>
+    <string name="term_of_service">Term of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="share_app">Share this app</string>
+    <string name="rate_app">Rate App</string>
+    <string name="check_out_this_amazing_app">Check out this amazing app: </string>
+    <string name="share_via">Share via</string>
+    <string name="this_action_may_contain_advertising">This action may contain advertising</string>
+    <string name="the_best_we_can_get">The best we can get</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="rate_on_google_play">Rate on Google Play</string>
+    <string name="rating_description_0">We would appreciate your review!</string>
+    <string name="rating_description_1_2">We want to know what made you unsatisfied.</string>
+    <string name="rating_description_3">We look forward to receiving your feedback to improve.</string>
+    <string name="rating_description_4">We will do our best to provide an even better experience.</string>
+    <string name="rating_description_5">Your satisfaction is our greatest motivation!</string>
+    <string name="thanks_for_your_rating">Thanks for your rating!</string>
+    <string name="please_rate_us">Please rate us 5 star!</string>
+    <string name="are_you_sure_want_to_quit_app">Do you want to exit the app?</string>
+    <string name="exit">Exit</string>
+    <string name="continues">Continue</string>
+    <string name="request_permission_need">Requesting permission to modify system settings</string>
+    <string name="title_onboarding_1">Track Your Daily Step Goals</string>
+    <string name="title_onboarding_2">Monitor Weight and Body Stats</string>
+    <string name="title_onboarding_3">Burn Calories and Stay Fit</string>
+    <string name="title_onboarding_4">Analyze Progress Over Time</string>
+    <string name="content_onboarding_1">Count every step to stay active and improve your daily fitness.</string>
+    <string name="content_onboarding_2">Log your weight and height to see progress over time.</string>
+    <string name="content_onboarding_3">Estimate calories burned while walking, running, or cycling daily.</string>
+    <string name="content_onboarding_4">View detailed stats by day, week, or month easily.</string>
+    <string name="done">Done</string>
     <string name="swipe_to_next">Swipe to Next</string>
-    <string name="title_onboarding_1">Fast Scan and Recover Lost Data</string>
-    <string name="title_onboarding_2">Safely Recover Lost Photos, Videos, Audios and more</string>
-    <string name="title_onboarding_3">Recover Deleted Messages Instantly</string>
-    <string name="title_onboarding_4">Simply enable notification access, and %s does the rest!</string>
-    <string name="feature_that_fits_your_needs">Feature that fits your needs</string>
+    <string name="thank_you_for_using_the_app">Thank you for using the app</string>
+    <string name="feature_that_fits_your_needs">Feature that first your needs</string>
+    <string name="exit_app">Exit app</string>
+    <string name="cancels">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="deleted_file_from_device">Deleted file from device</string>
+    <string name="file_will_be_deleted_permanently">File will be deleted permanently.</string>
+    <string name="next">Next</string>
+
+
 </resources>

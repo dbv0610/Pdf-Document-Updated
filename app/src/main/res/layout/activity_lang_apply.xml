@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:paddingTop="@dimen/_6sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rb_500"
+            android:includeFontPadding="false"
+            android:text="@string/language"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_16sdp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.dong.baselib.widget.view.UiTextView
+            android:id="@+id/selectLanguage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:paddingHorizontal="@dimen/_12sdp"
+            android:paddingVertical="@dimen/_5sdp"
+            android:text="@string/next"
+            app:bgColorAll="@color/mainColor"
+            app:cornerRadius="@dimen/_18sdp"
+            app:textGradient="false"
+            app:tvColor="@color/white" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/color_f8f8f8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+        <com.dong.baselib.widget.layout.UiLinearLayout
+            android:id="@+id/llFocusItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="@dimen/_10sdp"
+            app:cornerRadius="@dimen/_6sdp"
+            app:bgColorAll="@color/white"
+            android:layout_marginTop="@dimen/_18sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:stColorDark="@color/mainColor"
+            app:stColorLight="@color/mainColor"
+            app:strokeWidth="1.3dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgItemFlag"
+                android:layout_width="@dimen/_27sdp"
+                android:layout_height="@dimen/_27sdp"
+                tools:src="@tools:sample/avatars" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvItemName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_10sdp"
+                android:layout_weight="1"
+                android:fontFamily="@font/rb_500"
+                android:textAlignment="viewStart"
+                android:textColor="#1D2129"
+                android:textSize="@dimen/_11sdp"
+                tools:text="English" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgItemSelect"
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:layout_gravity="center_vertical"
+                android:padding="@dimen/_3sdp"
+                android:src="@drawable/ic_language_selected" />
+        </com.dong.baselib.widget.layout.UiLinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llFocusItem"
+            app:layout_constraintVertical_bias="0.21">
+
+            <ImageView
+                android:id="@+id/ivImgLoad"
+                android:layout_width="@dimen/_54sdp"
+                android:layout_height="@dimen/_54sdp"
+                android:padding="@dimen/_5sdp"
+                android:src="@drawable/ic_loading_view" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center"
+                android:text="@string/applying_language"
+                android:textColor="@color/black"
+                android:textSize="@dimen/_12sdp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llApplySuccess"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_24sdp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llFocusItem"
+            app:layout_constraintVertical_bias="0.3">
+
+            <com.dong.baselib.widget.view.RoundImageView
+                android:layout_width="@dimen/_48sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:padding="@dimen/_9sdp"
+                android:src="@drawable/ic_view_done"
+                android:tint="@color/white"
+                app:bgColorDark="@color/mainColor"
+                app:bgColorLight="@color/mainColor"
+                app:cornerRadius="@dimen/_40sdp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center"
+                android:text="@string/changes_applied"
+                android:textColor="@color/black"
+                android:textSize="@dimen/_12sdp" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

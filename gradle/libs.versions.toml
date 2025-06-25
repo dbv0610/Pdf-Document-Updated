@@ -30,6 +30,7 @@ firebaseMessaging = "24.1.1"
 firebaseCrashlytics = "19.4.4"
 navigationFragmentKtx = "2.9.0"
 navigationUiKtx = "2.9.0"
+roomRuntime = "2.7.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,10 @@ sdp-android = { module = "com.intuit.sdp:sdp-android", version.ref = "sdpAndroid
 shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 ssp-android = { module = "com.intuit.ssp:ssp-android", version.ref = "sspAndroid" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
+
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 
 
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }

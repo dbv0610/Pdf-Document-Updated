@@ -36,7 +36,6 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.createBitmap
 
 abstract class TapNoHandleListener : View.OnClickListener {
-
     override fun onClick(v: View?) {
         onTap(v)
     }
@@ -45,7 +44,6 @@ abstract class TapNoHandleListener : View.OnClickListener {
 }
 
 abstract class TapListener : View.OnClickListener {
-
     companion object {
         private const val TIME_WAIT = 500L
     }
@@ -81,7 +79,6 @@ fun View.click(action: (view: View?) -> Unit): TapListener {
     return tapListener
 }
 
-
 fun View.clickNoHandle(action: (view: View?) -> Unit) {
     setOnClickListener(object : TapNoHandleListener() {
         override fun onTap(v: View?) {
@@ -89,7 +86,6 @@ fun View.clickNoHandle(action: (view: View?) -> Unit) {
         }
     })
 }
-
 
 fun View.setAllEnabled(enabled: Boolean) {
     isEnabled = enabled
@@ -120,7 +116,6 @@ fun TextView.afterTextChanged(callback: (String) -> Unit) {
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
     })
 }
-
 
 fun EditText.listenNumberFormat(value: (EditText, String) -> Unit) {
     val edt = this
@@ -179,7 +174,6 @@ fun TextView.onFocusChange(callback: (Boolean, String) -> Unit) {
     }
 }
 
-
 fun TextView.keyDown(callback: (Int) -> Unit) {
     this.setOnKeyListener { _, keyCode, event ->
         if (event.action == KeyEvent.ACTION_DOWN) {
@@ -213,7 +207,6 @@ fun TextView.textChanged(callback: (String) -> Unit) {
         }
     })
 }
-
 
 fun View.fadeIn(duration: Long = 300) {
     this.alpha = 0f
@@ -267,7 +260,6 @@ fun View.invisible() {
         }
     }
 }
-
 
 fun <T> View.showStateGone(mutableLiveData: MutableLiveData<T>, lifecycleOwner: LifecycleOwner) {
     mutableLiveData.observe(lifecycleOwner) { isVisible ->
@@ -347,8 +339,6 @@ inline fun <T> List<T>.moveItemToPosition(position: Int, predicate: (T) -> Boole
     }
     return this
 }
-
-
 @SuppressLint("DefaultLocale")
 fun convertMillieToHhMmSs(millis: Long): String {
     val seconds = millis / 1000
@@ -361,13 +351,11 @@ fun convertMillieToHhMmSs(millis: Long): String {
         String.format("%02d:%02d", minute, second)
     }
 }
-
 @Suppress("DEPRECATION")
 fun getScreenDimensions(context: Context): Pair<Int, Int> {
     val displayMetrics = DisplayMetrics()
     val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     windowManager.defaultDisplay.getMetrics(displayMetrics)
-
     val screenWidth = displayMetrics.widthPixels
     val screenHeight = displayMetrics.heightPixels
 
@@ -390,7 +378,6 @@ fun ImageView.imageBitmap(): Bitmap? {
                 drawable.draw(canvas)
                 bitmap
             }
-
             else -> null
         }
         return originalBitmap
@@ -398,7 +385,6 @@ fun ImageView.imageBitmap(): Bitmap? {
         return null
     }
 }
-
 
 enum class GradientOrientation {
     TOP_TO_BOTTOM,
@@ -416,9 +402,7 @@ fun ImageView.gradientIcon(
     orientation: GradientOrientation = GradientOrientation.TOP_TO_BOTTOM
 ) {
     if (colors.size < 2) return
-
     val drawable = this.drawable ?: return
-
     val originalBitmap = when (drawable) {
         is BitmapDrawable -> drawable.bitmap
         is VectorDrawable -> {
@@ -432,13 +416,11 @@ fun ImageView.gradientIcon(
         }
         else -> return
     }
-
     val width = originalBitmap.width
     val height = originalBitmap.height
     val updatedBitmap = createBitmap(width, height)
     val canvas = Canvas(updatedBitmap)
     canvas.drawBitmap(originalBitmap, 0f, 0f, null)
-
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         shader = getGradientShader(width, height, colors, orientation)
         xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
@@ -456,18 +438,80 @@ private fun getGradientShader(
     orientation: GradientOrientation
 ): Shader {
     return when (orientation) {
-        GradientOrientation.TOP_TO_BOTTOM -> LinearGradient(0f, 0f, 0f, height.toFloat(), colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.BOTTOM_TO_TOP -> LinearGradient(0f, height.toFloat(), 0f, 0f, colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.LEFT_TO_RIGHT -> LinearGradient(0f, 0f, width.toFloat(), 0f, colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.RIGHT_TO_LEFT -> LinearGradient(width.toFloat(), 0f, 0f, 0f, colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.TL_BR -> LinearGradient(0f, 0f, width.toFloat(), height.toFloat(), colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.TR_BL -> LinearGradient(width.toFloat(), 0f, 0f, height.toFloat(), colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.BL_TR -> LinearGradient(0f, height.toFloat(), width.toFloat(), 0f, colors, null, Shader.TileMode.CLAMP)
-        GradientOrientation.BR_TL -> LinearGradient(width.toFloat(), height.toFloat(), 0f, 0f, colors, null, Shader.TileMode.CLAMP)
+        GradientOrientation.TOP_TO_BOTTOM -> LinearGradient(
+            0f,
+            0f,
+            0f,
+            height.toFloat(),
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.BOTTOM_TO_TOP -> LinearGradient(
+            0f,
+            height.toFloat(),
+            0f,
+            0f,
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.LEFT_TO_RIGHT -> LinearGradient(
+            0f,
+            0f,
+            width.toFloat(),
+            0f,
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.RIGHT_TO_LEFT -> LinearGradient(
+            width.toFloat(),
+            0f,
+            0f,
+            0f,
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.TL_BR -> LinearGradient(
+            0f,
+            0f,
+            width.toFloat(),
+            height.toFloat(),
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.TR_BL -> LinearGradient(
+            width.toFloat(),
+            0f,
+            0f,
+            height.toFloat(),
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.BL_TR -> LinearGradient(
+            0f,
+            height.toFloat(),
+            width.toFloat(),
+            0f,
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
+        GradientOrientation.BR_TL -> LinearGradient(
+            width.toFloat(),
+            height.toFloat(),
+            0f,
+            0f,
+            colors,
+            null,
+            Shader.TileMode.CLAMP
+        )
     }
 }
-
-
 
 fun View.rotateViewByTime(
     fromDegree: Float = 0f,
@@ -479,7 +523,8 @@ fun View.rotateViewByTime(
     rotation.duration = duration // Set the duration of the animation
     if (isLoop) {
         rotation.repeatCount = ObjectAnimator.INFINITE
-        rotation.repeatMode = ObjectAnimator.RESTART  // Optionally set the mode to restart the animation after each cycle
+        rotation.repeatMode =
+            ObjectAnimator.RESTART  // Optionally set the mode to restart the animation after each cycle
     }
     rotation.start() // Start the animation
 }
@@ -500,27 +545,62 @@ fun View.rotateViewWithTime(
     }
 }
 
-
-
 fun ViewGroup.swapChildren(index1: Int, index2: Int) {
-
     if (index1 < 0 || index1 >= this.childCount || index2 < 0 || index2 >= this.childCount) {
         return
     }
-
-
     val view1 = getChildAt(index1)
     val view2 = getChildAt(index2)
-
-
     this.removeViewAt(index1)
     this.removeViewAt(index2 - 1)
-
-
     this.addView(view1, index2)
     this.addView(view2, index1)
-
-
     this.requestLayout()
     this.invalidate()
 }
+
+fun View.paddingTop(number: Number) {
+    this.setPadding(this.paddingStart, number.toInt(), this.paddingEnd, this.paddingBottom)
+}
+
+fun View.paddingLeft(number: Number) {
+    this.setPadding(number.toInt(), this.paddingTop, this.paddingRight, this.paddingBottom)
+}
+
+fun View.paddingRight(number: Number) {
+    this.setPadding(this.paddingStart, this.paddingTop, number.toInt(), this.paddingBottom)
+}
+
+fun View.paddingBottom(number: Number) {
+    this.setPadding(this.paddingStart, this.paddingTop, this.paddingRight, number.toInt())
+}
+
+fun View.paddingVertical(number: Number) {
+    this.setPadding(this.paddingStart, number.toInt(), this.paddingTop, number.toInt())
+}
+
+fun View.paddingHorizontal(number: Number) {
+    this.setPadding(number.toInt(), this.paddingTop, number.toInt(), this.paddingBottom)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

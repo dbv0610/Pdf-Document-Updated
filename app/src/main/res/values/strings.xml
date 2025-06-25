@@ -3,8 +3,6 @@
     <string name="app_name" translatable="false">PDF 8</string>
     <string name="fb_app_id" translatable="false">1111111111</string>
     <string name="fb_client_token" translatable="false">2222222222222222222222</string>
-
-
     <string name="language">Language</string>
     <string name="changes_applied">Changes applied!</string>
     <string name="applying_language">Applying language…</string>
@@ -48,6 +46,18 @@
     <string name="deleted_file_from_device">Deleted file from device</string>
     <string name="file_will_be_deleted_permanently">File will be deleted permanently.</string>
     <string name="next">Next</string>
-
-
+    <string name="pdf_reader">PDF Reader</string>
+    <string name="create">Create</string>
+    <string name="document">Document</string>
+    <string name="pdf">PDF</string>
+    <string name="files">files</string>
+    <string name="doc">DOC</string>
+    <string name="ppt">PPT</string>
+    <string name="xls">XLS</string>
+    <string name="recents_files">Recents Files</string>
+    <string name="show_all">Show All</string>
+    <string name="favorite">Favorite</string>
+    <string name="setting">Setting</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

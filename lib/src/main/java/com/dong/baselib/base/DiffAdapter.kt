@@ -9,12 +9,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 
-
 class ModelDiffCallback<T : Any>(
     private val areItemsTheSameCallback: (oldItem: T, newItem: T) -> Boolean,
-    private val areContentsTheSameCallback: (oldItem: T, newItem: T) -> Boolean
+    private val areContentsTheSameCallback: (oldItem: T, newItem: T) -> Boolean,
+    private val payloadProvider: ((oldItem: T, newItem: T) -> List<String>?)? = null
 ) : DiffUtil.ItemCallback<T>() {
-
     override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
         return areItemsTheSameCallback(oldItem, newItem)
     }
@@ -22,22 +21,31 @@ class ModelDiffCallback<T : Any>(
     override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
         return areContentsTheSameCallback(oldItem, newItem)
     }
+
+    override fun getChangePayload(oldItem: T, newItem: T): Any? {
+        return payloadProvider?.invoke(oldItem, newItem)
+    }
 }
 
 abstract class DiffAdapter<T, VB : ViewBinding>(
     diffCallback: DiffUtil.ItemCallback<T>
 ) : ListAdapter<T, DiffAdapter<T, VB>.ViewHolder>(diffCallback) {
-
     lateinit var context: Context
     var binding: VB? = null
     var currentPosition = MutableLiveData<Int>(RecyclerView.NO_POSITION)
 
     abstract fun createBinding(inflater: LayoutInflater, parent: ViewGroup, viewType: Int): VB
+    abstract fun VB.bind(item: T, position: Int)
+    open fun VB.bind(item: T, position: Int, payloads: List<Any>) {
+        bind(item, position)
+    }
+
+    inner class ViewHolder(val binding: VB) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        binding = createBinding(inflater, parent, viewType)
         context = parent.context
+        binding = createBinding(inflater, parent, viewType)
         return ViewHolder(binding!!)
     }
 
@@ -46,10 +54,17 @@ abstract class DiffAdapter<T, VB : ViewBinding>(
         holder.binding.bind(item, position)
     }
 
-    abstract fun VB.bind(item: T, position: Int)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        val item = getItem(position)
+        if (payloads.isEmpty()) {
+            holder.binding.bind(item, position)
+        } else {
+            holder.binding.bind(item, position, payloads)
+        }
+    }
 
     fun submitListCustom(newList: List<T>) {
-        submitList(ArrayList(newList)) // Prevents modification issues
+        submitList(ArrayList(newList)) // to prevent mutation issues
     }
 
     fun removeItem(position: Int) {
@@ -79,6 +94,4 @@ abstract class DiffAdapter<T, VB : ViewBinding>(
         currentPosition.value = position
         notifyItemChanged(position)
     }
-
-    inner class ViewHolder(val binding: VB) : RecyclerView.ViewHolder(binding.root)
 }

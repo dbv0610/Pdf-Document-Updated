@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:background="@drawable/bg_shadow_view" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical">
+
+        <com.azg.pdf8.widget.NavigationItem
+            android:id="@+id/navItem1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:isActive="true"
+            app:navText="@string/document"
+            app:navIcon="@drawable/nav_enb_1" />
+
+        <com.azg.pdf8.widget.NavigationItem
+            android:id="@+id/navItem2"
+            android:layout_width="0dp"
+            app:navText="@string/favorite"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:navIcon="@drawable/nav_dis_2" />
+
+        <com.azg.pdf8.widget.NavigationItem
+            android:id="@+id/navItem3"
+            app:navText="@string/setting"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:navIcon="@drawable/nav_dis_3" />
+    </LinearLayout>
+</LinearLayout>

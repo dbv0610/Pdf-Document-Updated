@@ -582,25 +582,3 @@ fun View.paddingVertical(number: Number) {
 fun View.paddingHorizontal(number: Number) {
     this.setPadding(number.toInt(), this.paddingTop, number.toInt(), this.paddingBottom)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

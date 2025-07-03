@@ -74,6 +74,7 @@ class DocumentAdapter(
             DocumentType.Doc -> R.drawable.ic_app_docx
             DocumentType.Excel -> R.drawable.ic_app_xls
             DocumentType.Ppt -> R.drawable.ic_app_ppt
+            else -> 0
         }
     }
 

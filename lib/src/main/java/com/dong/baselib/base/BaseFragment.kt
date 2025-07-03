@@ -5,6 +5,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -21,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+import java.io.ByteArrayOutputStream
 import java.io.Serializable
 import kotlin.collections.iterator
 
@@ -73,7 +76,7 @@ abstract class BaseFragment<VB : ViewBinding>(
     }
 
     val binding: VB by lazy { bindingFactory(layoutInflater) }
-
+    fun Boolean?.orFalse() = this == true
     inline fun <reified T : Any> Fragment.getData(key: String?): T? {
         val bundle = arguments
         if (key == null || bundle?.containsKey(key) != true) return null
@@ -91,12 +94,37 @@ abstract class BaseFragment<VB : ViewBinding>(
                 @Suppress("DEPRECATION")
                 when {
                     Parcelable::class.java.isAssignableFrom(T::class.java) ->
-                        bundle.getParcelable(key,) as? T
+                        bundle.getParcelable(key) as? T
                     Serializable::class.java.isAssignableFrom(T::class.java) ->
                         bundle.getSerializable(key) as? T
                     else -> throw IllegalArgumentException("Unsupported type ${T::class.java}")
                 }
             }
+        }
+    }
+
+    inline fun <reified T : Any> ActivityResult.getResultData(key: String): T? {
+        val intent = this.data ?: return null
+        if (!intent.extras?.containsKey(key).orFalse()) return null
+
+        @Suppress("UNCHECKED_CAST", "DEPRECATION")
+        return when {
+            T::class == Int::class -> intent.getIntExtra(key, 0) as T
+            T::class == Boolean::class -> intent.getBooleanExtra(key, false) as T
+            T::class == String::class -> intent.getStringExtra(key) as T
+            T::class == Float::class -> intent.getFloatExtra(key, 0f) as T
+            T::class == Long::class -> intent.getLongExtra(key, 0L) as T
+            T::class == Double::class -> intent.getDoubleExtra(key, 0.0) as T
+            T::class == Char::class -> intent.getCharExtra(key, Char.MIN_VALUE) as T
+            T::class == CharSequence::class -> intent.getCharSequenceExtra(key) as T
+            intent.extras?.get(key) is ArrayList<*> -> {
+                (intent.extras!!.get(key) as ArrayList<*>) as T
+            }
+            Parcelable::class.java.isAssignableFrom(T::class.java) ->
+                intent.getParcelableExtra(key) as? T
+            Serializable::class.java.isAssignableFrom(T::class.java) ->
+                intent.getSerializableExtra(key) as? T
+            else -> throw IllegalArgumentException("Unsupported type ${T::class.java}")
         }
     }
 
@@ -130,6 +158,90 @@ abstract class BaseFragment<VB : ViewBinding>(
         startActivity(intent, bundle)
     }
 
+    inline fun <reified T : Any> Activity.getData(key: String?): T? {
+        if (key == null || intent?.extras?.containsKey(key) != true) return null
+
+        @Suppress("UNCHECKED_CAST", "DEPRECATION")
+        return when {
+            T::class == Int::class -> intent.getIntExtra(key, 0) as T
+            T::class == Boolean::class -> intent.getBooleanExtra(key, false) as T
+            T::class == String::class -> intent.getStringExtra(key) as T
+            T::class == Float::class -> intent.getFloatExtra(key, 0f) as T
+            T::class == Long::class -> intent.getLongExtra(key, 0L) as T
+            T::class == Double::class -> intent.getDoubleExtra(key, 0.0) as T
+            T::class == Char::class -> intent.getCharExtra(key, Char.MIN_VALUE) as T
+            T::class == CharSequence::class -> intent.getCharSequenceExtra(key) as T
+            intent.extras?.get(key) is ArrayList<*> -> {
+                (intent.extras!!.get(key) as ArrayList<*>) as T
+            }
+            Parcelable::class.java.isAssignableFrom(T::class.java) ->
+                intent.getParcelableExtra(key) as? T
+            Serializable::class.java.isAssignableFrom(T::class.java) ->
+                intent.getSerializableExtra(key) as? T
+            else -> throw IllegalArgumentException("Unsupported type ${T::class.java}")
+        }
+    }
+
+    inline fun <reified T : Any> Context.launchActivity(
+        params: Map<String, Any?> = emptyMap()
+    ) {
+        val intent = Intent(this, T::class.java).apply {
+            params.forEach { (key, value) ->
+                when (value) {
+                    null -> putExtra(key, null as Serializable?)
+                    is Int -> putExtra(key, value)
+                    is Long -> putExtra(key, value)
+                    is Boolean -> putExtra(key, value)
+                    is Float -> putExtra(key, value)
+                    is Double -> putExtra(key, value)
+                    is String -> putExtra(key, value)
+                    is Char -> putExtra(key, value)
+                    is CharSequence -> putExtra(key, value)
+                    is Parcelable -> putExtra(key, value)
+                    is Serializable -> putExtra(key, value)
+                    is List<*> -> {
+                        when {
+                            value.all { it is Parcelable } -> {
+                                @Suppress("UNCHECKED_CAST")
+                                putParcelableArrayListExtra(
+                                    key,
+                                    ArrayList(value as List<Parcelable>)
+                                )
+                            }
+                            value.all { it is Serializable } -> {
+                                @Suppress("UNCHECKED_CAST")
+                                putParcelableArrayListExtra(
+                                    key,
+                                    ArrayList(value as List<Parcelable>)
+                                )
+                            }
+                            value.all { it is String } -> {
+                                @Suppress("UNCHECKED_CAST")
+                                putStringArrayListExtra(
+                                    key,
+                                    ArrayList(value as List<String>)
+                                )
+                            }
+                            else -> throw IllegalArgumentException(
+                                "Unsupported List element type for key=\"$key\": " +
+                                        value.firstOrNull()?.javaClass
+                            )
+                        }
+                    }
+                    else -> throw IllegalArgumentException(
+                        "Unsupported extra type for key=\"$key\": ${value.javaClass}"
+                    )
+                }
+            }
+        }
+        if (this is Activity) {
+            startActivity(intent)
+        } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        }
+    }
+
     open fun listenerResult(result: ActivityResult) {}
     var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -143,25 +255,55 @@ abstract class BaseFragment<VB : ViewBinding>(
         noinline dataResult: (ActivityResult) -> Unit = { _ -> }
     ) {
         activityResultCallback = dataResult
-        val intent = Intent(this@BaseFragment.appContext(), T::class.java)
-        val bundle = Bundle()
-        params?.forEach { (key, value) ->
-            when (value) {
-                is Int -> bundle.putInt(key, value)
-                is String -> bundle.putString(key, value)
-                is Boolean -> bundle.putBoolean(key, value)
-                is Float -> bundle.putFloat(key, value)
-                is Long -> bundle.putLong(key, value)
-                is Double -> bundle.putDouble(key, value)
-                is Char -> bundle.putChar(key, value)
-                is CharSequence -> bundle.putCharSequence(key, value)
-                is Parcelable -> bundle.putParcelable(key, value)
-                is Serializable -> bundle.putSerializable(key, value)
-                is Bundle -> bundle.putBundle(key, value)
-                else -> throw IllegalArgumentException("Unsupported bundle component (${value.javaClass})")
+        val intent = Intent(this.requireActivity(), T::class.java).apply {
+            params?.forEach { (key, value) ->
+                when (value) {
+                    null -> putExtra(key, null as Serializable?)
+                    is Int -> putExtra(key, value)
+                    is Long -> putExtra(key, value)
+                    is Boolean -> putExtra(key, value)
+                    is Float -> putExtra(key, value)
+                    is Double -> putExtra(key, value)
+                    is String -> putExtra(key, value)
+                    is Char -> putExtra(key, value)
+                    is CharSequence -> putExtra(key, value)
+                    is Parcelable -> putExtra(key, value)
+                    is Serializable -> putExtra(key, value)
+                    is List<*> -> {
+                        when {
+                            value.all { it is Parcelable } -> {
+                                @Suppress("UNCHECKED_CAST")
+                                putParcelableArrayListExtra(
+                                    key,
+                                    ArrayList(value as List<Parcelable>)
+                                )
+                            }
+                            value.all { it is Serializable } -> {
+                                @Suppress("UNCHECKED_CAST")
+                                putParcelableArrayListExtra(
+                                    key,
+                                    ArrayList(value as List<Parcelable>)
+                                )
+                            }
+                            value.all { it is String } -> {
+                                @Suppress("UNCHECKED_CAST")
+                                putStringArrayListExtra(
+                                    key,
+                                    ArrayList(value as List<String>)
+                                )
+                            }
+                            else -> throw IllegalArgumentException(
+                                "Unsupported List element type for key=\"$key\": " +
+                                        value.firstOrNull()?.javaClass
+                            )
+                        }
+                    }
+                    else -> throw IllegalArgumentException(
+                        "Unsupported extra type for key=\"$key\": ${value.javaClass}"
+                    )
+                }
             }
         }
-        intent.putExtras(bundle)
         resultLauncher.launch(intent)
     }
 

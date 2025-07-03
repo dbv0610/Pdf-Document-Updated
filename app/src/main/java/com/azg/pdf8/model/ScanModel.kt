@@ -15,7 +15,7 @@ class Converters {
 }
 
 enum class DocumentType {
-    Doc, Pdf, Excel, Ppt
+    Doc, Pdf, Excel, Ppt, Image
 }
 @Entity(tableName = "DocumentData")
 @Parcelize
@@ -37,11 +37,15 @@ data class DocumentModel(
 
     fun clone(): DocumentModel {
         return DocumentModel(
+            mediaId = this.mediaId,
             path = this.path,
             lastModified = this.lastModified,
-            size = this.size
+            size = this.size,
         ).apply {
             isSelected = this@DocumentModel.isSelected
+            isInFavorite = this@DocumentModel.isInFavorite
+            type = this@DocumentModel.type
+            duration = this@DocumentModel.duration
         }
     }
 }

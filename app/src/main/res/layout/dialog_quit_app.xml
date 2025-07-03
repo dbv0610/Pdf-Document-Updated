@@ -10,7 +10,6 @@
     app:cornerRadius="@dimen/_12sdp">
 
     <LinearLayout
-        android:id="@+id/ctlGetSkin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"

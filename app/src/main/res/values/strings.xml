@@ -58,6 +58,31 @@
     <string name="show_all">Show All</string>
     <string name="favorite">Favorite</string>
     <string name="setting">Setting</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_pdf">Create PDF</string>
+    <string name="image_to_pdf">Image to PDF</string>
+    <string name="scan_document">Scan Document</string>
+    <string name="no_file_found">No file found</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="all">All</string>
+    <string name="add_image">Add image</string>
+    <string name="convert">Convert</string>
+    <string name="convert_to_pdf">Convert to PDF</string>
+    <string name="save">Save</string>
+    <string name="enter_new_name">Enter file name</string>
+    <string name="invalid_file_name">Invalid file name</string>
+    <string name="can_create_pdf">Can not create pdf file</string>
+    <string name="camera">Camera</string>
+    <string name="Unit_gram">Gram</string>
+    <string name="Feed_times_everyday">Time %s</string>
+    <string name="num_one_hint">Number 1:</string>
+    <string name="num_two_hint">Number 2:</string>
+    <string name="num_three_hint">Number 3:</string>
+    <string name="adjust">Adjust</string>
+    <string name="crop">Crop</string>
+    <string name="scale">Scale</string>
+    <string name="rotate">Rotate</string>
+    <string name="original">Original</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
 </resources>

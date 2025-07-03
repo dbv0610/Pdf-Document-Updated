@@ -8,9 +8,11 @@ import android.provider.MediaStore
 import com.azg.pdf8.model.DocumentModel
 import com.azg.pdf8.model.DocumentType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
@@ -153,7 +155,6 @@ object AppUtils {
                         )
                     )
                     processed++
-                    // Emit progress sau mỗi bản ghi hoặc theo nhóm
                     emit(ScanState.Progress(processed = processed, total = total))
                 }
             }
@@ -161,7 +162,7 @@ object AppUtils {
         } catch (e: Throwable) {
             emit(ScanState.Error(e))
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(Dispatchers.IO).onEach { delay(1) }
 }
 
 fun getMimeType(filePath: String): String {

@@ -21,13 +21,14 @@
 
     <application
         android:name=".app.AppPdfReader"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        tools:replace="android:fullBackupContent,android:allowBackup,android:dataExtractionRules"
         android:theme="@style/Theme.VideoRecorder"
         tools:targetApi="31">
 
@@ -37,15 +38,23 @@
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity"></activity>
         <activity
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
             android:name=".ui.main.camera.CropImageActivity"
             android:exported="false" />
         <activity
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
             android:name=".ui.main.camera.CameraActivity"
             android:exported="false" />
         <activity
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
             android:name=".ui.main.create.ChooseImageActivity"
             android:exported="false" />
         <activity
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
             android:name=".ui.main.create.CreateActivity"
             android:exported="false" />
         <activity

@@ -51,7 +51,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
             override fun createImage() {
                 launcherForResult<ChooseImageActivity>(
                     hashMapOf(
-                        "key" to Constant.IMAGE_ADD_LIST
+                        Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
                     )
                 ) { acResult ->
                     acResult.getResultData<MutableList<DocumentModel>>(Constant.IMAGE_ADD_LIST)
@@ -152,7 +152,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
     }
 
     override fun initialize() {
-        getData<String>("key")?.let { it ->
+        getData<String>(Constant.KEY_ACTION)?.let { it ->
             if (it == "addNew") {
                 getData<String>(Constant.IMAGE_PATH)?.let { model ->
                     val randomId = Random.nextInt()

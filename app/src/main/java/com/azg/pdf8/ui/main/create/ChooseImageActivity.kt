@@ -46,7 +46,7 @@ class ChooseImageActivity :
     }
 
     override fun initialize() {
-        screenAction = getData<String>("key").toString()
+        screenAction = getData<String>(Constant.KEY_ACTION).toString()
         photoAdapter = PhotoGalleryAdapter(object : ViewActionHandle {
             override fun onSelect(documentModel: DocumentModel) {
                 super.onSelect(documentModel)

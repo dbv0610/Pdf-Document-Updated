@@ -12,6 +12,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.azg.pdf8.R
+import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.databinding.ActivityCameraBinding
 import com.azg.pdf8.ui.main.create.CreateActivity
 import com.azg.pdf8.utils.Constant
@@ -106,7 +107,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding
                         if (screenAction == "mainSc") {
                             launchActivity<CreateActivity>(
                                 hashMapOf(
-                                    "key" to "addNew",
+                                    Constant.KEY_ACTION to "addNew",
                                     Constant.IMAGE_PATH to photoFile.absolutePath
                                 )
                             )
@@ -114,7 +115,8 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding
                             val intentData = Intent()
                             intentData.putExtra(
                                 Constant.CAPTURE_ADD,
-                                photoFile.absolutePath)
+                                photoFile.absolutePath
+                            )
                             setResult(RESULT_OK, intentData)
                             finish()
                         }
@@ -122,11 +124,9 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding
                 }
 
                 override fun onError(exc: ImageCaptureException) {
-                    Toast.makeText(
-                        this@CameraActivity,
-                        "Capture failed: ${exc.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    toastShort(
+                        "Capture failed: ${exc.message}"
+                    )
                 }
             }
         )

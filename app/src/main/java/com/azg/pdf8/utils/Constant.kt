@@ -9,4 +9,6 @@ object Constant {
     const val IMAGE_ADD_LIST = "image_add_list"
 
     const val CAPTURE_ADD = "CaptureAddImg"
+
+    const val KEY_ACTION="KeyAction"
 }

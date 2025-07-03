@@ -67,4 +67,13 @@
     <color name="color_e6c0ff">#E6C0FF</color>
     <color name="color_fafafa">#fafafa</color>
     <color name="color_background">#BA0508</color>
+
+
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="gray_bg">#ffe6e9ed</color>
+    <color name="feed_plan_time_color">#83898a</color>
+    <color name="feed_plan_btn_color">#f4b700</color>
 </resources>

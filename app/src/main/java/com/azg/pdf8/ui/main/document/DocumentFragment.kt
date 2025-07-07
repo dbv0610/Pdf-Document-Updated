@@ -5,7 +5,6 @@ import androidx.lifecycle.lifecycleScope
 import com.azg.pdf8.R;
 import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.base.BaseFragment
-import com.azg.pdf8.database.FavoriteDao
 import com.azg.pdf8.databinding.FragmentDocumentBinding
 import com.azg.pdf8.dialog.CreateEventHandle
 import com.azg.pdf8.dialog.DialogCreatePdf
@@ -23,7 +22,6 @@ import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.paddingTop
 import com.dong.baselib.widget.visible
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class DocumentFragment :
@@ -40,9 +38,10 @@ class DocumentFragment :
             }
         })
     }
-    val documentDao: FavoriteDao by inject()
     private val pdfAdapter by lazy {
-        RecentAdapter(documentDao) {
+        RecentAdapter(onFavoriteClick = { doc, index ->
+            documentViewModel.toggleFavoriteRecent(doc)
+        }) {
             launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
             documentViewModel.addToRecent(it)
         }.attachLifecycle(viewLifecycleOwner)

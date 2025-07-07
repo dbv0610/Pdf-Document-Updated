@@ -2,7 +2,6 @@ package com.azg.pdf8.ui.main.document.pdf
 
 import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.base.BaseActivity
-import com.azg.pdf8.database.FavoriteDao
 import com.azg.pdf8.databinding.ActivityPdfBinding
 import com.azg.pdf8.dialog.CreateEventHandle
 import com.azg.pdf8.dialog.DialogCreatePdf
@@ -10,7 +9,6 @@ import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.create.ChooseImageActivity
 import com.azg.pdf8.utils.Constant
-import com.azg.pdf8.viewmodel.AppDataRepo
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.dong.baselib.lifecycle.lifecycleLaunch
 import com.dong.baselib.widget.afterTextChanged
@@ -24,18 +22,18 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
         finish()
     }
 
-    val appRepo: AppDataRepo by inject()
     val viewModel: DocumentViewModel by inject()
-    val documentDao: FavoriteDao by inject()
-    private val pdfAdapter by lazy {
-        RecentAdapter(documentDao){
+    private val recentAdapter by lazy {
+        RecentAdapter(onFavoriteClick = { doc, index ->
+            viewModel.toggleFavoriteRecent(doc)
+        }) {
             launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
             viewModel.addToRecent(it)
         }.attachLifecycle(this@PdfActivity)
     }
 
     override fun initialize() {
-        viewModel.searchByKey("", DocumentType.Pdf)
+        viewModel.setSearchCriteria("", DocumentType.Pdf)
     }
 
     override fun ActivityPdfBinding.setData() {
@@ -47,14 +45,14 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
-                    pdfAdapter.submitList(it)
+                    recentAdapter.submitList(it)
                 }
             }
         }
-        rcvListData.adapter = pdfAdapter
+        rcvListData.adapter = recentAdapter
         edtSearch.afterTextChanged {
             if (it.isEmpty()) {
-                viewModel.searchByKey(edtSearch.text.toString(), DocumentType.Pdf)
+                viewModel.setSearchCriteria(edtSearch.text.toString(), DocumentType.Pdf)
             }
         }
     }
@@ -64,7 +62,7 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
             backPressed()
         }
         icSearch.click {
-            viewModel.searchByKey(edtSearch.text.toString(), DocumentType.Pdf)
+            viewModel.setSearchCriteria(edtSearch.text.toString(), DocumentType.Pdf)
         }
         btnCreate.click {
             DialogCreatePdf(this@PdfActivity, object : CreateEventHandle {

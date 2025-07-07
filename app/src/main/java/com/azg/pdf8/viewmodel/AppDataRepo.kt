@@ -16,10 +16,11 @@ import kotlinx.coroutines.flow.flowOn
 import java.io.File
 
 class AppDataRepo {
-    val _listPdf = MutableStateFlow(mutableListOf<RecentDocument>())
+
     val _listDoc = MutableStateFlow(mutableListOf<RecentDocument>())
     val _listXls = MutableStateFlow(mutableListOf<RecentDocument>())
     val _listPpt = MutableStateFlow(mutableListOf<RecentDocument>())
+    val _listPdf = MutableStateFlow(mutableListOf<RecentDocument>())
     val documentListPdf = _listPdf.asStateFlow()
     val documentListDoc = _listDoc.asStateFlow()
     val documentListXls = _listXls.asStateFlow()

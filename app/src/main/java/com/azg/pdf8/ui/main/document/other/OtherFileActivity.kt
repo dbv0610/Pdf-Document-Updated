@@ -23,25 +23,23 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
     override fun backPressed() {
         finish()
     }
-
-    val appRepo: AppDataRepo by inject()
     val viewModel: DocumentViewModel by inject()
-    val documentDao: FavoriteDao by inject()
     private val pdfAdapter by lazy {
-        RecentAdapter(documentDao) {
+        RecentAdapter(onFavoriteClick = { file, index ->
+            viewModel.toggleFavoriteRecent(file)
+        }) {
             viewModel.addToRecent(it)
         }.attachLifecycle(this@OtherFileActivity)
     }
     var documentType = DocumentType.Doc
 
     override fun initialize() {
-
         documentType = when (getData<String>(Constant.DOCUMENT_TYPE).toString()) {
             Constant.Doc -> DocumentType.Doc
             Constant.Xls -> DocumentType.Excel
             else -> DocumentType.Ppt
         }
-        viewModel.searchByKey("", documentType)
+        viewModel.setSearchCriteria("", documentType)
         binding.root.setBackgroundColor(
             when (documentType) {
                 DocumentType.Doc -> docColor
@@ -77,7 +75,6 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                 viewModel.searchByKey(edtSearch.text.toString(), documentType)
             }
         }
-
     }
 
     override fun ActivityOtherBinding.onClick() {

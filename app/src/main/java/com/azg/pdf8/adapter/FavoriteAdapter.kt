@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import com.azg.pdf8.R
 import com.azg.pdf8.databinding.ItemDocumentViewBinding
 import com.azg.pdf8.model.DocumentType
-import com.azg.pdf8.model.RecentDocument
-import com.azg.pdf8.model.RecentUi
+import com.azg.pdf8.model.FavoriteDocument
+import com.azg.pdf8.model.FavoriteUi
 import com.dong.baselib.base.DiffAdapter
 import com.dong.baselib.base.ModelDiffCallback
 import java.io.File
@@ -16,11 +16,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class RecentAdapter(
-    private val onFavoriteClick: (RecentDocument, Int) -> Unit = { _, _ -> },
-    private val onMenuClick: (View, RecentDocument, Int) -> Unit = { _, _, _ -> },
-    private val onViewFilePdf: (RecentDocument) -> Unit = { _ -> }
-) : DiffAdapter<RecentUi, ItemDocumentViewBinding>(
+class FavoriteAdapter(
+    private val onFavoriteClick: (FavoriteDocument, Int) -> Unit = { _, _ -> },
+    private val onMenuClick: (View, FavoriteDocument, Int) -> Unit = { _, _, _ -> },
+    private val onViewFilePdf: (FavoriteDocument) -> Unit = { _ -> }
+) : DiffAdapter<FavoriteUi, ItemDocumentViewBinding>(
     ModelDiffCallback(
         areItemsTheSameCallback = { old, new -> old.document.mediaId == new.document.mediaId },
         areContentsTheSameCallback = { old, new -> old == new },
@@ -37,7 +37,7 @@ class RecentAdapter(
         viewType: Int
     ) = ItemDocumentViewBinding.inflate(inflater, parent, false)
 
-    override fun ItemDocumentViewBinding.bind(item: RecentUi, position: Int) {
+    override fun ItemDocumentViewBinding.bind(item: FavoriteUi, position: Int) {
         val doc = item.document
         val file = File(doc.path)
 
@@ -61,9 +61,8 @@ class RecentAdapter(
         }
         root.alpha = if (doc.isSelected) 0.6f else 1f
     }
-
     override fun ItemDocumentViewBinding.bind(
-        item: RecentUi,
+        item: FavoriteUi,
         position: Int,
         payloads: List<Any>
     ) {
@@ -75,14 +74,14 @@ class RecentAdapter(
     }
 
     private fun getIconByType(type: DocumentType) = when (type) {
-        DocumentType.Pdf -> R.drawable.ic_app_pdf
-        DocumentType.Doc -> R.drawable.ic_app_docx
+        DocumentType.Pdf   -> R.drawable.ic_app_pdf
+        DocumentType.Doc   -> R.drawable.ic_app_docx
         DocumentType.Excel -> R.drawable.ic_app_xls
-        DocumentType.Ppt -> R.drawable.ic_app_ppt
-        else -> R.drawable.ic_app_pdf
+        DocumentType.Ppt   -> R.drawable.ic_app_ppt
+        else               -> R.drawable.ic_app_pdf
     }
 
-    private fun buildInfoText(doc: RecentDocument): String {
+    private fun buildInfoText(doc: FavoriteDocument): String {
         val size = Formatter.formatFileSize(context, doc.size)
         val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             .format(Date(doc.lastModified))

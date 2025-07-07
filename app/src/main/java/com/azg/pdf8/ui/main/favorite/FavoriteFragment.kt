@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.adapter.FavoriteAdapter
 import com.azg.pdf8.base.BaseFragment
-import com.azg.pdf8.database.FavoriteDao
 import com.azg.pdf8.databinding.FragmentFavoriteBinding
 import com.azg.pdf8.dialog.CreateEventHandle
 import com.azg.pdf8.dialog.DialogCreatePdf
@@ -26,7 +25,6 @@ import kotlin.getValue
 class FavoriteFragment :
     BaseFragment<FragmentFavoriteBinding>(FragmentFavoriteBinding::inflate, true) {
     val documentViewModel: DocumentViewModel by inject()
-    val documentDao: FavoriteDao by inject()
     private val createDialog by lazy {
         DialogCreatePdf(appActivity, object : CreateEventHandle {
             override fun createImage() {
@@ -38,8 +36,10 @@ class FavoriteFragment :
             }
         })
     }
-    private val pdfAdapter by lazy {
-        FavoriteAdapter(documentDao) {
+    private val favoriteAdapter by lazy {
+        FavoriteAdapter(onFavoriteClick = {document , index->
+            documentViewModel.toggleFavorite(document)
+        }) {
             launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
             documentViewModel.addToRecent(it)
         }.attachLifecycle(viewLifecycleOwner)
@@ -47,9 +47,6 @@ class FavoriteFragment :
     @SuppressLint("SetTextI18n")
     override fun FragmentFavoriteBinding.initView() {
         lnHeader.paddingTop(statusBarHeight + appActivity.dimenSdp(6))
-
-
-
         lifecycleLaunch {
             documentViewModel.listFavoriteSearch.collect {
                 if (it.isEmpty()) {
@@ -59,13 +56,13 @@ class FavoriteFragment :
                     rcvListData.visible()
                     lnNoData.gone()
                     val lm = rcvListData.layoutManager as LinearLayoutManager
-                    pdfAdapter.submitList(it){
+                    favoriteAdapter.submitList(it){
                         lm.scrollToPositionWithOffset(0, 0)
                     }
                 }
             }
         }
-        rcvListData.adapter = pdfAdapter
+        rcvListData.adapter = favoriteAdapter
     }
 
     override fun FragmentFavoriteBinding.onClick() {

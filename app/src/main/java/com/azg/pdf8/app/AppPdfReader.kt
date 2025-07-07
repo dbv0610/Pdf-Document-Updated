@@ -41,7 +41,6 @@ class AppPdfReader : Application() {
         }
         SharedPreference.Companion.init(this@AppPdfReader)
         registerLifecycleCallback()
-        PDFBoxResourceLoader.init(applicationContext);
     }
 
     private fun registerLifecycleCallback() {

@@ -30,7 +30,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
 
     private var isGrantPermission = false
-    val documentDao: RecentDao by inject()
     val documentViewModel: DocumentViewModel by inject()
     private val quitActivity by lazy {
         QuitAppDialog(this@MainActivity) {

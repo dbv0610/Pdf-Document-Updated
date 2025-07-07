@@ -146,7 +146,6 @@ dependencies {
 
 
     implementation(libs.android.pdf.viewer)
-    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation(libs.pdfbox.android)
     implementation(project(path=":mupdf_lib"))
     implementation(project(path=":android_office"))

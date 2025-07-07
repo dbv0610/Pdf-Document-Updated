@@ -1,35 +1,34 @@
 package com.azg.pdf8.viewmodel
 
-import com.azg.pdf8.database.DocumentDao
+import com.azg.pdf8.database.RecentDao
 import com.azg.pdf8.database.DocumentRepository
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import kotlinx.coroutines.flow.Flow
 
 class DocumentRepositoryImpl(
-    private val dao: DocumentDao
+    private val dao: RecentDao
 ) : DocumentRepository {
-    override fun getAllDocuments(): Flow<List<DocumentModel>> = dao.getAll()
+    override fun getAllDocuments(): Flow<List<RecentDocument>> = dao.getAll()
 
-    override fun getFavoriteDocuments(): Flow<List<DocumentModel>> = dao.getFavorites()
 
-    override suspend fun insert(document: DocumentModel) {
+    override suspend fun insert(document: RecentDocument) {
         dao.insert(document)
     }
 
-    override suspend fun insertAll(documents: List<DocumentModel>) {
+    override suspend fun insertAll(documents: List<RecentDocument>) {
         dao.insertAll(documents)
     }
 
-    override suspend fun update(document: DocumentModel) {
+    override suspend fun update(document: RecentDocument) {
         dao.update(document)
     }
 
-    override suspend fun delete(document: DocumentModel) {
+    override suspend fun delete(document: RecentDocument) {
         dao.delete(document)
     }
 
     override suspend fun setFavorite(mediaId: Long, isFavorite: Boolean) {
-        dao.setFavorite(mediaId, isFavorite)
+
     }
 
     override suspend fun clearAll() {

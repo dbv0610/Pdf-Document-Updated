@@ -28,35 +28,57 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        tools:replace="android:fullBackupContent,android:allowBackup,android:dataExtractionRules"
         android:theme="@style/Theme.VideoRecorder"
+        tools:replace="android:fullBackupContent,android:allowBackup,android:dataExtractionRules"
         tools:targetApi="31">
-
+        <activity
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
+            android:name=".ui.main.document.pdf.PdfActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.TestActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"></activity>
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"
             android:name=".ui.main.camera.CropImageActivity"
-            android:exported="false" />
-        <activity
+            android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
+            android:name=".ui.main.document.other.OtherFileActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
             android:name=".ui.main.camera.CameraActivity"
-            android:exported="false" />
-        <activity
+            android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+
+        <activity
+            android:name=".ui.main.document.pdf.SearchResultActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+
+        <activity
+            android:name=".ui.main.document.pdf.ReadPdfActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ui.main.create.ChooseImageActivity"
-            android:exported="false" />
-        <activity
+            android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
             android:name=".ui.main.create.CreateActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="false"

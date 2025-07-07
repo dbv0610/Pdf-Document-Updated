@@ -1,20 +1,18 @@
 package com.azg.pdf8.database
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.azg.pdf8.model.Converters
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.FavoriteDocument
+import com.azg.pdf8.model.RecentDocument
 
 @Database(
-    entities = [DocumentModel::class],
+    entities = [RecentDocument::class, FavoriteDocument::class],
     version = 1, exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun documentDao(): DocumentDao
+    abstract fun documentDao(): RecentDao
+    abstract fun favoriteDao(): FavoriteDao
 }

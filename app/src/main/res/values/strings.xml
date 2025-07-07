@@ -85,4 +85,23 @@
     <string name="original">Original</string>
     <string name="left">Left</string>
     <string name="right">Right</string>
+    <string name="search">Search</string>
+    <string name="share">Share</string>
+    <string name="invalid_page_number">Invalid page number</string>
+    <string name="please_enter_a_search">Please enter key to search</string>
+    <string name="copying_">Coppy</string>
+    <string name="searching">Search</string>
+    <string name="rename">Rename</string>
+    <string name="page">Page</string>
+    <string name="page_by_page">Page by page</string>
+    <string name="thumbnail">Thumbnail</string>
+    <string name="sort">Sort</string>
+    <string name="lastest_first">Lastest first</string>
+    <string name="oldest_first">Oldest first</string>
+    <string name="by_date">By date</string>
+    <string name="by_size">By size</string>
+    <string name="largest_first">Largest first</string>
+    <string name="smallest_first">Smallest first</string>
+    <string name="file_type">File type</string>
+    <string name="pptx">PPTX</string>
 </resources>

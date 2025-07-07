@@ -33,3 +33,5 @@ dependencyResolutionManagement {
 rootProject.name = "AS005 PDF 8"
 include(":app")
 include(":lib")
+include(":mupdf_lib")
+include(":android_office")

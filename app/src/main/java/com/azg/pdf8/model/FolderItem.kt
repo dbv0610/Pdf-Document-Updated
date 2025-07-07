@@ -7,6 +7,6 @@ import kotlinx.parcelize.Parcelize
 data class FolderItem(
     var folderName: String = "All",
     var previewPath: String = "",
-    var listData: MutableList<DocumentModel> = mutableListOf<DocumentModel>(),
+    var listData: MutableList<RecentDocument> = mutableListOf<RecentDocument>(),
     var itemCount: Int = 0
 ) : Parcelable

@@ -76,4 +76,10 @@
     <color name="gray_bg">#ffe6e9ed</color>
     <color name="feed_plan_time_color">#83898a</color>
     <color name="feed_plan_btn_color">#f4b700</color>
+    <color name="color_BA0508">#BA0508</color>
+
+    <color name="pdf_color">#BA0508</color>
+    <color name="doc_color">#006FC4</color>
+    <color name="xls_color">#00733B</color>
+    <color name="ppt_color">#FF6A00</color>
 </resources>

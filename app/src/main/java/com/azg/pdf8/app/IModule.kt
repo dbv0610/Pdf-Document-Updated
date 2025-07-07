@@ -2,7 +2,9 @@ package com.azg.pdf8.app
 
 import androidx.room.Room
 import com.azg.pdf8.database.AppDatabase
-import com.azg.pdf8.database.DocumentDao
+import com.azg.pdf8.database.FavoriteDao
+import com.azg.pdf8.database.RecentDao
+import com.azg.pdf8.ui.main.document.pdf.ReadPdfViewModel
 import com.azg.pdf8.ui.onboarding.OnboardingViewModel
 import com.azg.pdf8.viewmodel.AppDataRepo
 import com.azg.pdf8.viewmodel.CreateViewModel
@@ -15,9 +17,10 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { OnboardingViewModel() }
-    viewModel { DocumentViewModel(get(), get()) }
+    viewModel { DocumentViewModel(get(), get(), get()) }
     viewModel { ScanImageViewModel(get()) }
     viewModel { CreateViewModel() }
+    viewModel { ReadPdfViewModel(get()) }
 }
 val dataModule = module {
     single<Permission> { Permission().initialize(get()) }
@@ -30,5 +33,6 @@ val dataModule = module {
         ).allowMainThreadQueries()
             .build()
     }
-    single<DocumentDao> { get<AppDatabase>().documentDao() }
+    single<RecentDao> { get<AppDatabase>().documentDao() }
+    single<FavoriteDao> { get<AppDatabase>().favoriteDao() }
 }

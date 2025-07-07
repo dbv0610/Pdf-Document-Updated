@@ -3,6 +3,7 @@ package com.dong.baselib.base
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -34,11 +35,18 @@ abstract class DiffAdapter<T, VB : ViewBinding>(
     var binding: VB? = null
     var currentPosition = MutableLiveData<Int>(RecyclerView.NO_POSITION)
 
+    protected var lifecycle: LifecycleOwner? = null
+
+    fun attachLifecycle(lifecycle: LifecycleOwner): DiffAdapter<T,VB> {
+        this@DiffAdapter.lifecycle = lifecycle
+        return this@DiffAdapter
+    }
     abstract fun createBinding(inflater: LayoutInflater, parent: ViewGroup, viewType: Int): VB
     abstract fun VB.bind(item: T, position: Int)
     open fun VB.bind(item: T, position: Int, payloads: List<Any>) {
         bind(item, position)
     }
+
 
     inner class ViewHolder(val binding: VB) : RecyclerView.ViewHolder(binding.root)
 

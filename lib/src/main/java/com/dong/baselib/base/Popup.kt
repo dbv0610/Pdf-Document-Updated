@@ -1,12 +1,16 @@
 package com.dong.baselib.base
 
+import android.app.Activity
 import android.content.Context
+import android.content.res.Resources
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
 import androidx.viewbinding.ViewBinding
 import com.dong.baselib.widget.click
@@ -18,11 +22,9 @@ class Popup<VB : ViewBinding> private constructor(
 ) {
     private var width: Int = WindowManager.LayoutParams.WRAP_CONTENT
     private var height: Int = WindowManager.LayoutParams.WRAP_CONTENT
-
     private var locationX: Int = 0
     private var locationY: Int = 0
     private var onViewBinder: ((VB, PopupWindow) -> Unit)? = null
-
     private var autoClose: Boolean = false
     private var time: Long = 1500
 
@@ -72,6 +74,7 @@ class Popup<VB : ViewBinding> private constructor(
         this.onViewBinder = onViewBinder
         return this
     }
+
     fun dismiss() {
         popupWindow?.dismiss()
     }
@@ -91,13 +94,12 @@ class Popup<VB : ViewBinding> private constructor(
 //            popupView.root.s {
 //                popupWindow?.dismiss()
 //            }
-        if (autoClose) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                it.dismiss()
-            }, time)
+            if (autoClose) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    it.dismiss()
+                }, time)
+            }
         }
-        }
-
     }
 
     fun showAt(view: View) {
@@ -117,7 +119,6 @@ class Popup<VB : ViewBinding> private constructor(
             view.getLocationOnScreen(location)
             val viewX = location[0]
             val viewY = location[1]
-
             val displayMetrics = context.resources.displayMetrics
             val screenWidth = displayMetrics.widthPixels
             val screenHeight = displayMetrics.heightPixels
@@ -128,13 +129,11 @@ class Popup<VB : ViewBinding> private constructor(
             )
             val popupWidth = rootView.measuredWidth
             val popupHeight = rootView.measuredHeight
-
             val adjustedX = if (viewX + locationX + popupWidth > screenWidth) {
                 screenWidth - popupWidth - (popupWidth / 5f).toInt() + 32.dpToPx().toInt()
             } else {
                 viewX + locationX - (popupWidth / 5f).toInt() + 32.dpToPx().toInt()
             }
-
             val adjustedY = if (viewY + locationY + popupHeight > screenHeight) {
                 screenHeight - popupHeight - 24.dpToPx().toInt()
             } else {
@@ -150,5 +149,74 @@ class Popup<VB : ViewBinding> private constructor(
             }
         }
     }
+}
 
+class PopupHelper<V : ViewBinding> private constructor(
+    private val context: Context,
+    private val inflateBinding: (LayoutInflater) -> V
+) {
+    private var onBind: (V, PopupWindow) -> Unit = { _, _ -> }
+
+    companion object {
+        @JvmStatic
+        fun <V : ViewBinding> with(
+            context: Context,
+            inflateBinding: (LayoutInflater) -> V
+        ): PopupHelper<V> {
+            return PopupHelper(context, inflateBinding)
+        }
+    }
+
+    fun onBind(callback: (binding: V, popup: PopupWindow) -> Unit): PopupHelper<V> {
+        this.onBind = callback
+        return this
+    }
+
+    fun show(anchor: View) {
+        val inflater = LayoutInflater.from(context)
+        val binding = inflateBinding(inflater)
+        val popup = PopupWindow(
+            binding.root,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        ).apply {
+            isOutsideTouchable = true
+            setOnDismissListener { context.hideKeyboard() }
+            binding.root.setOnClickListener { dismiss() }
+        }
+
+        onBind(binding, popup)
+
+        binding.root.measure(
+            View.MeasureSpec.makeMeasureSpec(anchor.width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        val popupHeight = binding.root.height
+        anchor.post {
+            val screenPos = IntArray(2)
+            anchor.getLocationOnScreen(screenPos)
+            val anchorY = screenPos[1]
+            val screenHeight = Resources.getSystem().displayMetrics.heightPixels
+            val popupHeightGuess = popupHeight
+
+            if (anchorY + anchor.height + popupHeightGuess < screenHeight - 4 * context.statusBarHeight) {
+                popup.showAsDropDown(anchor)
+            } else {
+                val yOffset = anchorY - popupHeightGuess - context.statusBarHeight
+                popup.showAtLocation(anchor, Gravity.TOP or Gravity.START, 0, yOffset)
+            }
+        }
+    }
+
+    private val Context.statusBarHeight: Int
+        get() {
+            val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
+            return if (resId > 0) resources.getDimensionPixelSize(resId) else 0
+        }
+
+    private fun Context.hideKeyboard() {
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+            ?.hideSoftInputFromWindow((this as? Activity)?.currentFocus?.windowToken, 0)
+    }
 }

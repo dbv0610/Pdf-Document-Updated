@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.dong.baselib.widget.layout.UiLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_margin="@dimen/_8sdp"
+android:orientation="vertical"
+app:bgColorAll="@color/color_f5f5f5"
+app:cornerRadius="@dimen/_12sdp">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingHorizontal="@dimen/_12sdp"
+    android:paddingVertical="@dimen/_12sdp">
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="@font/rb_600"
+        android:includeFontPadding="false"
+        android:text="@string/sort"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_14sdp" />
+
+    <ImageView
+        android:id="@+id/icClose"
+        android:layout_width="@dimen/_22sdp"
+        android:layout_height="@dimen/_22sdp"
+        android:src="@drawable/ic_rounded_close"
+        app:tint="@color/black" />
+</LinearLayout>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="@dimen/_12sdp">
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rb_500"
+        android:includeFontPadding="false"
+        android:text="@string/by_date"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_12sdp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/lastest_first"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivLastFirst"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/oldest_first"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivOldFirst"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:fontFamily="@font/rb_500"
+        android:includeFontPadding="false"
+        android:text="@string/by_size"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_12sdp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/largest_first"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivLargetFirst"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/smallest_first"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivSmallFirst"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:fontFamily="@font/rb_500"
+        android:includeFontPadding="false"
+        android:text="@string/file_type"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_12sdp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/pdf"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivPdf"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/doc"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivDocx"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/xls"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivXlsx"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_400"
+            android:includeFontPadding="false"
+            android:text="@string/pptx"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_11sdp" />
+
+        <ImageView
+            android:id="@+id/ivPpt"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_language_unselected" />
+    </LinearLayout>
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:id="@+id/btnAgree"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:fontFamily="@font/rb_600"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:padding="@dimen/_10sdp"
+        android:text="@string/sort"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_13sdp"
+        app:bgColorDark="@color/mainColor"
+        app:bgColorLight="@color/mainColor"
+        app:cornerRadius="@dimen/_8sdp" />
+</LinearLayout>
+</com.dong.baselib.widget.layout.UiLinearLayout>

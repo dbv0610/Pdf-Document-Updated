@@ -144,4 +144,10 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
+
+    implementation(libs.android.pdf.viewer)
+    implementation(libs.pdfbox.android)
+    implementation(project(path=":mupdf_lib"))
+    implementation(project(path=":android_office"))
+
 }

@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
+import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.MutableLiveData
@@ -118,6 +120,44 @@ abstract class BaseActivity<VB : ViewBinding>(
     }
     @SuppressLint("ClickableViewAccessibility")
     fun hideKeyboardScrollView(scrollView: NestedScrollView, action: (() -> Unit)? = {}) {
+        scrollView.setOnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    yDown = motionEvent.y
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (!isMove) {
+                        hideKeyboard()
+                        action?.invoke()
+                    }
+                    isMove = false
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val yMove = motionEvent.y
+                    val distY: Float = yMove - yDown
+                    if (abs(distY) >= 10) {
+                        isMove = true
+                    }
+                }
+            }
+            false
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (currentFocus is EditText) {
+            val rect = Rect()
+            currentFocus!!.getGlobalVisibleRect(rect)
+            if (!rect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                hideKeyboard()
+                currentFocus!!.clearFocus()
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun hideKeyboardByView(scrollView: View, action: (() -> Unit)? = {}) {
         scrollView.setOnTouchListener { _, motionEvent ->
             when (motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> {

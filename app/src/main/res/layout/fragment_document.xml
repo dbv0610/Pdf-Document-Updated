@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="@dimen/_12sdp"
-        android:paddingVertical="@dimen/_12sdp">
+        android:paddingVertical="@dimen/_6sdp">
 
         <TextView
             android:layout_width="0dp"
@@ -299,15 +299,58 @@
                 android:text="@string/show_all"
                 android:textSize="@dimen/_12sdp" />
         </LinearLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_weight="1"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:id="@+id/listData"
-            android:layout_marginTop="@dimen/_8sdp"
-            tools:listitem="@layout/item_document_view"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_marginTop="@dimen/_8sdp"
             android:layout_height="0dp"
-            tools:ignore="NestedWeights" />
+            tools:ignore="NestedWeights">
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/lnNoData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginHorizontal="@dimen/_18sdp"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.35">
+
+                <ImageView
+                    android:layout_width="@dimen/_64sdp"
+                    android:layout_height="@dimen/_64sdp"
+                    android:src="@drawable/img_no_data" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_18sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:fontFamily="@font/rb_400"
+                    android:text="@string/no_file_found"
+                    android:textAlignment="center"
+                    android:textColor="@color/_8c8c8c"
+                    android:textSize="@dimen/_12sdp" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvListData"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/_8sdp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="NestedWeights"
+                tools:layout_editor_absoluteY="10dp"
+                tools:listitem="@layout/item_document_view" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </LinearLayout>

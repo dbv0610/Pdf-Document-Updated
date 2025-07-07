@@ -2,10 +2,9 @@ package com.azg.pdf8.utils
 
 import android.content.ContentUris
 import android.content.Context
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.DocumentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -15,12 +14,14 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 sealed class ScanState {
     object Start : ScanState()
     data class Progress(val processed: Int, val total: Int) : ScanState()
-    data class Success(val list: List<DocumentModel>) : ScanState()
+    data class Success(val list: List<RecentDocument>) : ScanState()
     data class Error(val throwable: Throwable) : ScanState()
 }
 
@@ -38,8 +39,8 @@ object AppUtils {
             return filePath.absolutePath
         }
 
-    fun scanAllDocumentsFlow(context: Context): Flow<List<DocumentModel>> = flow {
-        val result = mutableListOf<DocumentModel>()
+    fun scanAllDocumentsFlow(context: Context): Flow<List<RecentDocument>> = flow {
+        val result = mutableListOf<RecentDocument>()
         val uri = MediaStore.Files.getContentUri("external")
         val projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
@@ -86,7 +87,7 @@ object AppUtils {
                     val type = docMimeMap[mime] ?: DocumentType.Doc
 
                     result.add(
-                        DocumentModel(
+                        RecentDocument(
                             mediaId = mediaId,
                             path = path,
                             lastModified = lastModified,
@@ -103,7 +104,7 @@ object AppUtils {
 
     fun scanImagesFlow(context: Context): Flow<ScanState> = flow {
         emit(ScanState.Start)
-        val result = mutableListOf<DocumentModel>()
+        val result = mutableListOf<RecentDocument>()
         val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
@@ -146,7 +147,7 @@ object AppUtils {
                     val lastModified = it.getLong(dateCol) * 1000L
                     val size = it.getLong(sizeCol)
                     result.add(
-                        DocumentModel(
+                        RecentDocument(
                             mediaId = id,
                             path = path,
                             lastModified = lastModified,
@@ -163,6 +164,15 @@ object AppUtils {
             emit(ScanState.Error(e))
         }
     }.flowOn(Dispatchers.IO).onEach { delay(1) }
+}
+
+fun formatDateByMillis(millis: Long): String {
+    val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
+    return sdf.format(Date(millis))
+}
+fun formatTimeByMillis(millis: Long): String {
+    val sdf = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+    return sdf.format(Date(millis))
 }
 
 fun getMimeType(filePath: String): String {

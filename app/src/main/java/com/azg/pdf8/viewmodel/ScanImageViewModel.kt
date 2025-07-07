@@ -3,7 +3,7 @@ package com.azg.pdf8.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.FolderItem
 import com.azg.pdf8.utils.AppUtils
 import com.azg.pdf8.utils.ScanState
@@ -27,7 +27,7 @@ class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
         _headerUiState.value = state
     }
 
-    private val _listSelectPhotoFolder = MutableStateFlow<List<DocumentModel>>(emptyList())
+    private val _listSelectPhotoFolder = MutableStateFlow<List<RecentDocument>>(emptyList())
     val listSelectPhotoFolder = _listSelectPhotoFolder.asStateFlow()
     private val _listPhotoFolder = MutableStateFlow<List<FolderItem>>(emptyList())
     val listPhotoFolder = _listPhotoFolder.asStateFlow()
@@ -36,10 +36,10 @@ class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
     fun setScType(sc: ScreenType) {
         _scType.value = sc
     }
-    private val _listSelectedItem = MutableStateFlow<List<DocumentModel>>(emptyList())
+    private val _listSelectedItem = MutableStateFlow<List<RecentDocument>>(emptyList())
     val listSelectedItem = _listSelectedItem.asStateFlow()
 
-    fun modifyItemSelect(model: DocumentModel) {
+    fun modifyItemSelect(model: RecentDocument) {
         val current = _listSelectedItem.value
         val exists = current.any { it.path == model.path }
         _listSelectedItem.value = if (exists) {
@@ -50,10 +50,10 @@ class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
     }
 
     fun clearSelected(){
-        _listSelectedItem.value = mutableListOf<DocumentModel>()
+        _listSelectedItem.value = mutableListOf<RecentDocument>()
     }
 
-    fun groupFolder(mutableList: MutableList<DocumentModel>) {
+    fun groupFolder(mutableList: MutableList<RecentDocument>) {
         _listPhotoFolder.value = repository.groupToFolderList(mutableList)
         _listSelectPhotoFolder.value = mutableList
     }

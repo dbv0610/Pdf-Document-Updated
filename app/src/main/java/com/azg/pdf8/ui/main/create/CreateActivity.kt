@@ -1,6 +1,5 @@
 package com.azg.pdf8.ui.main.create;
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -15,7 +14,7 @@ import com.azg.pdf8.dialog.DialogCreatePdf
 import com.azg.pdf8.dialog.DialogProcess
 import com.azg.pdf8.dialog.PdfNameDialog
 import com.azg.pdf8.model.CreatePdf
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.camera.CropImageActivity
 import com.azg.pdf8.utils.AppUtils
@@ -29,10 +28,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import java.io.File
-import java.io.FileOutputStream
 import java.util.Collections
 import kotlin.random.Random
 
@@ -54,7 +51,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                         Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
                     )
                 ) { acResult ->
-                    acResult.getResultData<MutableList<DocumentModel>>(Constant.IMAGE_ADD_LIST)
+                    acResult.getResultData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_LIST)
                         ?.let { data ->
                             if (data.isNotEmpty()) {
                                 viewModel.addDataToList(data)
@@ -164,7 +161,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                     binding.progressBar.gone()
                 }
             } else {
-                getData<MutableList<DocumentModel>>(Constant.IMAGE_ADD_NEW)?.let { data ->
+                getData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_NEW)?.let { data ->
                     if (data.isNotEmpty()) {
                         viewModel.initListData(data)
                         binding.progressBar.gone()
@@ -174,7 +171,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                 }
             }
         } ?: run {
-            getData<MutableList<DocumentModel>>(Constant.IMAGE_ADD_NEW)?.let { data ->
+            getData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_NEW)?.let { data ->
                 if (data.isNotEmpty()) {
                     viewModel.initListData(data)
                     binding.progressBar.gone()

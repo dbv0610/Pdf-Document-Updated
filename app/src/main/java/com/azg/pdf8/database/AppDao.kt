@@ -5,33 +5,76 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.FavoriteDocument
+import com.azg.pdf8.model.RecentDocument
 import kotlinx.coroutines.flow.Flow
+
 @Dao
-interface DocumentDao {
-
+interface RecentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(document: DocumentModel)
-
+    suspend fun insert(document: RecentDocument)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(documents: List<DocumentModel>)
-
-    @Query("SELECT * FROM DocumentData")
-    fun getAll(): Flow<List<DocumentModel>>
-
-    @Query("SELECT * FROM DocumentData WHERE isInFavorite = 1")
-    fun getFavorites(): Flow<List<DocumentModel>>
-
+    suspend fun insertAll(documents: List<RecentDocument>)
+    @Query("SELECT * FROM RecentDocument")
+    fun getAll(): Flow<List<RecentDocument>>
+    @Query("SELECT COUNT(*) FROM RecentDocument WHERE mediaId = :mediaId")
+    suspend fun isExistInFavorite(mediaId: Int): Int
+    @Transaction
+    suspend fun toggleFavorite(mediaId: RecentDocument, favorite: Boolean) {
+        if (favorite) {
+            insert(mediaId)
+        } else {
+            delete(mediaId)
+        }
+    }
     @Delete
-    suspend fun delete(document: DocumentModel)
-
+    suspend fun delete(document: RecentDocument)
     @Update
-    suspend fun update(document: DocumentModel)
-
-    @Query("UPDATE DocumentData SET isInFavorite = :favorite WHERE mediaId = :mediaId")
-    suspend fun setFavorite(mediaId: Long, favorite: Boolean)
-
-    @Query("DELETE FROM DocumentData")
+    suspend fun update(document: RecentDocument)
+    @Query("DELETE FROM RecentDocument")
+    suspend fun clearAll()
+}
+@Dao
+interface FavoriteDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(document: FavoriteDocument)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(documents: List<FavoriteDocument>)
+    @Query("SELECT * FROM FavoriteDocument")
+    fun getAll(): Flow<List<FavoriteDocument>>
+    @Query("SELECT COUNT(*) FROM FavoriteDocument WHERE mediaId = :mediaId")
+    suspend fun isExistInFavorite(mediaId: Int): Int
+    @Transaction
+    suspend fun toggleFavorite(recent: RecentDocument, favorite: Boolean) {
+        if (favorite) {
+            val mediaData = FavoriteDocument(
+                recent.mediaId,
+                recent.path,
+                recent.lastModified,
+                recent.size,
+                recent.type
+            )
+            insert(mediaData)
+        } else {
+            deleteById(recent.mediaId)
+        }
+    }
+    @Transaction
+    suspend fun toggleFavorite(mediaId: FavoriteDocument, favorite: Boolean) {
+        if (favorite) {
+            insert(mediaId)
+        } else {
+            delete(mediaId)
+        }
+    }
+    @Delete
+    suspend fun delete(document: FavoriteDocument)
+    @Query("DELETE FROM FavoriteDocument WHERE mediaId = :docId")
+    suspend fun deleteById(docId: Long)
+    @Update
+    suspend fun update(document: FavoriteDocument)
+    @Query("DELETE FROM FavoriteDocument")
     suspend fun clearAll()
 }

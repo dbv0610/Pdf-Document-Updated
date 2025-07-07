@@ -12,7 +12,7 @@ import com.azg.pdf8.adapter.FolderGalleryAdapter
 import com.azg.pdf8.adapter.PhotoGalleryAdapter
 import com.azg.pdf8.adapter.ViewActionHandle
 import com.azg.pdf8.databinding.ActivityChooseImageBinding
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.utils.ScanState
 import com.azg.pdf8.viewmodel.ScanImageViewModel
@@ -48,13 +48,13 @@ class ChooseImageActivity :
     override fun initialize() {
         screenAction = getData<String>(Constant.KEY_ACTION).toString()
         photoAdapter = PhotoGalleryAdapter(object : ViewActionHandle {
-            override fun onSelect(documentModel: DocumentModel) {
-                super.onSelect(documentModel)
-                viewModel.modifyItemSelect(documentModel)
+            override fun onSelect(RecentDocument: RecentDocument) {
+                super.onSelect(RecentDocument)
+                viewModel.modifyItemSelect(RecentDocument)
             }
 
-            override fun onUpdateState(documentModel: DocumentModel, position: Int) {
-                super.onUpdateState(documentModel, position)
+            override fun onUpdateState(RecentDocument: RecentDocument, position: Int) {
+                super.onUpdateState(RecentDocument, position)
                 if (viewModel.headerUiState.value == UiGalleryState.Default) {
                     viewModel.setHeaderState(UiGalleryState.Select)
                 } else {

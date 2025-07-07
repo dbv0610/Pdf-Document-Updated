@@ -4,6 +4,14 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.toColorInt
 
 @ColorInt
+val pdfColor = "#BA0508".toColorInt()
+@ColorInt
+val docColor = "#006FC4".toColorInt()
+@ColorInt
+val xlsColor = "#00733B".toColorInt()
+@ColorInt
+val pptColor = "#FF6A00".toColorInt()
+@ColorInt
 val color_status_bar = "#E6FFFFFF".toColorInt()
 @ColorInt
 val primary_38 = "#61165DFF".toColorInt()
@@ -59,7 +67,6 @@ val color_f0f0f0 = "#F0F0F0".toColorInt()
 val color_ff6f00 = "#FF6F00".toColorInt()
 @ColorInt
 val color_8c8c8c = "#8C8C8C".toColorInt()
-
 @ColorInt
 val color_1f1f1f = "#1F1F1F".toColorInt()
 @ColorInt
@@ -68,3 +75,4 @@ val color_999999 = "#999999".toColorInt()
 val color__595959 = "#595959".toColorInt()
 @ColorInt
 val color_f8f8f8 = "#F8F8F8".toColorInt()
+

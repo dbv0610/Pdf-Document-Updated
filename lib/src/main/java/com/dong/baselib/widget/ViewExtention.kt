@@ -23,6 +23,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -34,6 +35,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.createBitmap
+import androidx.core.view.isVisible
 
 abstract class TapNoHandleListener : View.OnClickListener {
     override fun onClick(v: View?) {
@@ -231,6 +233,25 @@ fun ImageView.loadImage(url: Uri) {
     Glide.with(this.context).load(url).diskCacheStrategy(DiskCacheStrategy.ALL).into(this)
 }
 
+fun View.doOnVisibilityChange(onChange: (Boolean) -> Unit) {
+    var lastVisible = (isVisible)
+    onChange(lastVisible)
+    val listener = ViewTreeObserver.OnGlobalLayoutListener {
+        val nowVisible = (isVisible)
+        if (nowVisible != lastVisible) {
+            lastVisible = nowVisible
+            onChange(nowVisible)
+        }
+    }
+    viewTreeObserver.addOnGlobalLayoutListener(listener)
+    addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) = Unit
+        override fun onViewDetachedFromWindow(v: View) {
+            viewTreeObserver.removeOnGlobalLayoutListener(listener)
+            removeOnAttachStateChangeListener(this)
+        }
+    })
+}
 fun View.gone() {
     if (Looper.myLooper() == Looper.getMainLooper()) {
         this.visibility = View.GONE

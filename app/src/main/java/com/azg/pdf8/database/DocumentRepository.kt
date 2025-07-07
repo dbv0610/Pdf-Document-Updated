@@ -1,15 +1,14 @@
 package com.azg.pdf8.database
 
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import kotlinx.coroutines.flow.Flow
 
 interface DocumentRepository {
-    fun getAllDocuments(): Flow<List<DocumentModel>>
-    fun getFavoriteDocuments(): Flow<List<DocumentModel>>
-    suspend fun insert(document: DocumentModel)
-    suspend fun insertAll(documents: List<DocumentModel>)
-    suspend fun update(document: DocumentModel)
-    suspend fun delete(document: DocumentModel)
+    fun getAllDocuments(): Flow<List<RecentDocument>>
+    suspend fun insert(document: RecentDocument)
+    suspend fun insertAll(documents: List<RecentDocument>)
+    suspend fun update(document: RecentDocument)
+    suspend fun delete(document: RecentDocument)
     suspend fun setFavorite(mediaId: Long, isFavorite: Boolean)
     suspend fun clearAll()
 }

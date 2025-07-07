@@ -1,21 +1,17 @@
 package com.azg.pdf8.viewmodel
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.pdf.PdfDocument
-import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azg.pdf8.model.CreatePdf
-import com.azg.pdf8.model.DocumentModel
+import com.azg.pdf8.model.RecentDocument
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import androidx.core.graphics.scale
-import com.azg.pdf8.utils.AppUtils
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -55,7 +51,7 @@ class CreateViewModel : ViewModel() {
         _listPhotoSelect.value = newList
     }
 
-    fun addDataToList(dataRepo: MutableList<DocumentModel>) {
+    fun addDataToList(dataRepo: MutableList<RecentDocument>) {
         viewModelScope.launch(Dispatchers.IO) {
             val created = dataRepo.mapIndexed { index, doc ->
                 val thumbnail = BitmapFactory.decodeFile(doc.path)
@@ -73,7 +69,7 @@ class CreateViewModel : ViewModel() {
         }
     }
 
-    fun initListData(docs: List<DocumentModel>) {
+    fun initListData(docs: List<RecentDocument>) {
         viewModelScope.launch(Dispatchers.IO) {
             val created = docs.mapIndexed { index, doc ->
                 val thumbnail = BitmapFactory.decodeFile(doc.path)

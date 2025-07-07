@@ -60,6 +60,15 @@ class Permission {
                 return false
             }
         }
+    val checkGrantedStorage_24_33: Boolean
+        get() {
+            return (ContextCompat.checkSelfPermission(
+                context, Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                context, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+                    )
+        }
     val checkGrantedContact: Boolean
         get() {
             return (ContextCompat.checkSelfPermission(
@@ -104,10 +113,9 @@ class Permission {
                 ) == PackageManager.PERMISSION_GRANTED
             } else true
         }
-
     val checkGrantRecognize: Boolean
         get() {
-            return  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContextCompat.checkSelfPermission(
                     context, Manifest.permission.ACTIVITY_RECOGNITION
                 ) == PackageManager.PERMISSION_GRANTED

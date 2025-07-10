@@ -1,19 +1,14 @@
 package com.azg.pdf8.viewmodel
 
-import android.content.ContentUris
-import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.azg.pdf8.database.FavoriteDao
 import com.azg.pdf8.database.RecentDao
@@ -21,15 +16,14 @@ import com.azg.pdf8.dialog.SortByData
 import com.azg.pdf8.dialog.SortDateType
 import com.azg.pdf8.dialog.SortSizeType
 import com.azg.pdf8.model.DocumentPage
-import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.FavoriteDocument
 import com.azg.pdf8.model.FavoriteUi
+import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.RecentUi
+import com.azg.pdf8.ui.main.document.pdf.PageViewType
 import com.azg.pdf8.utils.AppUtils
 import com.azg.pdf8.utils.formatDateByMillis
-import com.dong.baselib.api.isApi30to33
-import com.dong.baselib.api.isApiFrom24to29
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -43,15 +37,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import androidx.core.graphics.createBitmap
-import androidx.lifecycle.asLiveData
-import com.azg.pdf8.ui.main.document.pdf.PageViewType
-import kotlinx.coroutines.flow.update
-import kotlin.collections.map
-import kotlin.use
 
 class DocumentViewModel(
     val repo: AppDataRepo,
@@ -62,8 +51,6 @@ class DocumentViewModel(
     private val favIdsFlow = favoriteDao.favoriteIds()
     private var _sortByData = MutableStateFlow(SortByData.None)
     val sortByData = _sortByData.asStateFlow()
-
-
     private val _pageViewState = MutableStateFlow<PageViewType>(PageViewType.PageByPage)
     val pageViewState = _pageViewState.asStateFlow()
 
@@ -115,9 +102,6 @@ class DocumentViewModel(
         _searchKey.value = key
         _searchType.value = type
     }
-
-
-
 
     private val _pagesState = MutableStateFlow<List<DocumentPage>>(emptyList())
     val pagesState: LiveData<List<DocumentPage>> = _pagesState.asLiveData()
@@ -186,8 +170,6 @@ class DocumentViewModel(
         }
     }
 
-
-
     private val allDocsFlow: Flow<List<RecentDocument>> =
         combine(
             repo.documentListPdf,
@@ -197,6 +179,44 @@ class DocumentViewModel(
         ) { pdfs, docs, xls, ppts ->
             (pdfs + docs + xls + ppts)
         }
+    val listRecentSearch: StateFlow<List<RecentUi>> = combine(
+        recentDocument,
+        _searchKey,
+        sortByDateFlow,
+        sortBySizeFlow,
+        filterTypesFlow
+    ) { docs, rawKey, sortDateType, sortSizeType, filterByTypes ->
+        val byType = if (filterByTypes.isEmpty()) {
+            mutableListOf()
+        } else {
+            docs.filter { it.document.type in filterByTypes }
+        }
+        val key = rawKey.trim().lowercase()
+        val byKey = if (key.isEmpty()) {
+            byType
+        } else {
+            byType.filter { ui ->
+                val name = File(ui.document.path).name.lowercase()
+                val date = formatDateByMillis(ui.document.lastModified).lowercase()
+                name.contains(key) || date.contains(key)
+            }
+        }
+        val sorted = when (sortDateType) {
+            SortDateType.NewToOld -> byKey.sortedBy { it.document.lastModified }
+            SortDateType.OldToNew -> byKey.sortedByDescending { it.document.lastModified }
+            SortDateType.NoSelect -> when (sortSizeType) {
+                SortSizeType.BigToSmall -> byKey.sortedBy { it.document.size }
+                SortSizeType.SmallToBig -> byKey.sortedByDescending { it.document.size }
+                SortSizeType.NoSelect -> byKey
+            }
+        }
+        sorted
+    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
     val listDocumentSearch: StateFlow<List<RecentUi>> = combine(
         allDocsFlow,
         favoriteDocument,
@@ -233,7 +253,51 @@ class DocumentViewModel(
         sorted
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
+    //    val listRecentSearch: StateFlow<List<RecentUi>> = combine(
+//        recentDocument,
+//        favoriteDocument,
+//        _searchKey,
+//        sortByDateFlow,
+//        sortBySizeFlow,
+//        filterTypesFlow,
+//    ) { docs, favUiList, key, sortByDate, sortBySize, filterBy ->
+//
+//        val filtered = if (filterBy.isEmpty()) {
+//            mutableListOf()
+//        } else {
+//            docs.filter { doc -> filterBy.contains(doc.document.type) }
+//        }
+////
+////        val k = key.trim().lowercase()
+////        val baseList = filtered.map { doc ->
+////            val isFav = favUiList.any { it.document.mediaId == doc.document.mediaId }
+////            RecentUi(doc.document, isFav)
+////        }
+////        val filteredByType = type?.let { t ->
+////            baseList.filter { it.document.type == t }
+////        } ?: baseList
+////        val filteredByKey = if (k.isEmpty()) {
+////            filteredByType
+////        } else {
+////            filteredByType.filter { ui ->
+////                val name = File(ui.document.path).name.lowercase()
+////                val date = formatDateByMillis(ui.document.lastModified).lowercase()
+////                name.contains(k) || date.contains(k)
+////            }
+////        }
+////        val sorted = when (sortType) {
+////            SortByData.None -> filteredByKey
+////            SortByData.SortByName ->
+////                filteredByKey.sortedBy { File(it.document.path).name.lowercase() }
+////            SortByData.SortBySize ->
+////                filteredByKey.sortedBy { it.document.size }
+////            SortByData.SortByDate ->
+////                filteredByKey.sortedBy { it.document.lastModified }
+////        }
+////        sorted
+//        mutableListOf<RecentUi>()
+//    }
+//        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     init {
         viewModelScope.launch {
             combine(

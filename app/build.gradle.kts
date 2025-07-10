@@ -144,20 +144,6 @@ dependencies {
     implementation(libs.android.pdf.viewer)
     implementation(libs.pdfbox.android)
 
-    implementation("com.google.guava:guava:29.0-android")
-    implementation(
-        group = "com.aspose",
-        name = "aspose-words",
-        version = "22.5",
-        classifier = "jdk17"
-    )
-    implementation(
-        group = "com.aspose",
-        name = "aspose-slides",
-        version = "22.5",
-        classifier = "jdk16"
-    )
-    implementation("com.aspose:aspose-cells:22.5")
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+    implementation(libs.guava)
     implementation(project(path = ":android_office"))
 }

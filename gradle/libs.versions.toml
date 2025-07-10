@@ -1,6 +1,8 @@
 [versions]
 agp = "8.8.2"
 cameraView = "1.4.2"
+guava = "29.0-android"
+itext7Core = "9.2.0"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -16,6 +18,8 @@ billingKtx = "8.0.0"
 glide = "4.16.0"
 gson = "2.13.1"
 lottie = "6.6.7"
+okhttp = "5.1.0"
+poi = "5.2.3"
 review-ktx = "2.0.2"
 shimmer = "0.5.0"
 koin-android = "4.1.0"
@@ -39,6 +43,7 @@ rxjava = "3.1.10"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -46,6 +51,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
 
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review-ktx" }
 sdp-android = { module = "com.intuit.sdp:sdp-android", version.ref = "sdpAndroid" }

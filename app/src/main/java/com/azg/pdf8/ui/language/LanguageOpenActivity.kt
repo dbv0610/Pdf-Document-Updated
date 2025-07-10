@@ -15,6 +15,7 @@ import com.azg.pdf8.widget.color_D9D9D9
 import com.azg.pdf8.widget.mainColor
 import com.dong.baselib.api.parcelable
 import com.dong.baselib.lifecycle.set
+import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.invisible
 import com.dong.baselib.widget.moveItemToPosition
 import com.dong.baselib.widget.visible
@@ -38,8 +39,8 @@ abstract class LanguageOpenActivity :
             }
             val intent = Intent(context, clazz)
             intent.putExtra(ARG_SCREEN_TYPE, screenType)
-            val anim = ActivityOptions.makeCustomAnimation(context, 0,0).toBundle()
-            context.startActivity(intent,anim)
+            val anim = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
+            context.startActivity(intent, anim)
         }
 
         val currentLang = MutableLiveData<LanguageItem>()
@@ -52,13 +53,12 @@ abstract class LanguageOpenActivity :
         }.getOrNull() ?: LanguageScreenType.Language1
     }
 
-
-
     override fun ActivityLanguageOpenBinding.onClick() = Unit
 
     override fun initialize() {
         updateUI()
     }
+
     override fun backPressed() {
         finishAffinity()
     }
@@ -68,13 +68,12 @@ abstract class LanguageOpenActivity :
     fun updateUI() {
         when (screenType) {
             is LanguageScreenType.Language1 -> {
-                binding.selectLanguage.backgroundAll(color_D9D9D9)
+                binding.selectLanguage.invisible()
             }
-
             is LanguageScreenType.Language2 -> {
                 binding.selectLanguage.visibility = View.VISIBLE
                 currentLang.value?.let { languageAdapter.selectItem(it) }
-                binding.selectLanguage.backgroundAll(mainColor)
+                binding.selectLanguage.visible()
                 binding.selectLanguage.setOnClickListener {
                     languageAdapter.getSelectedLanguage()?.let {
                         navigateToNextScreen(it)
@@ -138,5 +137,4 @@ abstract class LanguageOpenActivity :
         startActivity(intent)
         finish()
     }
-
 }

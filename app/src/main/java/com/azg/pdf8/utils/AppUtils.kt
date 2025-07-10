@@ -4,6 +4,9 @@ import android.content.ContentUris
 import android.content.Context
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
+import com.azg.pdf8.database.FavoriteDao
+import com.azg.pdf8.database.RecentDao
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.DocumentType
 import kotlinx.coroutines.Dispatchers
@@ -39,68 +42,106 @@ object AppUtils {
             return filePath.absolutePath
         }
 
-    fun scanAllDocumentsFlow(context: Context): Flow<List<RecentDocument>> = flow {
-        val result = mutableListOf<RecentDocument>()
-        val uri = MediaStore.Files.getContentUri("external")
-        val projection = arrayOf(
-            MediaStore.Files.FileColumns._ID,
-            MediaStore.Files.FileColumns.DATA,
-            MediaStore.Files.FileColumns.DATE_MODIFIED,
-            MediaStore.Files.FileColumns.SIZE,
-            MediaStore.Files.FileColumns.MIME_TYPE
-        )
-        val docMimeMap = mapOf(
-            "application/pdf" to DocumentType.Pdf,
-            "application/msword" to DocumentType.Doc,
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" to DocumentType.Doc,
-            "application/vnd.ms-excel" to DocumentType.Excel,
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" to DocumentType.Excel,
-            "application/vnd.ms-powerpoint" to DocumentType.Ppt,
-            "application/vnd.openxmlformats-officedocument.presentationml.presentation" to DocumentType.Ppt
-        )
-        val selection = docMimeMap.keys.joinToString(" OR ") {
-            "${MediaStore.Files.FileColumns.MIME_TYPE} = ?"
-        }
-        val selectionArgs = docMimeMap.keys.toTypedArray()
-
-        withContext(Dispatchers.IO) {
-            val cursor = context.contentResolver.query(
-                uri,
-                projection,
-                selection,
-                selectionArgs,
-                "${MediaStore.Files.FileColumns.DATE_MODIFIED} DESC"
-            )
-            cursor?.use {
-                val idCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                val pathCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA)
-                val dateCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
-                val sizeCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
-                val mimeCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)
-
-                while (it.moveToNext()) {
-                    val mediaId = it.getLong(idCol)
-                    val path = it.getString(pathCol)
-                    val lastModified = it.getLong(dateCol) * 1000
-                    val size = it.getLong(sizeCol)
-                    val mime = it.getString(mimeCol)
-                    val type = docMimeMap[mime] ?: DocumentType.Doc
-
-                    result.add(
-                        RecentDocument(
-                            mediaId = mediaId,
-                            path = path,
-                            lastModified = lastModified,
-                            size = size,
-                            type = type
-                        )
-                    )
+    fun getSdStorageDirectories(context: Context): List<String> {
+        val results = mutableListOf<String>()
+        context.getExternalFilesDirs(null)?.forEach { file ->
+            file?.let {
+                val path = file.path.substringBefore("/Android")
+                if (Environment.isExternalStorageRemovable(file)) {
+                    results.add(path)
                 }
             }
         }
+        if (results.isEmpty()) {
+            val output = runCatching {
+                ProcessBuilder()
+                    .command("mount | grep /dev/block/vold")
+                    .redirectErrorStream(true)
+                    .start()
+                    .inputStream
+                    .bufferedReader()
+                    .use { it.readText() }
+            }.getOrElse {
+                it.printStackTrace()
+                ""
+            }
 
-        emit(result)
+            if (output.isNotBlank()) {
+                output.lines().forEach { line ->
+                    runCatching {
+                        val mountPoint = line.split(" ")[2]
+                        results.add(mountPoint)
+                    }.onFailure { it.printStackTrace() }
+                }
+            }
+        }
+        return results
     }
+    fun <T> scanMedia(
+        context: Context,
+        fileFilter: (File) -> Boolean,
+        buildModel: (File) -> T
+    ): Flow<T> = flow {
+        val storagePaths = AppUtils.getSdStorageDirectories(context).toMutableList()
+        val externalStorage = Environment.getExternalStorageDirectory()
+        if (externalStorage.exists()) storagePaths.add(externalStorage.absolutePath)
+
+        val directories = ArrayDeque<File>()
+        storagePaths
+            .map(::File)
+            .filter { it.exists() && it.isDirectory }
+            .forEach(directories::add)
+
+        while (directories.isNotEmpty()) {
+            val dir = directories.removeFirstOrNull() ?: continue
+            dir.listFiles()?.forEach { file ->
+                if (file.isDirectory) {
+                    if (!file.name.startsWith(".")) directories.add(file)
+                } else if (file.isFile && fileFilter(file)) {
+                    emit(buildModel(file))
+                }
+            }
+        }
+    }
+        .onEach { delay(1) }
+        .flowOn(Dispatchers.IO)
+
+
+    fun scanAllDocumentsFlow(
+        context: Context,
+        recentDao: RecentDao,
+        favoriteDao: FavoriteDao
+    ): Flow<RecentDocument> =
+        scanMedia(
+            context,
+            fileFilter = { file ->
+                when (file.extension.lowercase()) {
+                    "pdf", "doc", "docx", "xls",
+                    "xlsx", "ppt", "pptx" -> true
+                    else -> false
+                }
+            },
+            buildModel = { file ->
+                val id = file.absolutePath.hashCode().toLong()
+                val type = when (file.extension.lowercase()) {
+                    "pdf" -> DocumentType.Pdf
+                    "doc", "docx" -> DocumentType.Doc
+                    "xls", "xlsx" -> DocumentType.Excel
+                    "ppt", "pptx" -> DocumentType.Ppt
+                    else -> DocumentType.Doc
+                }
+                RecentDocument(
+                    mediaId      = id,
+                    path         = file.absolutePath,
+                    lastModified = file.lastModified(),
+                    size         = file.length(),
+                    type         = type
+                )
+            }
+        ).onEach { doc ->
+            recentDao.updatePath(doc.mediaId.toInt(), doc.path)
+            favoriteDao.updateName(doc.mediaId.toInt(), doc.path)
+        }
 
     fun scanImagesFlow(context: Context): Flow<ScanState> = flow {
         emit(ScanState.Start)
@@ -170,22 +211,8 @@ fun formatDateByMillis(millis: Long): String {
     val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
     return sdf.format(Date(millis))
 }
+
 fun formatTimeByMillis(millis: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.ENGLISH)
     return sdf.format(Date(millis))
-}
-
-fun getMimeType(filePath: String): String {
-    val extension = filePath.substringAfterLast('.', "").lowercase(Locale.ROOT)
-    return when (extension) {
-        "pdf" -> "application/pdf"
-        "doc", "docx" -> "application/msword"
-        "xls", "xlsx" -> "application/vnd.ms-excel"
-        "ppt", "pptx" -> "application/vnd.ms-powerpoint"
-        "txt", "js", "kt", "py", "java" -> "text/plain"
-        "mp3", "wav", "m4a", "aac", "ogg", "flac", "amr" -> "audio/*"
-        "jpg", "jpeg", "png", "gif", "bmp", "webp" -> "image/*"
-        "mp4", "3gp", "avi", "mkv" -> "video/*"
-        else -> "*/*"
-    }
 }

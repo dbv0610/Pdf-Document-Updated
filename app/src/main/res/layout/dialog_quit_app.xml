@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/_12sdp"
     android:orientation="vertical"
-    android:padding="@dimen/_16sdp"
     app:bgColorAll="@color/white"
     app:cornerRadius="@dimen/_12sdp">
 
@@ -13,34 +12,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:background="@color/color_background"
+        android:orientation="vertical"
+        android:padding="@dimen/_16sdp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/rb_600"
             android:includeFontPadding="false"
-            android:text="@string/exit_app"
+            android:text="@string/confirm"
             android:textAlignment="textStart"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="@dimen/_16sdp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_12sdp"
-            android:fontFamily="@font/rb_400"
-            android:includeFontPadding="false"
-            android:text="@string/are_you_sure_want_to_quit_app"
-            android:textAlignment="textStart"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_13sdp" />
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:fontFamily="@font/rb_400"
+        android:includeFontPadding="false"
+        android:text="@string/are_you_sure_want_to_quit_app"
+        android:textAlignment="textStart"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_13sdp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
         android:layout_marginTop="@dimen/_16sdp"
+        android:layout_marginBottom="@dimen/_12sdp"
         android:orientation="horizontal"
         android:weightSum="2">
 
@@ -51,14 +55,13 @@
             android:layout_marginEnd="@dimen/_6sdp"
             android:layout_weight="1"
             android:fontFamily="@font/rb_500"
+            android:gravity="center"
             android:padding="@dimen/_10sdp"
             android:text="@string/cancels"
-            android:textAlignment="center"
             android:textColor="@color/mainColor"
             android:textSize="@dimen/_13sdp"
             app:cornerRadius="@dimen/_8sdp"
-            app:stColorDark="@color/mainColor"
-            app:stColorLight="@color/mainColor"
+            app:stColorAll="@color/mainColor"
             app:strokeWidth="@dimen/_1sdp" />
 
         <com.dong.baselib.widget.view.UiTextView
@@ -75,8 +78,7 @@
             android:text="@string/exit"
             android:textColor="@color/white"
             android:textSize="@dimen/_13sdp"
-            app:bgColorDark="@color/mainColor"
-            app:bgColorLight="@color/mainColor"
+            app:bgColorAll="@color/mainColor"
             app:cornerRadius="@dimen/_8sdp" />
     </LinearLayout>
 </com.dong.baselib.widget.layout.UiLinearLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/_6sdp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.dong.baselib.widget.view.UiTextView
+        android:layout_width="match_parent"
+        android:id="@+id/tvContent"
+        android:text="Home"
+        app:stColorAll="@color/color_c9cdd4"
+        app:strokeWidth="1.2dp"
+        android:textSize="@dimen/_11sdp"
+        android:textColor="@color/black"
+        app:cornerRadius="@dimen/_16sdp"
+        android:fontFamily="@font/rb_400"
+        android:textAlignment="center"
+        android:paddingVertical="@dimen/_10sdp"
+        android:includeFontPadding="false"
+        android:layout_height="wrap_content"/>
+</FrameLayout>

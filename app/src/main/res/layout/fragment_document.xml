@@ -294,21 +294,129 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_12sdp"
                 android:fontFamily="@font/rb_600"
-                android:textColor="@color/mainColor"
                 android:includeFontPadding="false"
                 android:text="@string/show_all"
+                android:textColor="@color/mainColor"
                 android:textSize="@dimen/_12sdp" />
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lnNoPer"
             android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_marginTop="@dimen/_8sdp"
             android:layout_height="0dp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_weight="1"
             tools:ignore="NestedWeights">
 
             <LinearLayout
-                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_12sdp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/_18sdp"
+                app:cornerRadius="@dimen/_8sdp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.25">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/_12sdp">
+
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/img_permission"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.dong.baselib.widget.layout.UiLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_16sdp"
+                        android:clickable="false"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/_8sdp"
+                        app:bgColorAll="@color/white"
+                        app:cornerRadius="@dimen/_8sdp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/imageView2"
+                        tools:layout_editor_absoluteX="16dp">
+
+                        <ImageView
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:clickable="false"
+                            android:src="@drawable/img_per_file" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/_12sdp"
+                            android:layout_weight="1"
+                            android:clickable="false"
+                            android:fontFamily="@font/rb_600"
+                            android:includeFontPadding="false"
+                            android:text="@string/allow_access_to_manage_all_files"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/_10sdp" />
+
+                        <ImageView
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:clickable="false"
+                            android:src="@drawable/img_per_switch" />
+                    </com.dong.baselib.widget.layout.UiLinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:clickable="false"
+                    android:fontFamily="@font/rb_400"
+                    android:includeFontPadding="false"
+                    android:text="@string/pdf_reader_requires_file_access_to_function_properly_please_allow_permission"
+                    android:textAlignment="center"
+                    android:textColor="@color/color_8c8c8c"
+                    android:textSize="@dimen/_11sdp" />
+
+                <com.dong.baselib.widget.view.UiTextView
+                    android:id="@+id/btnGranted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:fontFamily="@font/rb_500"
+                    android:gravity="center"
+                    android:textSize="@dimen/_11sdp"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="@dimen/_26sdp"
+                    android:paddingVertical="@dimen/_10sdp"
+                    android:text="@string/allow_access"
+                    android:textColor="@color/white"
+                    app:bgColorAll="@color/mainColor"
+                    app:cornerRadius="@dimen/_8sdp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lnGrantPer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            tools:ignore="NestedWeights">
+
+            <LinearLayout
                 android:id="@+id/lnNoData"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -316,6 +424,7 @@
                 android:layout_marginHorizontal="@dimen/_18sdp"
                 android:gravity="center"
                 android:orientation="vertical"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

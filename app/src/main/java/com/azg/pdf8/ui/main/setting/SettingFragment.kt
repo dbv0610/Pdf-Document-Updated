@@ -24,6 +24,10 @@ class SettingFragment :
         binding.langCurrent.text = langName
     }
 
+    override fun backPress() {
+        super.backPress()
+        fragmentAttach?.fragmentOnBack()
+    }
     override fun FragmentSettingBinding.onClick() {
         llLanguage.click {
             addFragment(LanguageFragment())

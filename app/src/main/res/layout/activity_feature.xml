@@ -16,11 +16,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
-
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_12sdp"
             android:layout_weight="1"
+            android:includeFontPadding="false"
+            android:fontFamily="@font/rb_500"
             android:text="@string/feature_that_fits_your_needs"
             android:textColor="@color/black"
             android:textSize="@dimen/_13sdp" />
@@ -32,13 +33,19 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:padding="@dimen/_12sdp"
+        android:padding="@dimen/_6sdp"
         app:layout_constraintBottom_toTopOf="@+id/txtContinue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llAppBar"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toBottomOf="@+id/llAppBar">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcvItemData"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="3"
+            tools:listitem="@layout/item_feature_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
 
     </LinearLayout>

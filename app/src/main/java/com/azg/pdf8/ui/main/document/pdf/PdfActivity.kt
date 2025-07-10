@@ -3,14 +3,21 @@ package com.azg.pdf8.ui.main.document.pdf
 import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityPdfBinding
+import com.azg.pdf8.databinding.PopupMenuActionBinding
 import com.azg.pdf8.dialog.CreateEventHandle
 import com.azg.pdf8.dialog.DialogCreatePdf
+import com.azg.pdf8.dialog.RenameDialog
+import com.azg.pdf8.dialog.SortDataByDialog
 import com.azg.pdf8.model.DocumentType
+import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.create.ChooseImageActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
+import com.dong.baselib.base.PopupDataHelper
+import com.dong.baselib.file.shareFileWithPath
 import com.dong.baselib.lifecycle.lifecycleLaunch
+import com.dong.baselib.string.fileName
 import com.dong.baselib.widget.afterTextChanged
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.gone
@@ -26,14 +33,40 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
     private val recentAdapter by lazy {
         RecentAdapter(onFavoriteClick = { doc, index ->
             viewModel.toggleFavoriteRecent(doc)
+        }, onMenuClick = { view, doc, pos ->
+            popupHerper?.show(view, doc)
         }) {
             launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
             viewModel.addToRecent(it)
         }.attachLifecycle(this@PdfActivity)
     }
-
+    var popupHerper: PopupDataHelper<PopupMenuActionBinding, RecentDocument>? = null
     override fun initialize() {
         viewModel.setSearchCriteria("", DocumentType.Pdf)
+        popupHerper = PopupDataHelper.with(
+            this@PdfActivity,
+            PopupMenuActionBinding::inflate
+        )
+
+        popupHerper?.onBindData { binding, popup, model ->
+            binding.lnShare.click {
+                shareFileWithPath(this@PdfActivity, model?.path ?: "")
+                popup.dismiss()
+            }
+            binding.lnRename.click {
+                popup.dismiss()
+                RenameDialog(this@PdfActivity) { newN ->
+                    model?.let {
+                        viewModel.renameFile(model, newN)
+                    }
+                }.showRename(model?.path?.fileName() ?: "")
+            }
+            binding.lnDelete.click {
+                model?.let {
+                    viewModel.removeFavorite(model)
+                }
+            }
+        }
     }
 
     override fun ActivityPdfBinding.setData() {
@@ -74,6 +107,13 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                     launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
                 }
             }).show()
+        }
+        icSortData.click {
+            SortDataByDialog(this@PdfActivity)
+                .attachLifecycle(this@PdfActivity)
+                .onSearchEvent { viewModel.setSortByData(it) }
+                .showSortByData(viewModel.sortByData.value)
+                .show()
         }
     }
 }

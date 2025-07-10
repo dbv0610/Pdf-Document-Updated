@@ -10,8 +10,5 @@ class Feature1Activity : FeatureActivity() {
         super.onCreate(savedInstanceState)
 
     }
-    
-    override fun ActivityFeatureBinding.setData() {
 
-    }
 }

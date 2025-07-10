@@ -5,42 +5,45 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.azg.pdf8.databinding.ItemFeatureBinding
+import com.azg.pdf8.databinding.ItemFeatureViewBinding
+import com.azg.pdf8.widget.color_C9CDD4
+import com.azg.pdf8.widget.mainColor
+import com.dong.baselib.widget.black
+import com.dong.baselib.widget.white
 
 class FeatureAdapter(
-    private val onSelectedItem: () -> Unit,
-) : ListAdapter<FeatureModel, FeatureAdapter.FeatureViewHolder>(
-    object : DiffUtil.ItemCallback<FeatureModel>() {
-        override fun areItemsTheSame(oldItem: FeatureModel, newItem: FeatureModel): Boolean {
-            return oldItem.packageName == newItem.packageName
-        }
+    private val items: MutableList<FeatureModel>,
+    private val onSelectedItem: (FeatureModel) -> Unit,
+) : RecyclerView.Adapter<FeatureAdapter.FeatureViewHolder>() {
+    override fun getItemCount() = items.size
 
-        override fun areContentsTheSame(oldItem: FeatureModel, newItem: FeatureModel): Boolean {
-            return oldItem == newItem
-        }
-    }
-) {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeatureViewHolder {
-        return FeatureViewHolder(
-            ItemFeatureBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        FeatureViewHolder(
+            ItemFeatureViewBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
         )
-    }
 
     override fun onBindViewHolder(holder: FeatureViewHolder, position: Int) {
-        holder.bindView(getItem(position))
+        holder.bind(items[position])
     }
 
-    inner class FeatureViewHolder(private val binding: ItemFeatureBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bindView(item: FeatureModel) {
-            binding.imgIcon.setImageResource(item.icon)
-            binding.tvTitle.text = item.name
-            binding.ctlContainer.isSelected = item.isSelected
-            itemView.setOnClickListener {
-                item.isSelected = !item.isSelected
-                binding.ctlContainer.isSelected = item.isSelected
-                onSelectedItem()
+    inner class FeatureViewHolder(
+        private val binding: ItemFeatureViewBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(model: FeatureModel) {
+            binding.tvContent.apply {
+                text = binding.root.context.getString(model.name)
+                strokeColor(
+                    if (model.isSelected) mainColor else color_C9CDD4
+                )
+                backgroundAll(if (model.isSelected) mainColor else white)
+                setTextColor(if (model.isSelected) white else black)
+            }
+            binding.root.setOnClickListener {
+                model.isSelected = !model.isSelected
+                notifyItemChanged(adapterPosition)
+                onSelectedItem(model)
             }
         }
     }

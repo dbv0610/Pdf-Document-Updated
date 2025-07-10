@@ -10,6 +10,7 @@ import com.azg.pdf8.viewmodel.AppDataRepo
 import com.azg.pdf8.viewmodel.CreateViewModel
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.viewmodel.ScanImageViewModel
+import com.azg.pdf8.viewmodel.ConvertViewModel
 import com.dong.baselib.permission.Permission
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.viewModel
@@ -21,6 +22,7 @@ val viewModelModule = module {
     viewModel { ScanImageViewModel(get()) }
     viewModel { CreateViewModel() }
     viewModel { ReadPdfViewModel(get()) }
+    viewModel { ConvertViewModel() }
 }
 val dataModule = module {
     single<Permission> { Permission().initialize(get()) }

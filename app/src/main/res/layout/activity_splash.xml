@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.dong.baselib.widget.layout.UiConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    app:bgIsGradient="true"
+    app:bgGradientEnd="#830000"
+    app:bgGradientStart="#FF0000"
     android:layout_height="match_parent"
     tools:context=".ui.splash.SplashActivity">
 
@@ -28,12 +31,12 @@
         android:layout_marginHorizontal="@dimen/_16sdp"
         android:layout_marginTop="@dimen/_16sdp"
         android:adjustViewBounds="true"
-        android:textStyle="italic"
+
         android:includeFontPadding="false"
         android:text="@string/app_name"
         android:fontFamily="@font/rb_700"
         android:textAlignment="center"
-        android:textColor="@color/mainColor"
+        android:textColor="@color/white"
         android:textSize="@dimen/_18sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,7 +50,7 @@
         android:layout_marginBottom="@dimen/_10sdp"
         android:text="@string/this_action_may_contain_advertising"
         android:textAlignment="center"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:textSize="@dimen/_11sdp"
         app:layout_constraintBottom_toTopOf="@id/progressIndicator" />
 
@@ -58,12 +61,12 @@
         android:layout_marginBottom="@dimen/_16sdp"
         android:indeterminate="true"
         android:progressBackgroundTint="#FFFFFF"
-        app:indicatorColor="@color/mainColor"
+        app:indicatorColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.6"
+        app:layout_constraintWidth_percent="0.65"
         app:layout_marginBaseline="@dimen/_2sdp"
         app:trackCornerRadius="@dimen/_12sdp"
         app:trackThickness="@dimen/_4sdp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.dong.baselib.widget.layout.UiConstraintLayout>

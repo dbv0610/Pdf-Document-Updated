@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azg.pdf8.model.ContentWithPage
 import com.azg.pdf8.model.RecentDocument
-import com.azg.pdf8.model.PdfPage
+import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.viewmodel.AppDataRepo
 import com.azg.pdf8.viewmodel.DataResponse
 import kotlinx.coroutines.Dispatchers
@@ -34,8 +34,8 @@ class ReadPdfViewModel(private val repository: AppDataRepo) : ViewModel() {
         _pageViewState.value = state
     }
 
-    private val _pagesState = MutableStateFlow<List<PdfPage>>(emptyList())
-    val pagesState: LiveData<List<PdfPage>> = _pagesState.asLiveData()
+    private val _pagesState = MutableStateFlow<List<DocumentPage>>(emptyList())
+    val pagesState: LiveData<List<DocumentPage>> = _pagesState.asLiveData()
 
     fun renderPdf(context: Context, pdfUri: Uri, thumbnailWidth: Int = 200) {
         viewModelScope.launch {
@@ -44,7 +44,7 @@ class ReadPdfViewModel(private val repository: AppDataRepo) : ViewModel() {
                     ?: throw IllegalArgumentException("Cannot open PDF: $pdfUri")
 
                 PdfRenderer(pfd).use { renderer ->
-                    _pagesState.value = List(renderer.pageCount) { PdfPage.loading(it) }
+                    _pagesState.value = List(renderer.pageCount) { DocumentPage.loading(it) }
 
                     withContext(Dispatchers.IO) {
                         (0 until renderer.pageCount).forEach { index ->
@@ -88,7 +88,7 @@ class ReadPdfViewModel(private val repository: AppDataRepo) : ViewModel() {
                             } catch (e: Exception) {
                                 _pagesState.update { current ->
                                     current.map {
-                                        if (it.index == index) PdfPage.error(index, e) else it
+                                        if (it.index == index) DocumentPage.error(index, e) else it
                                     }
                                 }
                             }
@@ -96,7 +96,7 @@ class ReadPdfViewModel(private val repository: AppDataRepo) : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                _pagesState.value = listOf(PdfPage.error(0, e))
+                _pagesState.value = listOf(DocumentPage.error(0, e))
             }
         }
     }

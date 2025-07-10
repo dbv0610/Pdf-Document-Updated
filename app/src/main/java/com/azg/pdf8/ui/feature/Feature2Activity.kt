@@ -15,8 +15,4 @@ class Feature2Activity : FeatureActivity() {
         super.onCreate(savedInstanceState)
 
     }
-  
-    override fun ActivityFeatureBinding.setData() {
-
-    }
 }

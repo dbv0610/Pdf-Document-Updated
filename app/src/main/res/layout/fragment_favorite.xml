@@ -92,6 +92,7 @@
                     android:layout_height="match_parent"/>
 
                 <ImageView
+                    android:id="@+id/icSearch"
                     android:padding="@dimen/_3sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_width="@dimen/_24sdp"

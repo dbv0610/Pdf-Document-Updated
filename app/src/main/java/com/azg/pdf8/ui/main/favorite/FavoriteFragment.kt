@@ -1,6 +1,7 @@
 package com.azg.pdf8.ui.main.favorite
 
 import android.annotation.SuppressLint
+import android.view.inputmethod.EditorInfo
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.adapter.FavoriteAdapter
 import com.azg.pdf8.base.BaseFragment
@@ -14,6 +15,7 @@ import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.dong.baselib.lifecycle.lifecycleLaunch
+import com.dong.baselib.widget.afterTextChanged
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.dimenSdp
 import com.dong.baselib.widget.gone
@@ -21,6 +23,7 @@ import com.dong.baselib.widget.paddingTop
 import com.dong.baselib.widget.visible
 import org.koin.android.ext.android.inject
 import kotlin.getValue
+import kotlin.text.trim
 
 class FavoriteFragment :
     BaseFragment<FragmentFavoriteBinding>(FragmentFavoriteBinding::inflate, true) {
@@ -36,8 +39,12 @@ class FavoriteFragment :
             }
         })
     }
+    override fun backPress() {
+        super.backPress()
+        fragmentAttach?.fragmentOnBack()
+    }
     private val favoriteAdapter by lazy {
-        FavoriteAdapter(onFavoriteClick = {document , index->
+        FavoriteAdapter(onFavoriteClick = { document, index ->
             documentViewModel.toggleFavorite(document)
         }) {
             launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
@@ -56,18 +63,42 @@ class FavoriteFragment :
                     rcvListData.visible()
                     lnNoData.gone()
                     val lm = rcvListData.layoutManager as LinearLayoutManager
-                    favoriteAdapter.submitList(it){
+                    favoriteAdapter.submitList(it) {
                         lm.scrollToPositionWithOffset(0, 0)
                     }
                 }
             }
         }
         rcvListData.adapter = favoriteAdapter
+
+        edtSearch.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = v.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    documentViewModel.setSearchCriteria(query, null)
+                }
+                v.clearFocus()
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+        edtSearch.afterTextChanged {
+            val query = it.trim()
+            if (query.isEmpty()) {
+                documentViewModel.setSearchCriteria("", null)
+            }
+        }
     }
 
     override fun FragmentFavoriteBinding.onClick() {
         btnCreate.click {
             createDialog.show()
+        }
+        icSearch.click {
+            val query = edtSearch.text.toString().trim()
+            documentViewModel.setSearchCriteria(query, null)
         }
         lnSortData.click {
             SortFavoriteDialog(appActivity)

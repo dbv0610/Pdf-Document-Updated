@@ -34,25 +34,19 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <com.dong.baselib.widget.view.UiTextView
+        <ImageView
+            android:contentDescription="check"
+            android:layout_width="@dimen/_24sdp"
             android:id="@+id/selectLanguage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/rb_400"
-            android:includeFontPadding="false"
-            android:paddingHorizontal="@dimen/_12sdp"
-            android:paddingVertical="@dimen/_5sdp"
-            android:text="@string/next"
-            app:bgColorAll="@color/mainColor"
-            app:cornerRadius="@dimen/_18sdp"
-            app:textGradient="false"
-            app:tvColor="@color/white" />
+            android:padding="@dimen/_1sdp"
+            android:src="@drawable/ic_view_done"
+            android:layout_height="@dimen/_24sdp"
+            tools:ignore="HardcodedText" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/color_f8f8f8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
@@ -65,13 +59,12 @@
             android:orientation="horizontal"
             android:padding="@dimen/_10sdp"
             app:cornerRadius="@dimen/_6sdp"
-            app:bgColorAll="@color/white"
+            app:bgColorAll="@color/color_F2F2F7"
             android:layout_marginTop="@dimen/_18sdp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:stColorDark="@color/mainColor"
-            app:stColorLight="@color/mainColor"
+            app:stColorAll="@color/mainColor"
             app:strokeWidth="1.3dp">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -110,10 +103,10 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llFocusItem"
-            app:layout_constraintVertical_bias="0.21">
+            app:layout_constraintVertical_bias="0.25">
 
             <ImageView
                 android:id="@+id/ivImgLoad"
@@ -129,7 +122,7 @@
                 android:gravity="center"
                 android:text="@string/applying_language"
                 android:textColor="@color/black"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_11sdp" />
         </LinearLayout>
 
         <LinearLayout
@@ -164,7 +157,7 @@
                 android:gravity="center"
                 android:text="@string/changes_applied"
                 android:textColor="@color/black"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_11sdp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

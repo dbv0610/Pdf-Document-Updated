@@ -21,7 +21,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding>(FragmentLanguageB
     private val languageAdapter by lazy {
         LanguageSettingAdapter {
             currentLang.value = it
-        }
+        }.attachLifecycle(viewLifecycleOwner)
     }
 
     override fun FragmentLanguageBinding.onClick() {

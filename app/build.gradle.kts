@@ -1,4 +1,3 @@
-
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -53,7 +52,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-             signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     bundle {
@@ -76,16 +75,13 @@ android {
     flavorDimensions.add("version")
     productFlavors {
         create("dev") {
-
             applicationId = "com.azg.pdf8"
             manifestPlaceholders["ad_app_id"] = "ca-app-pub-3940256099942544~3347511713"
 
             buildConfigField("boolean", "build_debug", "true")
-
         }
 
         create("product") {
-
             applicationId = ""
             manifestPlaceholders["ad_app_id"] = ""
 
@@ -147,7 +143,7 @@ dependencies {
 
     implementation(libs.android.pdf.viewer)
     implementation(libs.pdfbox.android)
-    implementation(project(path=":mupdf_lib"))
-    implementation(project(path=":android_office"))
 
+    implementation(libs.guava)
+    implementation(project(path = ":android_office"))
 }

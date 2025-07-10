@@ -1,13 +1,26 @@
 package com.azg.pdf8.viewmodel
 
+import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.pdf.PdfRenderer
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azg.pdf8.database.FavoriteDao
 import com.azg.pdf8.database.RecentDao
+import com.azg.pdf8.dialog.SortByData
 import com.azg.pdf8.dialog.SortDateType
 import com.azg.pdf8.dialog.SortSizeType
+import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.FavoriteDocument
@@ -15,6 +28,9 @@ import com.azg.pdf8.model.FavoriteUi
 import com.azg.pdf8.model.RecentUi
 import com.azg.pdf8.utils.AppUtils
 import com.azg.pdf8.utils.formatDateByMillis
+import com.dong.baselib.api.isApi30to33
+import com.dong.baselib.api.isApiFrom24to29
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,27 +42,43 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.core.graphics.createBitmap
+import androidx.lifecycle.asLiveData
+import com.azg.pdf8.ui.main.document.pdf.PageViewType
+import kotlinx.coroutines.flow.update
+import kotlin.collections.map
+import kotlin.use
 
-class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val favoriteDao: FavoriteDao) :
-    ViewModel() {
-    private val _recentDocument = recentDao.getAll()
-        .map { list ->
-            list.map { doc ->
-                doc to (favoriteDao.isExistInFavorite(doc.mediaId.toInt()) > 0)
+class DocumentViewModel(
+    val repo: AppDataRepo,
+    val recentDao: RecentDao,
+    val favoriteDao: FavoriteDao
+) : ViewModel() {
+    private val recentFlow = recentDao.getAll()
+    private val favIdsFlow = favoriteDao.favoriteIds()
+    private var _sortByData = MutableStateFlow(SortByData.None)
+    val sortByData = _sortByData.asStateFlow()
+
+
+    private val _pageViewState = MutableStateFlow<PageViewType>(PageViewType.PageByPage)
+    val pageViewState = _pageViewState.asStateFlow()
+
+    fun setPageState(state: PageViewType) {
+        _pageViewState.value = state
+    }
+
+    val recentDocument: StateFlow<List<RecentUi>> =
+        combine(recentFlow, favIdsFlow) { recents, favIds ->
+            val favSet = favIds.map { it.toInt() }.toSet()
+            recents.map { doc ->
+                RecentUi(doc, doc.mediaId.toInt() in favSet)
             }
         }
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    val recentDocument: StateFlow<List<RecentUi>> = _recentDocument.map { pairs ->
-        pairs.map { (doc, isFav) ->
-            RecentUi(doc, isFav)
-        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-
-
-
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     private val _listFavoriteSearch = MutableStateFlow(mutableListOf<FavoriteUi>())
     val listFavoriteSearch = _listFavoriteSearch.asStateFlow()
     private val _favorites = favoriteDao.getAll()
@@ -72,15 +104,90 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
             DocumentType.Image
         )
     )
-
-
-
-    private val _searchKey  = MutableStateFlow("")
+    private val _searchKey = MutableStateFlow("")
     private val _searchType = MutableStateFlow<DocumentType?>(null)
+
+    fun setSortByData(data: SortByData) {
+        _sortByData.value = data
+    }
+
     fun setSearchCriteria(key: String, type: DocumentType?) {
-        _searchKey.value  = key
+        _searchKey.value = key
         _searchType.value = type
     }
+
+
+
+
+    private val _pagesState = MutableStateFlow<List<DocumentPage>>(emptyList())
+    val pagesState: LiveData<List<DocumentPage>> = _pagesState.asLiveData()
+
+    fun renderPdf(context: Context, pdfUri: Uri, thumbnailWidth: Int = 200) {
+        viewModelScope.launch {
+            try {
+                val pfd = context.contentResolver.openFileDescriptor(pdfUri, "r")
+                    ?: throw IllegalArgumentException("Cannot open PDF: $pdfUri")
+
+                PdfRenderer(pfd).use { renderer ->
+                    _pagesState.value = List(renderer.pageCount) { DocumentPage.loading(it) }
+
+                    withContext(Dispatchers.IO) {
+                        (0 until renderer.pageCount).forEach { index ->
+                            try {
+                                val page = renderer.openPage(index)
+                                val ratio = page.height.toFloat() / page.width
+                                val thumbHeight = (thumbnailWidth * ratio).toInt()
+                                val bitmap = try {
+                                    createBitmap(thumbnailWidth, thumbHeight).also { bmp ->
+                                        page.render(
+                                            bmp,
+                                            null,
+                                            null,
+                                            PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                                        )
+                                    }
+                                } catch (e: OutOfMemoryError) {
+                                    createBitmap(
+                                        thumbnailWidth / 2,
+                                        (thumbHeight / 2).coerceAtLeast(1),
+                                        Bitmap.Config.RGB_565
+                                    ).also { bmp ->
+                                        page.render(
+                                            bmp,
+                                            null,
+                                            null,
+                                            PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                                        )
+                                    }
+                                }
+
+                                page.close()
+                                _pagesState.update { current ->
+                                    current.map {
+                                        if (it.index == index) it.copy(
+                                            bitmap = bitmap,
+                                            isLoading = false
+                                        ) else it
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                _pagesState.update { current ->
+                                    current.map {
+                                        if (it.index == index) DocumentPage.error(index, e) else it
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _pagesState.value = listOf(DocumentPage.error(0, e))
+            }
+        }
+    }
+
+
+
     private val allDocsFlow: Flow<List<RecentDocument>> =
         combine(
             repo.documentListPdf,
@@ -90,36 +197,42 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
         ) { pdfs, docs, xls, ppts ->
             (pdfs + docs + xls + ppts)
         }
-
     val listDocumentSearch: StateFlow<List<RecentUi>> = combine(
         allDocsFlow,
         favoriteDocument,
         _searchKey,
-        _searchType
-    ) { docs, favUiList, key, type ->
+        _searchType,
+        _sortByData
+    ) { docs, favUiList, key, type, sortType ->
         val k = key.trim().lowercase()
-        docs
-            .map { doc ->
-                val isFav = favUiList.any { it.document.mediaId == doc.mediaId }
-                RecentUi(doc, isFav)
+        val baseList = docs.map { doc ->
+            val isFav = favUiList.any { it.document.mediaId == doc.mediaId }
+            RecentUi(doc, isFav)
+        }
+        val filteredByType = type?.let { t ->
+            baseList.filter { it.document.type == t }
+        } ?: baseList
+        val filteredByKey = if (k.isEmpty()) {
+            filteredByType
+        } else {
+            filteredByType.filter { ui ->
+                val name = File(ui.document.path).name.lowercase()
+                val date = formatDateByMillis(ui.document.lastModified).lowercase()
+                name.contains(k) || date.contains(k)
             }
-            .let { list ->
-                if (type != null) list.filter { it.document.type == type }
-                else list
-            }
-            .filter { ui ->
-                if (k.isEmpty()) true
-                else {
-                    val name = File(ui.document.path).name.lowercase()
-                    val date = formatDateByMillis(ui.document.lastModified).lowercase()
-                    name.contains(k) || date.contains(k)
-                }
-            }
+        }
+        val sorted = when (sortType) {
+            SortByData.None -> filteredByKey
+            SortByData.SortByName ->
+                filteredByKey.sortedBy { File(it.document.path).name.lowercase() }
+            SortByData.SortBySize ->
+                filteredByKey.sortedBy { it.document.size }
+            SortByData.SortByDate ->
+                filteredByKey.sortedBy { it.document.lastModified }
+        }
+        sorted
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-
-
 
     init {
         viewModelScope.launch {
@@ -127,15 +240,26 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
                 favoriteDocument,
                 sortByDateFlow,
                 sortBySizeFlow,
-                filterTypesFlow
-            ) { original, byDate, bySize, types ->
+                filterTypesFlow,
+                _searchKey,
+            ) { original, byDate, bySize, types, key ->
                 val filtered = if (types.isEmpty()) {
                     mutableListOf()
                 } else {
                     original.filter { doc -> types.contains(doc.document.type) }
                 }
                 if (byDate == SortDateType.NoSelect && bySize == SortSizeType.NoSelect) {
-                    filtered
+                    if (key.isEmpty()) {
+                        filtered
+                    } else {
+                        filtered.filter { ui ->
+                            val filename = File(ui.document.path).name.lowercase()
+                            val dateStr = formatDateByMillis(ui.document.lastModified)
+                                .lowercase()
+                            filename.contains(key.lowercase())
+                                    || dateStr.contains(key.lowercase())
+                        }.toMutableList()
+                    }
                 } else {
                     if (byDate != SortDateType.NoSelect) {
                         val sorted = when (byDate) {
@@ -143,14 +267,34 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
                             SortDateType.OldToNew -> filtered.sortedBy { it.document.lastModified }
                             else -> filtered
                         }
-                        sorted
+                        if (key.isEmpty()) {
+                            sorted
+                        } else {
+                            sorted.filter { ui ->
+                                val filename = File(ui.document.path).name.lowercase()
+                                val dateStr = formatDateByMillis(ui.document.lastModified)
+                                    .lowercase()
+                                filename.contains(key.lowercase())
+                                        || dateStr.contains(key.lowercase())
+                            }.toMutableList()
+                        }
                     } else {
                         val sorted = when (bySize) {
                             SortSizeType.BigToSmall -> filtered.sortedByDescending { it.document.size }
                             SortSizeType.SmallToBig -> filtered.sortedBy { it.document.size }
                             else -> filtered
                         }
-                        sorted
+                        if (key.isEmpty()) {
+                            sorted
+                        } else {
+                            sorted.filter { ui ->
+                                val filename = File(ui.document.path).name.lowercase()
+                                val dateStr = formatDateByMillis(ui.document.lastModified)
+                                    .lowercase()
+                                filename.contains(key.lowercase())
+                                        || dateStr.contains(key.lowercase())
+                            }.toMutableList()
+                        }
                     }
                 }
             }.collect { result ->
@@ -167,37 +311,6 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
         sortByDateFlow.value = byDate
         sortBySizeFlow.value = bySize
         filterTypesFlow.value = types
-    }
-    private val favoriteIds = emptySet<Long>()
-
-    fun searchByKey(key: String, type: DocumentType) {
-        val normalizedKey = key.trim().lowercase()
-        val srcDocs: List<RecentDocument> = when (type) {
-            DocumentType.Doc   -> repo.documentListDoc.value
-            DocumentType.Pdf   -> repo.documentListPdf.value
-            DocumentType.Ppt   -> repo.documentListPpt.value
-            DocumentType.Excel -> repo.documentListXls.value
-            else               -> emptyList()
-        }
-        val srcUiList = srcDocs.map { doc ->
-            RecentUi(
-                document   = doc,
-                isFavorite = favoriteIds.contains(doc.mediaId)
-            )
-        }
-        if (normalizedKey.isEmpty()) {
-          //  _listDocumentSearch.value = srcUiList.toMutableList()
-            return
-        }
-        val filtered = srcUiList.filter { ui ->
-            val filename = File(ui.document.path).name.lowercase()
-            val dateStr  = formatDateByMillis(ui.document.lastModified)
-                .lowercase()
-
-            filename.contains(normalizedKey)
-                    || dateStr.contains(normalizedKey)
-        }
-       // _listDocumentSearch.value = filtered.toMutableList()
     }
 
     init {
@@ -222,21 +335,24 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
 
     fun loadDocuments(context: Context) {
         viewModelScope.launch {
-            AppUtils.scanAllDocumentsFlow(context)
+            val allDocs = AppUtils
+                .scanAllDocumentsFlow(context, recentDao, favoriteDao)
                 .onEach { delay(2) }
                 .catch { e -> Log.e("DocumentViewModel", "Error scanning docs: $e") }
-                .collect { documents ->
-                    repo._listAllData.value = documents.toMutableList()
-                    Log.e("DocumentViewModel", "Error scanning docs: $documents.")
-                    repo._listPdf.value =
-                        documents.filter { it.type == DocumentType.Pdf }.toMutableList()
-                    repo._listDoc.value =
-                        documents.filter { it.type == DocumentType.Doc }.toMutableList()
-                    repo._listXls.value =
-                        documents.filter { it.type == DocumentType.Excel }.toMutableList()
-                    repo._listPpt.value =
-                        documents.filter { it.type == DocumentType.Ppt }.toMutableList()
-                }
+                .toList()
+            repo._listAllData.value = allDocs.toMutableList()
+            repo._listPdf.value =
+                allDocs.filter { it.type == DocumentType.Pdf }.toMutableList().reversed()
+                    .toMutableList()
+            repo._listDoc.value =
+                allDocs.filter { it.type == DocumentType.Doc }.toMutableList().reversed()
+                    .toMutableList()
+            repo._listXls.value =
+                allDocs.filter { it.type == DocumentType.Excel }.toMutableList().reversed()
+                    .toMutableList()
+            repo._listPpt.value =
+                allDocs.filter { it.type == DocumentType.Ppt }.toMutableList().reversed()
+                    .toMutableList()
         }
     }
 
@@ -263,6 +379,48 @@ class DocumentViewModel(val repo: AppDataRepo, val recentDao: RecentDao, val fav
         viewModelScope.launch {
             val isExit = favoriteDao.isExistInFavorite(doc.mediaId.toInt()) > 0
             favoriteDao.toggleFavorite(doc, !isExit)
+        }
+    }
+
+    fun removeFavorite(model: RecentDocument) {
+        viewModelScope.launch {
+            favoriteDao.deleteById(model.mediaId)
+        }
+    }
+
+    fun renameFile(
+        model: RecentDocument,
+        newBaseName: String
+    ) {
+        val oldFile = File(model.path)
+        val extension = oldFile.extension
+        val newName = "$newBaseName.$extension"
+        val newFile = File(oldFile.parentFile, newName)
+
+        if (newFile.exists()) return
+        else {
+            if (!oldFile.renameTo(newFile)) {
+                Log.e("TAG_Rename", "Failed to rename file on disk: ${oldFile.path}")
+                return
+            }
+            Log.d("TAG_Rename", "Renamed on disk to: ${newFile.absolutePath}")
+            val updatedPath = newFile.absolutePath
+
+
+            viewModelScope.launch {
+                repo._listPdf.value = repo._listPdf.value
+                    .map { data ->
+                        if (data.mediaId == model.mediaId) data.copy(path = updatedPath)
+                        else data
+                    }
+                    .toMutableList()
+
+                recentDao.updatePath(model.mediaId.toInt(), updatedPath)
+                favoriteDao.updateName(
+                    documentId = model.mediaId.toInt(),
+                    newPath = updatedPath
+                )
+            }
         }
     }
 }

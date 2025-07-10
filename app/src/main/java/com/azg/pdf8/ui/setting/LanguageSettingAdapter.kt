@@ -6,9 +6,11 @@ import com.azg.pdf8.R
 import com.dong.baselib.base.BaseAdapter
 import com.azg.pdf8.databinding.ItemLanguageSettingBinding
 import com.azg.pdf8.ui.language.LanguageItem
+import com.azg.pdf8.widget.mainColor
 import com.dong.baselib.lifecycle.change
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.fromColor
+import com.dong.baselib.widget.transparent
 
 class LanguageSettingAdapter(var lang: (LanguageItem) -> Unit = { _ -> }) :
     BaseAdapter<LanguageItem, ItemLanguageSettingBinding>() {
@@ -20,15 +22,18 @@ class LanguageSettingAdapter(var lang: (LanguageItem) -> Unit = { _ -> }) :
 
 
     override fun ItemLanguageSettingBinding.bind(item: LanguageItem, position: Int) {
-        currentPosition.change {
-            if (it == position) {
-                llFocusItem.strokeColor(fromColor("#3A65FC"))
-                imgItemSelect.setImageResource(R.drawable.ic_language_selected)
-            } else {
-                llFocusItem.strokeColor(fromColor("#00FF6100"))
-                imgItemSelect.setImageResource(R.drawable.ic_language_unselected)
+        lifecycle?.let {
+            currentPosition.observe(it) {
+                if (it == position) {
+                    llFocusItem.strokeColor(mainColor)
+                    imgItemSelect.setImageResource(R.drawable.ic_language_selected)
+                } else {
+                    llFocusItem.strokeColor(transparent)
+                    imgItemSelect.setImageResource(R.drawable.ic_language_unselected)
+                }
             }
         }
+
         imgItemFlag.setImageResource(item.flagId)
         tvItemName.text = item.name
 

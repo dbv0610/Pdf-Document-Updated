@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asFlow
@@ -39,6 +41,111 @@ fun <T> MutableLiveData<T>.change(value: (T) -> Unit) {
         value(it)
     }
 }
+
+
+fun <T1, T2, R> combine(
+    lifecycleOwner: LifecycleOwner,
+    liveData1: LiveData<T1>,
+    liveData2: LiveData<T2>,
+    transform: (T1?, T2?) -> R
+): LiveData<R> = MediatorLiveData<R>().apply {
+    var last1: T1? = null
+    var last2: T2? = null
+    fun update() {
+        value = transform(last1, last2)
+    }
+    val observer1 = Observer<T1> { value ->
+        last1 = value
+        update()
+    }
+    val observer2 = Observer<T2> { value ->
+        last2 = value
+        update()
+    }
+    addSource(liveData1, observer1)
+    addSource(liveData2, observer2)
+    lifecycleOwner.lifecycle.addObserver(object : LifecycleEventObserver {
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            if (event == Lifecycle.Event.ON_DESTROY) {
+                removeSource(liveData1)
+                removeSource(liveData2)
+                source.lifecycle.removeObserver(this)
+            }
+        }
+    })
+}fun <T1, T2, T3, R> combine(
+    lifecycleOwner: LifecycleOwner,
+    liveData1: LiveData<T1>,
+    liveData2: LiveData<T2>,
+    liveData3: LiveData<T3>,
+    transform: (T1?, T2?, T3?) -> R
+): LiveData<R> = MediatorLiveData<R>().apply {
+    var last1: T1? = null
+    var last2: T2? = null
+    var last3: T3? = null
+
+    fun update() {
+        value = transform(last1, last2, last3)
+    }
+    val observer1 = Observer<T1> { value ->
+        last1 = value
+        update()
+    }
+    val observer2 = Observer<T2> { value ->
+        last2 = value
+        update()
+    }
+
+    val observer3 = Observer<T3> { value ->
+        last3 = value
+        update()
+    }
+    addSource(liveData1, observer1)
+    addSource(liveData2, observer2)
+    addSource(liveData3, observer3)
+    lifecycleOwner.lifecycle.addObserver(object : LifecycleEventObserver {
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            if (event == Lifecycle.Event.ON_DESTROY) {
+                removeSource(liveData1)
+                removeSource(liveData2)
+                removeSource(liveData3)
+                source.lifecycle.removeObserver(this)
+            }
+        }
+    })
+}
+
+fun <R> combine(
+    lifecycleOwner: LifecycleOwner,
+    vararg sources: LiveData<*>,
+    transform: (Array<Any?>) -> R
+): LiveData<R> = MediatorLiveData<R>().apply {
+    val latestValues = Array<Any?>(sources.size) { null }
+    val observers = mutableListOf<Observer<Any?>>()
+    fun update() {
+        value = transform(latestValues)
+    }
+    sources.forEachIndexed { index, source ->
+        val observer = Observer<Any?> { value ->
+            latestValues[index] = value
+            update()
+        }
+        observers.add(observer)
+        addSource(source, observer)
+    }
+    lifecycleOwner.lifecycle.addObserver(object : LifecycleEventObserver {
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            if (event == Lifecycle.Event.ON_DESTROY) {
+                sources.forEachIndexed { index, src ->
+                    removeSource(src)
+                }
+                source.lifecycle.removeObserver(this)
+            }
+        }
+    })
+}
+
+
 
 fun <T> MutableLiveData<T>.post(value: T) {
     this.postValue(value)
@@ -110,7 +217,6 @@ fun Fragment.LauncherEffect(
 fun AppCompatActivity.lifecycleLaunch(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
-
     block: suspend CoroutineScope.() -> Unit
 ) {
     lifecycleScope.launch(context = context, start = start) {

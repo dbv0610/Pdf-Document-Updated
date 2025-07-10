@@ -17,7 +17,7 @@ interface RecentDao {
     suspend fun insert(document: RecentDocument)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(documents: List<RecentDocument>)
-    @Query("SELECT * FROM RecentDocument")
+    @Query("SELECT * FROM RecentDocument order by lastTimeView DESC")
     fun getAll(): Flow<List<RecentDocument>>
     @Query("SELECT COUNT(*) FROM RecentDocument WHERE mediaId = :mediaId")
     suspend fun isExistInFavorite(mediaId: Int): Int
@@ -35,6 +35,10 @@ interface RecentDao {
     suspend fun update(document: RecentDocument)
     @Query("DELETE FROM RecentDocument")
     suspend fun clearAll()
+
+    @Query("UPDATE RecentDocument SET path = :newPath WHERE mediaId = :id")
+    suspend fun updatePath(id: Int, newPath: String)
+
 }
 @Dao
 interface FavoriteDao {
@@ -42,6 +46,8 @@ interface FavoriteDao {
     suspend fun insert(document: FavoriteDocument)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(documents: List<FavoriteDocument>)
+    @Query("SELECT mediaId FROM FavoriteDocument")
+    fun favoriteIds(): Flow<List<Long>>
     @Query("SELECT * FROM FavoriteDocument")
     fun getAll(): Flow<List<FavoriteDocument>>
     @Query("SELECT COUNT(*) FROM FavoriteDocument WHERE mediaId = :mediaId")
@@ -77,4 +83,13 @@ interface FavoriteDao {
     suspend fun update(document: FavoriteDocument)
     @Query("DELETE FROM FavoriteDocument")
     suspend fun clearAll()
+    @Query(
+        """
+    UPDATE FavoriteDocument
+       SET path = :newPath
+     WHERE mediaId = :documentId
+  """
+    )
+    suspend fun updateName(documentId: Int, newPath: String)
+
 }

@@ -13,6 +13,7 @@ import com.azg.pdf8.databinding.ActivitySplashBinding
 import com.azg.pdf8.firebase.Analytics
 import com.azg.pdf8.ui.language.LanguageOpenActivity
 import com.azg.pdf8.ui.language.LanguageScreenType
+import com.azg.pdf8.ui.language.LanguageWaitingActivity
 import com.azg.pdf8.ui.main.MainActivity
 import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.widget.delay
@@ -70,9 +71,8 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
         if (isFinishFirstFlow) {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
-            LanguageOpenActivity.start(this, LanguageScreenType.Language1)
+           launchActivity<LanguageWaitingActivity>()
         }
-
         finish()
     }
 }

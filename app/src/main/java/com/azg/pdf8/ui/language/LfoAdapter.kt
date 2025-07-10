@@ -1,7 +1,10 @@
 package com.azg.pdf8.ui.language
 
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -66,6 +69,7 @@ class LfoAdapter : ListAdapter<LanguageItem, LfoAdapter.LanguageViewHolder>(Lang
         tutorialMode = true
         notifyItemChanged(currentList.indexOfFirst { it.isDefault })
     }
+    private var isEnable: Boolean = true
 
     inner class LanguageViewHolder(
         private val binding: ItemViewLanguageBinding
@@ -73,6 +77,11 @@ class LfoAdapter : ListAdapter<LanguageItem, LfoAdapter.LanguageViewHolder>(Lang
 
         fun bind(item: LanguageItem) {
             with(binding) {
+                if (!isEnable) {
+                    binding.imgItemFlag.locked()
+                } else {
+                    binding.imgItemFlag.unlock()
+                }
                 imgItemFlag.setImageResource(item.flagId)
                 tvItemName.text = item.name
                 updateSelectionState(item.isChoose)
@@ -82,6 +91,7 @@ class LfoAdapter : ListAdapter<LanguageItem, LfoAdapter.LanguageViewHolder>(Lang
 
         fun updateSelectionState(isSelected: Boolean) {
             with(binding) {
+
                 imgItemSelect.apply {
                     setImageResource(
                         if (isSelected) R.drawable.ic_language_selected
@@ -113,6 +123,22 @@ class LfoAdapter : ListAdapter<LanguageItem, LfoAdapter.LanguageViewHolder>(Lang
         }
     }
 
+    fun ImageView.locked() {
+        val matrix = ColorMatrix()
+        matrix.setSaturation(0f) //0 means grayscale
+        val filter = ColorMatrixColorFilter(matrix)
+        this.colorFilter = filter
+        this.imageAlpha = 128 // 128 = 0.5
+    }
+
+    fun ImageView.unlock() {
+        this.colorFilter = null
+        this.imageAlpha = 255
+    }
+
+    fun setEnable(enable: Boolean) {
+        this.isEnable = enable
+    }
     companion object {
         private const val PAYLOAD_SELECTION_CHANGE = "payload_selection_change"
     }

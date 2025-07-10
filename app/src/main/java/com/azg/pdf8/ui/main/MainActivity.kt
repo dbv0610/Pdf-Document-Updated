@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.database.RecentDao
 import com.azg.pdf8.databinding.ActivityMainBinding
+import com.azg.pdf8.dialog.DialogPermission
 import com.azg.pdf8.dialog.QuitAppDialog
 import com.azg.pdf8.ui.main.document.DocumentFragment
 import com.azg.pdf8.ui.main.favorite.FavoriteFragment
@@ -42,13 +43,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         backPressed()
     }
 
-    override fun fragmentAction(data: Any) {
-        super.fragmentAction(data)
-    }
-
-    override fun <T> fragmentSendData(key: String, data: T) {
-        super.fragmentSendData(key, data)
-    }
 
     fun isStorageAccess(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -72,18 +66,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     override fun initialize() {
         addFragment(DocumentFragment(), binding.mainContainer.id, false)
         documentViewModel.loadDocuments(this@MainActivity)
-
-        isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             isStorageAccess()
         } else permission.checkGrantedStorage_24_33
-        if(!isGrantPermission){
-            requestStoragePermission()
+        if (!isGrantPermission) {
+            DialogPermission(this@MainActivity).onAllowAccess {
+                requestStoragePermission()
+            }.show()
         }
-
     }
 
     override fun ActivityMainBinding.setData() {
-
         navigationBar.onMenuItemChange(object : NavigationBar.MenuActionChange {
             override fun onHome() {
                 replaceFragment(DocumentFragment(), mainContainer.id, false)

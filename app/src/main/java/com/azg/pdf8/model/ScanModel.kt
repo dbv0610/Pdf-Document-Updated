@@ -14,9 +14,9 @@ import kotlin.Long
 
 class Converters {
     @TypeConverter
-    fun fromDocumentType(value: DocumentType): String = value.name
+    fun fromDocumentType(varue: DocumentType): String = varue.name
     @TypeConverter
-    fun toDocumentType(value: String): DocumentType = DocumentType.valueOf(value)
+    fun toDocumentType(varue: String): DocumentType = DocumentType.valueOf(varue)
 }
 
 enum class DocumentType {
@@ -32,13 +32,13 @@ data class RecentDocument(
     @ColumnInfo(name = "mediaId")
     val mediaId: Long = 0L,
     @ColumnInfo(name = "path")
-    val path: String = "",
+    var path: String = "",
     @ColumnInfo(name = "lastModified")
-    val lastModified: Long = 0L,
+    var lastModified: Long = 0L,
     @ColumnInfo(name = "lastTimeView")
-    val lastTimeView: Long = System.currentTimeMillis(),
+    var lastTimeView: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "size")
-    val size: Long = 0L,
+    var size: Long = 0L,
     @ColumnInfo(name = "type")
     var type: DocumentType = DocumentType.Doc
 ) : Parcelable {
@@ -60,9 +60,9 @@ data class RecentDocument(
 data class FavoriteDocument(
     @PrimaryKey
     val mediaId: Long = 0L,
-    val path: String = "",
-    val lastModified: Long = 0L,
-    val size: Long = 0L,
+    var path: String = "",
+    var lastModified: Long = 0L,
+    var size: Long = 0L,
     var type: DocumentType = DocumentType.Doc,
 ) : Parcelable {
     @Ignore

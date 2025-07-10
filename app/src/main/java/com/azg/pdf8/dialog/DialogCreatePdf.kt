@@ -21,5 +21,8 @@ class DialogCreatePdf(context: Context, val eventHandle: CreateEventHandle) :
             eventHandle.createImage()
             dismiss()
         }
+        icClose.click {
+            dismiss()
+        }
     }
 }

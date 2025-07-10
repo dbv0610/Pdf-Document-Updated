@@ -20,6 +20,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven(url = "https://jitpack.io")
         maven(url = "https://artifact.bytedance.com/repository/pangle/")
+        maven(url = "https://repository.aspose.com/repo/")
         maven(url = "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea")
         maven(url = "https://maven.pkg.github.com/azuraglobal/AzModuleAds") {
             credentials {
@@ -33,5 +34,4 @@ dependencyResolutionManagement {
 rootProject.name = "AS005 PDF 8"
 include(":app")
 include(":lib")
-include(":mupdf_lib")
 include(":android_office")

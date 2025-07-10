@@ -21,3 +21,5 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.shockwave.**
+-keep class com.aspose.** { *; }
+-dontwarn com.aspose.**

@@ -4,9 +4,8 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 data class FeatureModel(
-    val icon: Int,
-    val packageName: String,
-    val name: String,
+    var index: Int = 0,
+    val name: Int,
     var isSelected: Boolean = false,
 )
 

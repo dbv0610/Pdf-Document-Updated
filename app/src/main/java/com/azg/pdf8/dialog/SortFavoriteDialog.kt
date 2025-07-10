@@ -84,19 +84,36 @@ class SortFavoriteDialog(context: Context) :
             dismiss()
         }
         binding.ivLastFirst.click {
-            sortDate.value = SortDateType.NewToOld
+            if (sortDate.value == SortDateType.NewToOld) {
+                sortDate.value = SortDateType.NoSelect
+            } else {
+                sortDate.value = SortDateType.NewToOld
+            }
+
             sortSize.value = SortSizeType.NoSelect
         }
         binding.ivOldFirst.click {
-            sortDate.value = SortDateType.OldToNew
+            if (sortDate.value == SortDateType.OldToNew) {
+                sortDate.value = SortDateType.NoSelect
+            } else {
+                sortDate.value = SortDateType.OldToNew
+            }
             sortSize.value = SortSizeType.NoSelect
         }
         binding.ivLargetFirst.click {
-            sortSize.value =  SortSizeType.BigToSmall
+            if (sortSize.value == SortSizeType.BigToSmall) {
+                sortSize.value == SortSizeType.NoSelect
+            } else {
+                sortSize.value = SortSizeType.BigToSmall
+            }
             sortDate.value = SortDateType.NoSelect
         }
         binding.ivSmallFirst.click {
-            sortSize.value = SortSizeType.SmallToBig
+            if (sortSize.value == SortSizeType.SmallToBig) {
+                sortSize.value == SortSizeType.NoSelect
+            } else {
+                sortSize.value = SortSizeType.SmallToBig
+            }
             sortDate.value = SortDateType.NoSelect
         }
         binding.ivPdf.click {

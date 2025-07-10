@@ -48,13 +48,13 @@ class ChooseImageActivity :
     override fun initialize() {
         screenAction = getData<String>(Constant.KEY_ACTION).toString()
         photoAdapter = PhotoGalleryAdapter(object : ViewActionHandle {
-            override fun onSelect(RecentDocument: RecentDocument) {
-                super.onSelect(RecentDocument)
-                viewModel.modifyItemSelect(RecentDocument)
+            override fun onSelect(recentDocument: RecentDocument) {
+                super.onSelect(recentDocument)
+                viewModel.modifyItemSelect(recentDocument)
             }
 
-            override fun onUpdateState(RecentDocument: RecentDocument, position: Int) {
-                super.onUpdateState(RecentDocument, position)
+            override fun onUpdateState(recentDocument: RecentDocument, position: Int) {
+                super.onUpdateState(recentDocument, position)
                 if (viewModel.headerUiState.value == UiGalleryState.Default) {
                     viewModel.setHeaderState(UiGalleryState.Select)
                 } else {

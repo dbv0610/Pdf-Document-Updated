@@ -75,4 +75,6 @@ val color_999999 = "#999999".toColorInt()
 val color__595959 = "#595959".toColorInt()
 @ColorInt
 val color_f8f8f8 = "#F8F8F8".toColorInt()
+@ColorInt
+val color_C9CDD4 = "#C9CDD4".toColorInt()
 

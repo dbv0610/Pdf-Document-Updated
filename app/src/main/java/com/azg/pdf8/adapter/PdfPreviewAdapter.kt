@@ -3,24 +3,21 @@ package com.azg.pdf8.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.azg.pdf8.R
 import com.azg.pdf8.databinding.ItemPdfThumbBinding
-import com.azg.pdf8.model.PdfPage
+import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.widget.mainColor
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.transparent
-import kotlinx.coroutines.launch
 
-class PdfPreviewAdapter(val currentSelPage: (PdfPage) -> Unit = {}) :
+class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
     RecyclerView.Adapter<PdfPreviewAdapter.PdfPageViewHolder>() {
-    private var pages = emptyList<PdfPage>()
+    private var pages = emptyList<DocumentPage>()
 
-    fun submitList(newPages: List<PdfPage>) {
+    fun submitList(newPages: List<DocumentPage>) {
         pages = newPages
         notifyDataSetChanged()
     }
@@ -53,7 +50,7 @@ class PdfPreviewAdapter(val currentSelPage: (PdfPage) -> Unit = {}) :
 
     inner class PdfPageViewHolder(private val binding: ItemPdfThumbBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(page: PdfPage) {
+        fun bind(page: DocumentPage) {
             lifecycle?.let { lf ->
                 currentPage.observe(lf) {
                     binding.root.strokeColor(if (it == adapterPosition) mainColor else transparent)

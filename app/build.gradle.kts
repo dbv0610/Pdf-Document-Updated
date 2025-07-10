@@ -1,4 +1,3 @@
-
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -18,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "com.azg.pdf8"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
@@ -53,7 +52,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-             signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     bundle {
@@ -76,16 +75,13 @@ android {
     flavorDimensions.add("version")
     productFlavors {
         create("dev") {
-
             applicationId = "com.azg.pdf8"
             manifestPlaceholders["ad_app_id"] = "ca-app-pub-3940256099942544~3347511713"
 
             buildConfigField("boolean", "build_debug", "true")
-
         }
 
         create("product") {
-
             applicationId = ""
             manifestPlaceholders["ad_app_id"] = ""
 
@@ -147,7 +143,21 @@ dependencies {
 
     implementation(libs.android.pdf.viewer)
     implementation(libs.pdfbox.android)
-    implementation(project(path=":mupdf_lib"))
-    implementation(project(path=":android_office"))
 
+    implementation("com.google.guava:guava:29.0-android")
+    implementation(
+        group = "com.aspose",
+        name = "aspose-words",
+        version = "22.5",
+        classifier = "jdk17"
+    )
+    implementation(
+        group = "com.aspose",
+        name = "aspose-slides",
+        version = "22.5",
+        classifier = "jdk16"
+    )
+    implementation("com.aspose:aspose-cells:22.5")
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+    implementation(project(path = ":android_office"))
 }

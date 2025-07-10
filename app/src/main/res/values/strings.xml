@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">PDF 8</string>
+    <string name="app_name" translatable="false">PDF Reader - Manage Document</string>
     <string name="fb_app_id" translatable="false">1111111111</string>
     <string name="fb_client_token" translatable="false">2222222222222222222222</string>
     <string name="language">Language</string>
@@ -28,18 +28,18 @@
     <string name="exit">Exit</string>
     <string name="continues">Continue</string>
     <string name="request_permission_need">Requesting permission to modify system settings</string>
-    <string name="title_onboarding_1">Track Your Daily Step Goals</string>
-    <string name="title_onboarding_2">Monitor Weight and Body Stats</string>
-    <string name="title_onboarding_3">Burn Calories and Stay Fit</string>
-    <string name="title_onboarding_4">Analyze Progress Over Time</string>
-    <string name="content_onboarding_1">Count every step to stay active and improve your daily fitness.</string>
-    <string name="content_onboarding_2">Log your weight and height to see progress over time.</string>
-    <string name="content_onboarding_3">Estimate calories burned while walking, running, or cycling daily.</string>
-    <string name="content_onboarding_4">View detailed stats by day, week, or month easily.</string>
+    <string name="title_onboarding_1">Read and Edit Documents</string>
+    <string name="title_onboarding_2">Convert to PDF Instantly</string>
+    <string name="title_onboarding_3">Sign and Annotate PDFs</string>
+    <string name="title_onboarding_4">Create PDFs from Images</string>
+    <string name="content_onboarding_1">Open and edit PDF, DOC, XLS, and PPTX files easily with our powerful and user-friendly tools.</string>
+    <string name="content_onboarding_2">Convert documents and images into high-quality PDF files with just a few taps—fast, reliable, and secure.</string>
+    <string name="content_onboarding_3">Add your signature or comments to PDFs effortlessly. Great for contracts, reports, or reviewing documents.</string>
+    <string name="content_onboarding_4">Snap or upload photos and turn them into clean, shareable PDF files with smart formatting options.</string>
     <string name="done">Done</string>
     <string name="swipe_to_next">Swipe to Next</string>
     <string name="thank_you_for_using_the_app">Thank you for using the app</string>
-    <string name="feature_that_fits_your_needs">Feature that first your needs</string>
+    <string name="feature_that_fits_your_needs">Where do you usually use pdf reader?</string>
     <string name="exit_app">Exit app</string>
     <string name="cancels">Cancel</string>
     <string name="delete">Delete</string>
@@ -104,4 +104,33 @@
     <string name="smallest_first">Smallest first</string>
     <string name="file_type">File type</string>
     <string name="pptx">PPTX</string>
+    <string name="loading_language_data">Loading Language Data</string>
+    <string name="btn_home">Home</string>
+    <string name="btn_work">Work</string>
+    <string name="btn_library">Library</string>
+    <string name="btn_restaurant">Restaurant</string>
+    <string name="btn_airport">Airport</string>
+    <string name="btn_coffee_shop">Coffee shop</string>
+    <string name="btn_hotel">Hotel</string>
+    <string name="btn_train">Train</string>
+    <string name="btn_school">School</string>
+    <string name="btn_shopping_mall">Shopping mall</string>
+    <string name="btn_living_room">Living room</string>
+    <string name="btn_park">Park</string>
+    <string name="btn_bus">Bus</string>
+    <string name="btn_hospital">Hospital</string>
+    <string name="btn_university">University</string>
+    <string name="please_choose_feature">Please choose feature</string>
+    <string name="allow_access_to_manage_all_files">Allow access to manage all files</string>
+    <string name="pdf_reader_requires_file_access_to_function_properly_please_allow_permission">PDF Reader requires file access to function properly. Please allow permission.</string>
+    <string name="allow_access">Allow access</string>
+    <string name="sort_by_date">Sort by date</string>
+    <string name="sort_by_name">Sort by name</string>
+    <string name="sort_by_size">Sort by size</string>
+    <string name="confirm">Confirm</string>
+    <string name="no_result_found">No result found</string>
+    <string name="result">Result</string>
+    <string name="can_not_find_data">Can not find data</string>
+    <string name="search_not_available">Search not available</string>
+    <string name="search_error_occurred">Search error occurred</string>
 </resources>

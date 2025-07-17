@@ -1,0 +1,50 @@
+plugins {
+    alias(libs.plugins.kotlin.android)
+}
+apply plugin: 'com.android.library'
+
+android {
+    compileSdk 33
+    namespace "com.yalantis.ucrop"
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 35
+
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+
+    sourceSets.main {
+        jni.srcDirs = []
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    lint {
+        abortOnError false
+    }
+
+}
+
+dependencies {
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.exifinterface
+    implementation libs.androidx.transition
+    // OkHttp3 versions above 3.12.x don't support pre-Lollipop Android versions (API 21)
+    implementation libs.okhttp
+    implementation libs.ssp.android
+    implementation libs.sdp.android
+    implementation libs.androidx.core.ktx
+
+
+}

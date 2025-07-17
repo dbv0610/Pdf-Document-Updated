@@ -3,6 +3,8 @@ package com.dong.baselib.base
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -14,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import android.widget.PopupWindow
 import androidx.viewbinding.ViewBinding
 import com.dong.baselib.widget.click
@@ -249,4 +252,5 @@ class PopupHelper<V : ViewBinding> private constructor(
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow((this as? Activity)?.currentFocus?.windowToken, 0)
     }
+
 }

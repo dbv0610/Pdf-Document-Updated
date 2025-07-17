@@ -29,10 +29,10 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = "key"
-            keyPassword = "123456"
-            storeFile = rootProject.file("keystore/key.jks")
-            storePassword = "123456"
+            keyAlias = "pdf8"
+            keyPassword = "silverpdf"
+            storeFile = rootProject.file("keystore/silverai.jks")
+            storePassword = "silverai"
         }
     }
 
@@ -82,7 +82,7 @@ android {
         }
 
         create("product") {
-            applicationId = ""
+            applicationId = "com.documentreader.manage.pdfreader.viewpdf.open"
             manifestPlaceholders["ad_app_id"] = ""
 
             buildConfigField("boolean", "build_debug", "false")
@@ -146,4 +146,5 @@ dependencies {
 
     implementation(libs.guava)
     implementation(project(path = ":android_office"))
+    implementation(project(path = ":ucrop"))
 }

@@ -35,3 +35,5 @@ rootProject.name = "AS005 PDF 8"
 include(":app")
 include(":lib")
 include(":android_office")
+
+include(":ucrop")

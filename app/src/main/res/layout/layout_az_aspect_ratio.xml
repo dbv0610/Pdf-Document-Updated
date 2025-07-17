@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/_62sdp"
+    android:minWidth="@dimen/_62sdp"
+    android:layout_gravity="center"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center"
+    android:padding="@dimen/_4sdp"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivUcropAspectRation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        tools:src="@drawable/ic_aspect_ratio_1_1" />
+
+    <com.azg.pdf8.widget.AspectRatioTextView
+        android:id="@+id/tvAzAspectRatio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:textSize="@dimen/_9ssp"
+        android:textColor="@color/azcrop_scale_text_view_selector"
+        tools:text="@string/original" />
+
+</LinearLayout>

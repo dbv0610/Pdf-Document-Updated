@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:background="@color/color_background"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/color_background">
 
     <LinearLayout
         android:id="@+id/llAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingTop="@dimen/_24sdp"
-        android:paddingBottom="@dimen/_8sdp"
         android:orientation="horizontal"
+        android:paddingTop="@dimen/_6sdp"
+        android:paddingBottom="@dimen/_8sdp"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageButton
@@ -32,18 +32,21 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/_12sdp"
             android:layout_weight="1"
-            android:text="search_result"
-            android:textColor="@color/black" />
+            android:fontFamily="@font/rb_600"
+            android:includeFontPadding="false"
+            android:text="@string/search_result"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_14sdp" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvLinksResult"
         android:layout_width="match_parent"
-        android:background="@color/white"
         android:layout_height="0dp"
-        android:paddingBottom="@dimen/_6sdp"
+        android:background="@color/color_F2F2F7"
+        android:paddingBottom="@dimen/_12sdp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_content_search"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/llAppBar" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

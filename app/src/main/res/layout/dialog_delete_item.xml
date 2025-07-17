@@ -4,42 +4,47 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/_12sdp"
-    android:backgroundTint="@color/white"
     android:orientation="vertical"
-    android:padding="@dimen/_16sdp">
+    app:bgColorAll="@color/white"
+    app:cornerRadius="@dimen/_12sdp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:background="@color/color_background"
+        android:orientation="vertical"
+        android:padding="@dimen/_16sdp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/rb_600"
             android:includeFontPadding="false"
-            android:text="@string/deleted_file_from_device"
+            android:text="@string/confirm"
             android:textAlignment="textStart"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="@dimen/_16sdp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_16sdp"
-            android:fontFamily="@font/rb_400"
-            android:includeFontPadding="false"
-            android:text="@string/file_will_be_deleted_permanently"
-            android:textAlignment="textStart"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_12sdp" />
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:fontFamily="@font/rb_400"
+        android:includeFontPadding="false"
+        android:text="@string/are_you_sure_you_want_to_delete_file_this_action_cannot_be_undone"
+        android:textAlignment="textStart"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_13sdp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
         android:layout_marginTop="@dimen/_16sdp"
+        android:layout_marginBottom="@dimen/_12sdp"
         android:orientation="horizontal"
         android:weightSum="2">
 
@@ -47,22 +52,23 @@
             android:id="@+id/btnCancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
             android:layout_weight="1"
-            android:fontFamily="@font/rb_400"
+            android:fontFamily="@font/rb_500"
+            android:gravity="center"
             android:padding="@dimen/_10sdp"
             android:text="@string/cancels"
-            android:textAlignment="center"
-            android:textColor="@color/color_595959"
+            android:textColor="@color/black"
             android:textSize="@dimen/_13sdp"
-            app:bgColorDark="@color/color_F2F2F7"
-            app:bgColorLight="@color/color_F2F2F7"
-            app:cornerRadius="@dimen/_8sdp" />
+            app:cornerRadius="@dimen/_8sdp"
+            app:stColorAll="@color/black"
+            app:strokeWidth="@dimen/_1sdp" />
 
         <com.dong.baselib.widget.view.UiTextView
             android:id="@+id/btnAgree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_6sdp"
             android:layout_weight="1"
             android:fontFamily="@font/rb_600"
             android:gravity="center"
@@ -72,8 +78,7 @@
             android:text="@string/delete"
             android:textColor="@color/white"
             android:textSize="@dimen/_13sdp"
-            app:bgColorDark="@color/mainColor"
-            app:bgColorLight="@color/mainColor"
+            app:bgColorAll="@color/mainColor"
             app:cornerRadius="@dimen/_8sdp" />
     </LinearLayout>
 </com.dong.baselib.widget.layout.UiLinearLayout>

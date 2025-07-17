@@ -84,4 +84,11 @@
     <color name="ppt_color">#FF6A00</color>
     <color name="color_86909c">#86909C</color>
     <color name="color_c9cdd4">#c9cdd4</color>
+
+
+    <color name="color_default_crop_grid">#80ffffff</color>
+    <color name="color_default_dimmed">#8c000000</color>
+    <color name="color_default_crop_frame">#ffffff</color>
+    <color name="color_E84749">#E84749</color>
+    <color name="color_ba0508">#BA0508</color>
 </resources>

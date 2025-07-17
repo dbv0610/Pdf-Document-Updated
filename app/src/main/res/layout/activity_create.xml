@@ -64,7 +64,8 @@
             android:layout_weight="1"
             app:spanCount="3"
             android:orientation="vertical"
-            android:padding="@dimen/_6sdp"
+            android:paddingVertical="@dimen/_6sdp"
+            android:paddingHorizontal="@dimen/_4sdp"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             tools:listitem="" />
 
@@ -77,7 +78,7 @@
             android:padding="@dimen/_7sdp"
             app:cornerRadius="@dimen/_6sdp"
             app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
-            app:stColorAll="@color/mainColor"
+            app:stColorAll="@color/color_BA0508"
             app:strokeWidth="@dimen/_1sdp">
 
             <ImageView
@@ -92,9 +93,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_6sdp"
                 android:fontFamily="@font/rb_500"
+                android:includeFontPadding="false"
                 android:text="@string/add_image"
-                android:textColor="@color/mainColor"
-                android:textSize="@dimen/_12sdp" />
+                android:textColor="@color/color_BA0508"
+                android:textSize="@dimen/_13sdp" />
         </com.dong.baselib.widget.layout.UiLinearLayout>
         <com.dong.baselib.widget.layout.UiLinearLayout
             android:layout_width="match_parent"
@@ -104,7 +106,7 @@
             android:id="@+id/btnCreate"
             android:layout_marginTop="@dimen/_8sdp"
             android:layout_marginBottom="@dimen/_12sdp"
-            app:bgColorAll="@color/mainColor"
+            app:bgColorAll="@color/color_BA0508"
             android:padding="@dimen/_7sdp"
             app:cornerRadius="@dimen/_6sdp"
             app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
@@ -125,8 +127,9 @@
                 android:layout_marginHorizontal="@dimen/_6sdp"
                 android:fontFamily="@font/rb_500"
                 android:text="@string/convert"
+                android:includeFontPadding="false"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_13sdp" />
         </com.dong.baselib.widget.layout.UiLinearLayout>
     </LinearLayout>
 

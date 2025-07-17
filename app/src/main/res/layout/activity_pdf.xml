@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="@dimen/_12sdp"
-        android:paddingVertical="@dimen/_6sdp">
+        android:paddingVertical="@dimen/_8sdp">
 
         <ImageView
             android:id="@+id/icBack"
@@ -65,6 +65,7 @@
                 android:fontFamily="@font/rb_600"
                 android:includeFontPadding="false"
                 android:text="@string/create"
+                android:layout_marginStart="@dimen/_4sdp"
                 android:textColor="@color/white" />
         </com.dong.baselib.widget.layout.UiLinearLayout>
 

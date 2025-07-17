@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="@dimen/_12sdp"
-        android:paddingVertical="@dimen/_6sdp">
+        android:paddingBottom="@dimen/_8sdp"
+        android:paddingTop="@dimen/_12sdp">
 
         <TextView
             android:layout_width="0dp"
@@ -45,6 +46,7 @@
                 app:tint="@color/white" />
 
             <TextView
+                android:layout_marginStart="@dimen/_4sdp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/rb_600"
@@ -67,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_12sdp"
-            android:layout_marginTop="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_20sdp"
             android:fontFamily="@font/rb_500"
             android:includeFontPadding="false"
             android:text="@string/document"
@@ -284,6 +286,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_12sdp"
                 android:layout_weight="1"
+                android:textColor="@color/color_8c8c8c"
                 android:fontFamily="@font/rb_500"
                 android:includeFontPadding="false"
                 android:text="@string/recents_files"
@@ -297,8 +300,9 @@
                 android:fontFamily="@font/rb_600"
                 android:includeFontPadding="false"
                 android:text="@string/show_all"
+                android:paddingVertical="@dimen/_2sdp"
                 android:textColor="@color/mainColor"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_11sdp" />
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -433,8 +437,8 @@
                 app:layout_constraintVertical_bias="0.35">
 
                 <ImageView
-                    android:layout_width="@dimen/_64sdp"
-                    android:layout_height="@dimen/_64sdp"
+                    android:layout_width="@dimen/_78sdp"
+                    android:layout_height="@dimen/_78sdp"
                     android:src="@drawable/img_no_data" />
 
                 <TextView

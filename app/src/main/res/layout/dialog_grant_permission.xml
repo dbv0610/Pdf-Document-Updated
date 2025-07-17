@@ -13,7 +13,7 @@
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/_12sdp"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -81,7 +81,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_12sdp"
-        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_14sdp"
         android:clickable="false"
         android:fontFamily="@font/rb_400"
         android:includeFontPadding="false"
@@ -101,7 +101,7 @@
         android:fontFamily="@font/rb_500"
         android:text="@string/allow_access"
         android:textColor="@color/white"
-        app:bgColorAll="@color/mainColor"
+        app:bgColorAll="@color/color_ba0508"
         android:gravity="center"
         android:textSize="@dimen/_12sdp"
         app:cornerRadius="@dimen/_8sdp"

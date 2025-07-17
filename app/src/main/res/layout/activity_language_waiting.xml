@@ -24,7 +24,7 @@
             android:includeFontPadding="false"
             android:fontFamily="@font/rb_600"
             android:textColor="@color/black"
-            android:textSize="@dimen/_14sdp" />
+            android:textSize="@dimen/_16sdp" />
 
     </LinearLayout>
 

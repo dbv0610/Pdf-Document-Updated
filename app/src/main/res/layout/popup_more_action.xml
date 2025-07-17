@@ -8,33 +8,56 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginEnd="@dimen/_16sdp"
         android:layout_marginBottom="@dimen/_12sdp"
         android:background="@drawable/bg_dialog_view"
         android:elevation="@dimen/_6sdp"
         android:minWidth="@dimen/_115sdp"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/_6sdp"
+        android:paddingStart="@dimen/_6sdp"
+        android:paddingEnd="@dimen/_12sdp"
         android:paddingVertical="@dimen/_8sdp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
         <LinearLayout
-            android:id="@+id/lnRotate"
+            android:layout_marginBottom="@dimen/_12sdp"
+            android:id="@+id/lnToPdf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <ImageView
                 android:layout_width="@dimen/_24sdp"
                 android:layout_height="@dimen/_24sdp"
-                android:padding="@dimen/_2sdp"
+                android:padding="@dimen/_4sdp"
+                android:src="@drawable/ic_conver_pdf" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:fontFamily="@font/rb_400"
+                android:includeFontPadding="false"
+                android:padding="@dimen/_5sdp"
+                android:text="@string/convert_to_pdf"
+                android:textColor="@color/textColor"
+                android:textSize="@dimen/_11sdp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/lnRotate"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:padding="@dimen/_4sdp"
                 android:src="@drawable/ic_page_rotate" />
 
             <TextView
-                android:id="@+id/tvSortByDay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_4sdp"
@@ -43,7 +66,33 @@
                 android:padding="@dimen/_5sdp"
                 android:text="@string/rotate"
                 android:textColor="@color/textColor"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_11sdp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/lnSlideShow"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:padding="@dimen/_4sdp"
+                android:src="@drawable/ic_slide_show" />
+
+            <TextView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:fontFamily="@font/rb_400"
+                android:includeFontPadding="false"
+                android:padding="@dimen/_5sdp"
+                android:text="@string/slide_show"
+                android:textColor="@color/textColor"
+                android:textSize="@dimen/_11sdp" />
         </LinearLayout>
 
         <LinearLayout
@@ -54,7 +103,7 @@
 
             <ImageView
                 android:layout_width="@dimen/_24sdp"
-                android:padding="@dimen/_2sdp"
+                android:padding="@dimen/_4sdp"
                 android:layout_height="@dimen/_24sdp"
                 android:src="@drawable/ic_page_thumnail" />
 
@@ -67,7 +116,7 @@
                 android:padding="@dimen/_5sdp"
                 android:text="@string/thumbnail"
                 android:textColor="@color/black"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_11sdp" />
         </LinearLayout>
 
         <LinearLayout
@@ -79,7 +128,7 @@
             <ImageView
                 android:layout_width="@dimen/_24sdp"
                 android:layout_height="@dimen/_24sdp"
-                android:padding="@dimen/_2sdp"
+                android:padding="@dimen/_4sdp"
                 android:src="@drawable/ic_page_bypage" />
 
             <TextView
@@ -91,7 +140,7 @@
                 android:padding="@dimen/_5sdp"
                 android:text="@string/page_by_page"
                 android:textColor="@color/black"
-                android:textSize="@dimen/_12sdp" />
+                android:textSize="@dimen/_11sdp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

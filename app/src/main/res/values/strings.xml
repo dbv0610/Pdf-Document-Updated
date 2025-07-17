@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">PDF Reader - Manage Document</string>
+    <string name="app_name" translatable="false">PDF Reader - Document Reader</string>
     <string name="fb_app_id" translatable="false">1111111111</string>
     <string name="fb_client_token" translatable="false">2222222222222222222222</string>
     <string name="language">Language</string>
@@ -30,11 +30,11 @@
     <string name="request_permission_need">Requesting permission to modify system settings</string>
     <string name="title_onboarding_1">Read and Edit Documents</string>
     <string name="title_onboarding_2">Convert to PDF Instantly</string>
-    <string name="title_onboarding_3">Sign and Annotate PDFs</string>
+    <string name="title_onboarding_3">Quickly Access Favourites</string>
     <string name="title_onboarding_4">Create PDFs from Images</string>
     <string name="content_onboarding_1">Open and edit PDF, DOC, XLS, and PPTX files easily with our powerful and user-friendly tools.</string>
     <string name="content_onboarding_2">Convert documents and images into high-quality PDF files with just a few taps—fast, reliable, and secure.</string>
-    <string name="content_onboarding_3">Add your signature or comments to PDFs effortlessly. Great for contracts, reports, or reviewing documents.</string>
+    <string name="content_onboarding_3">Save your most-used PDFs for instant access anytime.</string>
     <string name="content_onboarding_4">Snap or upload photos and turn them into clean, shareable PDF files with smart formatting options.</string>
     <string name="done">Done</string>
     <string name="swipe_to_next">Swipe to Next</string>
@@ -134,4 +134,26 @@
     <string name="search_not_available">Search not available</string>
     <string name="search_error_occurred">Search error occurred</string>
     <string name="recent_files">Recent files</string>
+    <string name="reset">Reset</string>
+    <string name="aspect_ratio_1_1" translatable="false">1:1</string>
+    <string name="aspect_ratio_3_4" translatable="false">3:4</string>
+    <string name="aspect_ratio_4_3" translatable="false">4:3</string>
+    <string name="aspect_ratio_2_3" translatable="false">2:3</string>
+    <string name="aspect_ratio_3_2" translatable="false">3:2</string>
+    <string name="aspect_ratio_9_16" translatable="false">9:16</string>
+    <string name="aspect_ratio_16_9" translatable="false">16:9</string>
+    <string name="some_errors_occurred_please_try_again">Some errors occurred please try again</string>
+    <string name="are_you_sure_you_want_to_delete_file_this_action_cannot_be_undone">Are you sure you want to delete file? This action cannot be undone.</string>
+    <string name="not_found_search">No data found</string>
+    <string name="search_result">Search Result</string>
+    <string name="error_go_to_page">Error go to page</string>
+    <string name="error_create_pdf_file">Error create pdf file now</string>
+    <string name="pdf_file_was_create">Create file pdf success</string>
+    <string name="slide_show">Slide Show</string>
+    <string name="can_slide_show_now">Can not slide show now</string>
+    <string name="all_photo">All Photos</string>
+    <string name="enter_name">Enter name</string>
+    <string name="request_permission_need_to_use_fun">Grant permission to use the application functions</string>
+    <string name="search_for_file">Search for file</string>
+    <string name="file_have_exit_file">File name have exit</string>
 </resources>

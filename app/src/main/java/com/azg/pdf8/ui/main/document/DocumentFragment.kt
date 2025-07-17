@@ -2,20 +2,15 @@ package com.azg.pdf8.ui.main.document;
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Environment
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.azg.pdf8.R;
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.base.BaseFragment
 import com.azg.pdf8.databinding.FragmentDocumentBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
-import com.azg.pdf8.databinding.PopupMoreActionBinding
-import com.azg.pdf8.databinding.PopupMoreActionBinding.inflate
 import com.azg.pdf8.dialog.CreateEventHandle
 import com.azg.pdf8.dialog.DialogCreatePdf
 import com.azg.pdf8.dialog.RenameDialog
@@ -25,13 +20,11 @@ import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.create.ChooseImageActivity
 import com.azg.pdf8.ui.main.document.other.OtherFileActivity
 import com.azg.pdf8.ui.main.document.other.ReadDocumentActivity
-import com.azg.pdf8.ui.main.document.pdf.PageViewType
 import com.azg.pdf8.ui.main.document.pdf.PdfActivity
 import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.dong.baselib.base.PopupDataHelper
-import com.dong.baselib.base.PopupHelper
 import com.dong.baselib.file.shareFileWithPath
 import com.dong.baselib.lifecycle.lifecycleLaunch
 import com.dong.baselib.permission.Permission
@@ -41,7 +34,6 @@ import com.dong.baselib.widget.dimenSdp
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.paddingTop
 import com.dong.baselib.widget.visible
-import com.wxiwei.office.officereader.filelist.FileRenameDialog
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
@@ -53,7 +45,7 @@ class DocumentFragment :
     private val createDialog by lazy {
         DialogCreatePdf(this@DocumentFragment.appActivity, object : CreateEventHandle {
             override fun createImage() {
-                launchActivity<ChooseImageActivity>(hashMapOf("key" to "createNew"))
+                launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
             }
 
             override fun scanDocument() {
@@ -61,10 +53,12 @@ class DocumentFragment :
             }
         })
     }
+
     override fun backPress() {
         super.backPress()
         fragmentAttach?.fragmentOnBack()
     }
+
     private var currentIndex = 0
     var popupHerper: PopupDataHelper<PopupMenuActionBinding, RecentDocument>? = null
     private val pdfAdapter by lazy {
@@ -136,7 +130,7 @@ class DocumentFragment :
                 popup.dismiss()
                 RenameDialog(appActivity) { newN ->
                     model?.let {
-                        documentViewModel.renameFile( model, newN)
+                        documentViewModel.renameFile(model, newN)
                     }
                 }.showRename(model?.path?.fileName() ?: "")
             }
@@ -171,6 +165,9 @@ class DocumentFragment :
         }
         lnPdf.click {
             launchActivity<PdfActivity>()
+        }
+        tvShowAll.click {
+            launchActivity<RecentActivity>()
         }
         lnDocx.click {
             launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))

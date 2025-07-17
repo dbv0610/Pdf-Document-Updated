@@ -130,16 +130,31 @@ class PopupDataHelper<V : ViewBinding, T> private constructor(
         anchor.post {
             val screenPos = IntArray(2).also { anchor.getLocationOnScreen(it) }
             val anchorY = screenPos[1]
-            val screenHeight = Resources.getSystem().displayMetrics.heightPixels
 
-            if (anchorY + anchor.height + popupHeight < screenHeight - 4 * context.statusBarHeight) {
+            val dm = Resources.getSystem().displayMetrics
+            val screenHeight = dm.heightPixels
+
+            val sbh = context.statusBarHeight
+            val nbh = context.navigationBarHeight
+
+            val availableBelow = screenHeight - sbh - nbh - anchorY - anchor.height
+
+            if (availableBelow >= popupHeight) {
                 popup.showAsDropDown(anchor)
             } else {
-                val yOffset = anchorY - popupHeight - context.statusBarHeight
+                val yOffset = anchorY - popupHeight - sbh
                 popup.showAtLocation(anchor, Gravity.TOP or Gravity.START, 0, yOffset)
             }
         }
     }
+
+    // extend your class with nav-bar inset:
+    private val Context.navigationBarHeight: Int
+        @SuppressLint("InternalInsetResource", "DiscouragedApi")
+        get() {
+            val resId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+            return if (resId > 0) resources.getDimensionPixelSize(resId) else 0
+        }
 
     private val Context.statusBarHeight: Int
         @SuppressLint("InternalInsetResource", "DiscouragedApi")
@@ -196,20 +211,32 @@ class PopupHelper<V : ViewBinding> private constructor(
         )
         val popupHeight = binding.root.height
         anchor.post {
-            val screenPos = IntArray(2)
-            anchor.getLocationOnScreen(screenPos)
+            val screenPos = IntArray(2).also { anchor.getLocationOnScreen(it) }
             val anchorY = screenPos[1]
-            val screenHeight = Resources.getSystem().displayMetrics.heightPixels
-            val popupHeightGuess = popupHeight
 
-            if (anchorY + anchor.height + popupHeightGuess < screenHeight - 4 * context.statusBarHeight) {
+            val dm = Resources.getSystem().displayMetrics
+            val screenHeight = dm.heightPixels
+
+            val sbh = context.statusBarHeight
+            val nbh = context.navigationBarHeight
+
+            val availableBelow = screenHeight - sbh - nbh - anchorY - anchor.height
+
+            if (availableBelow >= popupHeight) {
                 popup.showAsDropDown(anchor)
             } else {
-                val yOffset = anchorY - popupHeightGuess - context.statusBarHeight
+                val yOffset = anchorY - popupHeight - sbh
                 popup.showAtLocation(anchor, Gravity.TOP or Gravity.START, 0, yOffset)
             }
         }
     }
+    private val Context.navigationBarHeight: Int
+        @SuppressLint("InternalInsetResource", "DiscouragedApi")
+        get() {
+            val resId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+            return if (resId > 0) resources.getDimensionPixelSize(resId) else 0
+        }
+
 
     private val Context.statusBarHeight: Int
         @SuppressLint("InternalInsetResource", "DiscouragedApi")

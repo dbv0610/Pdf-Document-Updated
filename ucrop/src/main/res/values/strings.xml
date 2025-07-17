@@ -1,0 +1,21 @@
+<resources>
+
+    <string name="azcrop_label_original">Original</string>
+    <string name="azcrop_label_edit_photo">Edit Photo</string>
+
+    <string name="azcrop_menu_crop">Crop</string>
+
+    <string name="azcrop_error_input_data_is_absent" translatable="false">Both input and output Uri must be specified</string>
+    <string name="azcrop_mutate_exception_hint" translatable="false">Therefore, override color resource (azcrop_color_toolbar_widget) in your app to make it work on pre-L devices</string>
+    <string name="azcrop_rotate">Rotate</string>
+    <string name="azcrop_scale">Scale</string>
+    <string name="azcrop_crop">Crop</string>
+    <string name="txt_azcrop_frame">Frame</string>
+    <string name="txt_azcrop_rotate">Rotate</string>
+    <string name="txt_azcrop_scale">Scale</string>
+    <string name="original">Original</string>
+    <string name="azcrop_left">Left</string>
+    <string name="azcrop_right">Right</string>
+    <string name="azcrop_reset">Reset</string>
+
+</resources>

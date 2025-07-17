@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="73c36f21-ca8e-4560-8c11-16c861d24738" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/utils/FileExtensions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/adapter/FavoriteAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/adapter/FavoriteAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/adapter/FileAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/adapter/FileAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/bottomsheet/MoreBottomSheet.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/bottomsheet/MoreBottomSheet.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/all/AllFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/all/AllFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/excel/ExcelFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/excel/ExcelFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/pdf/PDFFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/pdf/PDFFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/ppt/PptFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/ppt/PptFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/word/WordFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/ui/home/home_fragment/fragment_category/word/WordFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/utils/Constant.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/ag/pdf/perfect/utils/Constant.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "khanhnvazurag"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/azuraglobal/pdf_6.git",
+    "accountId": "72a7ad6b-e5d8-4fe2-b466-3b31974439e6"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 2
+}]]></component>
+  <component name="ProjectId" id="2x2B67B0h7PwkQhYlzkkCdlhCSC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "android.gradle.sync.needed": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "feature/OA545"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="73c36f21-ca8e-4560-8c11-16c861d24738" name="Changes" comment="" />
+      <created>1747126109985</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747126109985</updated>
+    </task>
+    <servers />
+  </component>
+</project>

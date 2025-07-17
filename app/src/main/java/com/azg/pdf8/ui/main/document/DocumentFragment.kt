@@ -12,10 +12,13 @@ import com.azg.pdf8.base.BaseFragment
 import com.azg.pdf8.databinding.FragmentDocumentBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
 import com.azg.pdf8.dialog.CreateEventHandle
+import com.azg.pdf8.dialog.DeleteDialog
 import com.azg.pdf8.dialog.DialogCreatePdf
+import com.azg.pdf8.dialog.DialogPermission
 import com.azg.pdf8.dialog.RenameDialog
 import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.RecentDocument
+import com.azg.pdf8.ui.main.MainActivity
 import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.create.ChooseImageActivity
 import com.azg.pdf8.ui.main.document.other.OtherFileActivity
@@ -49,7 +52,12 @@ class DocumentFragment :
             }
 
             override fun scanDocument() {
-                launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                if(permission.checkGrantedCamera){
+                    launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                } else {
+                    fragmentAttach?.fragmentAction("requestCameraPer")
+                }
+
             }
         })
     }
@@ -84,7 +92,7 @@ class DocumentFragment :
                 )
             }
 
-            documentViewModel.addToRecent(it)
+            documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(viewLifecycleOwner)
     }
     @SuppressLint("SetTextI18n")
@@ -135,9 +143,12 @@ class DocumentFragment :
                 }.showRename(model?.path?.fileName() ?: "")
             }
             binding.lnDelete.click {
-                model?.let {
-                    documentViewModel.removeFavorite(model)
-                }
+                popup.dismiss()
+                DeleteDialog(appActivity) {
+                    model?.let {
+                        documentViewModel.removeRecent(model)
+                    }
+                }.show()
             }
         }
     }
@@ -161,13 +172,28 @@ class DocumentFragment :
 
     override fun FragmentDocumentBinding.onClick() {
         btnCreate.click {
-            createDialog.show()
+            if (MainActivity.isGrantPermission) {
+                createDialog.show()
+            } else {
+                DialogPermission(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
+            }
         }
         lnPdf.click {
             launchActivity<PdfActivity>()
         }
         tvShowAll.click {
-            launchActivity<RecentActivity>()
+            if (MainActivity.isGrantPermission) {
+                launchActivity<RecentActivity>()
+            } else {
+                DialogPermission(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
+            }
+        }
+        btnGranted.click {
+            fragmentAttach?.fragmentAction("requestPermission")
         }
         lnDocx.click {
             launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))

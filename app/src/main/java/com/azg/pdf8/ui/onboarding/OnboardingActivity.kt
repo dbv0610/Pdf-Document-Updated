@@ -53,7 +53,7 @@ class OnboardingActivity :
 
     private fun updateTextNext() {
         if (getCurrentItem() >= listFragment.size - 1) {
-            binding.tvNext.text = getString(R.string.done)
+            binding.tvNext.text = getString(R.string.continues)
         } else {
             binding.tvNext.text = getString(R.string.next)
         }

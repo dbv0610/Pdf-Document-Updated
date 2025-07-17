@@ -4,7 +4,10 @@ import android.content.Context
 import com.azg.pdf8.R
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.databinding.DialogRenameFileBinding
+import com.azg.pdf8.widget.color_8c8c8c
 import com.dong.baselib.base.BaseDialog
+import com.dong.baselib.widget.afterTextChanged
+import com.dong.baselib.widget.black
 import com.dong.baselib.widget.click
 
 class RenameDialog(context: Context, val onNewName: (String) -> Unit) :
@@ -17,6 +20,7 @@ class RenameDialog(context: Context, val onNewName: (String) -> Unit) :
     override fun DialogRenameFileBinding.initView() {
         icClose.click {
             edtName.setText("")
+            dismiss()
         }
         binding.btnAgree.click {
             val text = edtName.text.toString().trim()
@@ -46,9 +50,17 @@ class RenameDialog(context: Context, val onNewName: (String) -> Unit) :
     }
 
     fun showRename(lastName: String) {
+        binding.tvHeader.text = context.getString(R.string.rename)
         val nameWithoutExtension = lastName.substringBeforeLast(".")
         this.lastName = nameWithoutExtension
-        binding.edtName.setText(nameWithoutExtension)
+        binding.edtName.apply {
+            setText(nameWithoutExtension)
+            setTextColor(color_8c8c8c)
+            afterTextChanged {
+                setTextColor(black)
+            }
+        }
+
         this@RenameDialog.show()
     }
 

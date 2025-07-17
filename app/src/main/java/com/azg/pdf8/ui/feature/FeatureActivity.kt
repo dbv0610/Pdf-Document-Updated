@@ -31,23 +31,28 @@ abstract class FeatureActivity :
             context.startActivity(intent)
         }
 
-        private var placeLabelIds = mutableListOf(
-            FeatureModel(0, R.string.btn_home, false),
-            FeatureModel(1, R.string.btn_work, false),
-            FeatureModel(2, R.string.btn_library, false),
-            FeatureModel(3, R.string.btn_restaurant, false),
-            FeatureModel(4, R.string.btn_airport, false),
-            FeatureModel(5, R.string.btn_coffee_shop, false),
-            FeatureModel(6, R.string.btn_hotel, false),
-            FeatureModel(7, R.string.btn_train, false),
-            FeatureModel(8, R.string.btn_school, false),
-            FeatureModel(9, R.string.btn_shopping_mall, false),
-            FeatureModel(10, R.string.btn_living_room, false),
-            FeatureModel(11, R.string.btn_park, false),
-            FeatureModel(12, R.string.btn_bus, false),
-            FeatureModel(13, R.string.btn_hospital, false),
-            FeatureModel(14, R.string.btn_university, false)
-        )
+         var placeLabelIds = mutableListOf<FeatureModel>()
+
+
+        fun listFeature(): MutableList<FeatureModel>{
+           return mutableListOf(
+                FeatureModel(0, R.string.btn_home, false),
+                FeatureModel(1, R.string.btn_work, false),
+                FeatureModel(2, R.string.btn_library, false),
+                FeatureModel(3, R.string.btn_restaurant, false),
+                FeatureModel(4, R.string.btn_airport, false),
+                FeatureModel(5, R.string.btn_coffee_shop, false),
+                FeatureModel(6, R.string.btn_hotel, false),
+                FeatureModel(7, R.string.btn_train, false),
+                FeatureModel(8, R.string.btn_school, false),
+                FeatureModel(9, R.string.btn_shopping_mall, false),
+                FeatureModel(10, R.string.btn_living_room, false),
+                FeatureModel(11, R.string.btn_park, false),
+                FeatureModel(12, R.string.btn_bus, false),
+                FeatureModel(13, R.string.btn_hospital, false),
+                FeatureModel(14, R.string.btn_university, false)
+            )
+        }
     }
 
     private val screenType by lazy {
@@ -61,9 +66,10 @@ abstract class FeatureActivity :
     override fun backPressed() {
         finishAffinity()
     }
-
+    open fun initList(){}
     var countSelect = 0
     override fun ActivityFeatureBinding.setData() {
+        initList()
         if(screenType is FeatureScreenType.Feature2){
             countSelect = placeLabelIds.count { it.isSelected }
             checkCountSelect()

@@ -12,6 +12,7 @@ import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityRecentBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
+import com.azg.pdf8.dialog.DeleteDialog
 import com.azg.pdf8.dialog.RenameDialog
 import com.azg.pdf8.dialog.SortFavoriteDialog
 import com.azg.pdf8.model.DocumentType
@@ -62,7 +63,7 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
                 )
             }
 
-            documentViewModel.addToRecent(it)
+            documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(this@RecentActivity)
     }
 
@@ -81,9 +82,12 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
                 }.showRename(model?.path?.fileName() ?: "")
             }
             binding.lnDelete.click {
-                model?.let {
-                    documentViewModel.removeFavorite(model)
-                }
+                popup.dismiss()
+                DeleteDialog(this@RecentActivity) {
+                    model?.let {
+                        documentViewModel.removeRecent(model)
+                    }
+                }.show()
             }
         }
     }
@@ -121,9 +125,7 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
         }
         edtSearch.afterTextChanged {
             val query = it.trim()
-            if (query.isEmpty()) {
-                documentViewModel.setSearchCriteria("", null)
-            }
+            documentViewModel.setSearchCriteria(query, null)
         }
     }
 

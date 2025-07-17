@@ -1,5 +1,6 @@
 package com.azg.pdf8.ui.main.document.pdf
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.core.view.isVisible
@@ -12,19 +13,16 @@ import com.azg.pdf8.model.ContentWithPage
 import com.azg.pdf8.utils.Constant.ARG_SEARCH_WITH_PAGE
 import com.dong.baselib.api.parcelableList
 
-class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>(ActivitySearchResultBinding::inflate) {
-
+class SearchResultActivity :
+    BaseActivity<ActivitySearchResultBinding>(ActivitySearchResultBinding::inflate) {
     private val searchList by lazy {
         runCatching {
             intent.parcelableList<ContentWithPage>(ARG_SEARCH_WITH_PAGE)
         }
     }
-
-
     private val adapter by lazy {
         SearchAdapter()
     }
-
 
     private fun initRecyclerview(searchList: List<ContentWithPage>) {
         binding.rvLinksResult.layoutManager = LinearLayoutManager(this)
@@ -33,29 +31,23 @@ class SearchResultActivity : BaseActivity<ActivitySearchResultBinding>(ActivityS
         adapter.updateData(searchList)
     }
 
-
-
     override fun backPressed() {
-        
+        finish()
     }
 
     override fun initialize() {
-        
     }
-
+    @SuppressLint("SetTextI18n")
     override fun ActivitySearchResultBinding.setData() {
         searchList.getOrNull()?.let {
             initRecyclerview(it)
-            binding.txtLinkTitle.text = "${getString(R.string.search)} (${it.size})"
+            binding.txtLinkTitle.text = "${getString(R.string.search_result)} (${it.size})"
         }
-
-        binding.btnBack.setOnClickListener {
-
-        }
-        
     }
 
     override fun ActivitySearchResultBinding.onClick() {
-        
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
     }
 }

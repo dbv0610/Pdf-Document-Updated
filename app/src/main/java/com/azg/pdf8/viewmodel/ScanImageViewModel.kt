@@ -12,21 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-enum class UiGalleryState {
-    Default, Select
-}
-
 enum class ScreenType {
     Folder, Detail
 }
 
 class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
-    private val _headerUiState = MutableStateFlow(UiGalleryState.Default)
-    val headerUiState = _headerUiState.asStateFlow()
-    fun setHeaderState(state: UiGalleryState) {
-        _headerUiState.value = state
-    }
-
     private val _listSelectPhotoFolder = MutableStateFlow<List<RecentDocument>>(emptyList())
     val listSelectPhotoFolder = _listSelectPhotoFolder.asStateFlow()
     private val _listPhotoFolder = MutableStateFlow<List<FolderItem>>(emptyList())
@@ -36,6 +26,7 @@ class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
     fun setScType(sc: ScreenType) {
         _scType.value = sc
     }
+
     private val _listSelectedItem = MutableStateFlow<List<RecentDocument>>(emptyList())
     val listSelectedItem = _listSelectedItem.asStateFlow()
 
@@ -49,7 +40,7 @@ class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
         }
     }
 
-    fun clearSelected(){
+    fun clearSelected() {
         _listSelectedItem.value = mutableListOf<RecentDocument>()
     }
 
@@ -75,5 +66,4 @@ class ScanImageViewModel(val repository: AppDataRepo) : ViewModel() {
     }
 
     fun removeList(i: Int) {}
-
 }

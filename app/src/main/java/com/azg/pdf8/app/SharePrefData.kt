@@ -12,6 +12,7 @@ fun isUfo(): Boolean {
 var countGrantedRecognize by sharedPreference.int("countGrantedRecognize", 0)
 var countGrantedNotification by sharedPreference.int("countGrantedNotification", 0)
 var countGrantedLocation by sharedPreference.int("countGrantedLocation", 0)
+var countGrantedCamera by sharedPreference.int("countGrantedCamera", 0)
 var caloriesStep by sharedPreference.float("caloriesStep", 0f)
 var avgWalkingSpeed by sharedPreference.float("avgWalkingSpeed", 0f)
 var currentTimeWeightInsert  by sharedPreference.string("currentTimeWeightInsert","")

@@ -1,12 +1,11 @@
 package com.azg.pdf8.widget
 
-import android.R
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.content.ContextCompat
+import com.azg.pdf8.R
 import com.dong.baselib.widget.fromColor
 
 class StrokeTextView @JvmOverloads constructor(

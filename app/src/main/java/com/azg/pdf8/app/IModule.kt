@@ -26,7 +26,7 @@ val viewModelModule = module {
 }
 val dataModule = module {
     single<Permission> { Permission().initialize(get()) }
-    single<AppDataRepo> { AppDataRepo() }
+    single<AppDataRepo> { AppDataRepo(get()) }
     single {
         Room.databaseBuilder(
             androidApplication(),

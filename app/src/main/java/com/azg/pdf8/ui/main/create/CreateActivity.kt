@@ -14,12 +14,16 @@ import com.azg.pdf8.dialog.DialogCreatePdf
 import com.azg.pdf8.dialog.DialogProcess
 import com.azg.pdf8.dialog.PdfNameDialog
 import com.azg.pdf8.model.CreatePdf
+import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.camera.CropImageActivity
+import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.AppUtils
+import com.azg.pdf8.utils.BitmapManager
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.CreateViewModel
+import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.viewmodel.OnCreateFile
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.gone
@@ -35,6 +39,7 @@ import kotlin.random.Random
 
 class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding::inflate) {
     private val viewModel: CreateViewModel by inject()
+    private val docViewModel: DocumentViewModel by inject()
 
     companion object {
         var currentFlowBimap = MutableStateFlow<CreatePdf?>(null)
@@ -64,16 +69,20 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
             }
 
             override fun scanDocument() {
-                launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
-                    it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
-                        val randomId = Random.nextInt()
-                        val bitmap = BitmapFactory.decodeFile(path)
-                        val model = CreatePdf(
-                            randomId, bitmap, randomId
-                        )
-                        viewModel.addData(model)
-                        binding.progressBar.gone()
+                if (permission.checkGrantedCamera) {
+                    launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
+                        it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
+                            val randomId = Random.nextInt()
+                            val bitmap = BitmapFactory.decodeFile(path)
+                            val model = CreatePdf(
+                                randomId, bitmap, randomId
+                            )
+                            viewModel.addData(model)
+                            binding.progressBar.gone()
+                        }
                     }
+                } else {
+                    requestCameraLauncher.launch(permission.cameraRequest)
                 }
             }
         })
@@ -87,6 +96,9 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
             onEdit = { data ->
                 currentFlowBimap.value = data
                 launchActivity<CropImageActivity>()
+
+                BitmapManager.setEditBitmap(data.picture)
+                BitmapManager.generateDesUri(baseContext)
             },
         )
     }
@@ -129,6 +141,19 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                             super.onFinish(file)
                             runOnUiThread {
                                 processDialog.dismiss()
+                                val document = RecentDocument(
+                                    mediaId = file.hashCode().toLong(),
+                                    path = outPutFile.absolutePath,
+                                    lastModified = System.currentTimeMillis(),
+                                    lastTimeView = System.currentTimeMillis(),
+                                    size = outPutFile.length(),
+                                    type = DocumentType.Pdf
+                                )
+                                docViewModel.addToRecent(document.apply {
+                                    lastTimeView = System.currentTimeMillis()
+                                })
+                                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                finish()
                             }
                         }
 
@@ -211,7 +236,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
             createDialog.show()
         }
         btnCreate.click {
-            createNameDialog.show()
+            createNameDialog.showWith(getString(R.string.convert_to_pdf))
         }
     }
 }

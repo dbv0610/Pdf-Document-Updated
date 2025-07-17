@@ -14,6 +14,13 @@ import com.google.android.gms.tasks.Task
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
 
+object Aso {
+    val PolicyLink =
+        "https://docs.google.com/document/d/e/2PACX-1vSAox3LoIlt2Vcm1PlepKv7UodxolMKuOc6IGvsbOM1He8VExZQMaQGLDTVOWBo0VUC90rdhMyzwMAy/pub"
+    val TemServiceLink = "https://docs.google.com/document/d/e/2PACX-1vSXNp_OrHgvR2_TceY-8X_13DFkPKdBYH_anomZrGJUMaz2D8XuRLW4DpL7_HinmdfMtmBilOH8X87p/pub"
+
+}
+
 fun Context.openUrl(url: String) {
     runCatching {
         Intent(Intent.ACTION_VIEW, Uri.parse(url)).also {

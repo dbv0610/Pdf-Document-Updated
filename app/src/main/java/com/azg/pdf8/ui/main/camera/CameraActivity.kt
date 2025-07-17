@@ -5,10 +5,12 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.camera.core.AspectRatio
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.azg.pdf8.R
@@ -23,6 +25,9 @@ import java.io.File
 class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding::inflate) {
     private var lensFacing = CameraSelector.LENS_FACING_BACK
     private lateinit var imageCapture: ImageCapture
+    private var camera: Camera? = null
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var isTorchOn = false
     private var screenAction = ""
 
     override fun backPressed() {
@@ -37,24 +42,10 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding
     override fun ActivityCameraBinding.setData() = Unit
 
     override fun ActivityCameraBinding.onClick() {
-        icCaptureImage.setOnClickListener {
-            takePhoto()
-        }
-        icBack.click {
-            finish()
-        }
+        icCaptureImage.setOnClickListener { takePhoto() }
+        icBack.setOnClickListener { finish() }
         icStateFlash.setOnClickListener {
-            val camera = cameraProvider?.bindToLifecycle(
-                this@CameraActivity,
-                CameraSelector.Builder().requireLensFacing(lensFacing).build(),
-                imageCapture
-            )
-            camera?.cameraControl?.enableTorch(!isTorchOn).also {
-                isTorchOn = !isTorchOn
-                icStateFlash.setImageResource(
-                    if (isTorchOn) R.drawable.ic_flash_on else R.drawable.ic_flash_off
-                )
-            }
+            camera?.cameraControl?.enableTorch(!isTorchOn)
         }
         icFlipCamera.setOnClickListener {
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK)
@@ -65,38 +56,38 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding
         }
     }
 
-    private var cameraProvider: ProcessCameraProvider? = null
-    private var isTorchOn = false
-
     private fun startCamera() {
-        val previewView = binding.previewView
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             cameraProvider = cameraProviderFuture.get()
             val preview = Preview.Builder()
                 .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                 .build()
-                .also { it.surfaceProvider = previewView.surfaceProvider }
+                .also { it.setSurfaceProvider(binding.previewView.surfaceProvider) }
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .setTargetRotation(previewView.display.rotation)
+                .setTargetRotation(binding.previewView.display.rotation)
                 .build()
             cameraProvider?.unbindAll()
-            cameraProvider?.bindToLifecycle(
+            camera = cameraProvider?.bindToLifecycle(
                 this,
                 CameraSelector.Builder().requireLensFacing(lensFacing).build(),
                 preview,
                 imageCapture
             )
-            isTorchOn = false
-            binding.icStateFlash.setImageResource(R.drawable.ic_flash_off)
+            camera?.cameraInfo?.torchState?.observe(this) { state ->
+                isTorchOn = state == TorchState.ON
+                binding.icStateFlash.setImageResource(
+                    if (isTorchOn) R.drawable.ic_flash_on
+                    else R.drawable.ic_flash_off
+                )
+            }
         }, ContextCompat.getMainExecutor(this))
     }
 
     private fun takePhoto() {
         val photoFile = File(cacheDir, "JPEG_${System.currentTimeMillis()}.jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
@@ -104,29 +95,29 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>(ActivityCameraBinding
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     cameraProvider?.unbindAll()
                     Handler(Looper.getMainLooper()).postDelayed({
-                        if (screenAction == "mainSc") {
-                            launchActivity<CreateActivity>(
-                                hashMapOf(
-                                    Constant.KEY_ACTION to "addNew",
-                                    Constant.IMAGE_PATH to photoFile.absolutePath
+                        when (screenAction) {
+                            "mainSc" -> {
+                                launchActivity<CreateActivity>(
+                                    hashMapOf(
+                                        Constant.KEY_ACTION to "addNew",
+                                        Constant.IMAGE_PATH to photoFile.absolutePath
+                                    )
                                 )
-                            )
-                        } else if (screenAction == Constant.CAPTURE_ADD) {
-                            val intentData = Intent()
-                            intentData.putExtra(
-                                Constant.CAPTURE_ADD,
-                                photoFile.absolutePath
-                            )
-                            setResult(RESULT_OK, intentData)
-                            finish()
+                                finish()
+                            }
+                            Constant.CAPTURE_ADD -> {
+                                val data = Intent().apply {
+                                    putExtra(Constant.CAPTURE_ADD, photoFile.absolutePath)
+                                }
+                                setResult(RESULT_OK, data)
+                                finish()
+                            }
                         }
                     }, 3000L)
                 }
 
                 override fun onError(exc: ImageCaptureException) {
-                    toastShort(
-                        "Capture failed: ${exc.message}"
-                    )
+                    toastShort("Capture failed: ${exc.message}")
                 }
             }
         )

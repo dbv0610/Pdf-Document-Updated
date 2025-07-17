@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class FolderItem(
-    var folderName: String = "All",
+    var folderName: String = "All photos",
     var previewPath: String = "",
     var listData: MutableList<RecentDocument> = mutableListOf<RecentDocument>(),
     var itemCount: Int = 0

@@ -15,7 +15,7 @@ class PdfNameDialog(context: Context, val onNewName: (String) -> Unit) :
     var lastName = ""
     override fun DialogRenameFileBinding.initView() {
         icClose.click {
-            edtName.setText("")
+            dismiss()
         }
         binding.btnAgree.click {
             val text = edtName.text.toString().trim()
@@ -48,6 +48,10 @@ class PdfNameDialog(context: Context, val onNewName: (String) -> Unit) :
         val nameWithoutExtension = lastName.substringBeforeLast(".")
         this.lastName = nameWithoutExtension
         binding.edtName.setText(nameWithoutExtension)
+        this@PdfNameDialog.show()
+    }
+    fun showWith(lastName: String) {
+        binding.tvHeader.text = lastName
         this@PdfNameDialog.show()
     }
 

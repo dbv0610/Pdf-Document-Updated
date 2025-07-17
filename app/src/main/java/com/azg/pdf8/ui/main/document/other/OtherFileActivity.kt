@@ -1,19 +1,16 @@
 package com.azg.pdf8.ui.main.document.other
 
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
-import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityOtherBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
+import com.azg.pdf8.dialog.DeleteDialog
 import com.azg.pdf8.dialog.RenameDialog
 import com.azg.pdf8.dialog.SortDataByDialog
 import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.RecentDocument
-import com.azg.pdf8.ui.main.document.pdf.PageViewType
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.docColor
@@ -27,8 +24,8 @@ import com.dong.baselib.widget.afterTextChanged
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import java.io.File
 
 class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBinding::inflate) {
     override fun backPressed() {
@@ -36,11 +33,17 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
     }
 
     val viewModel: DocumentViewModel by inject()
-    private val pdfAdapter by lazy {
+    private lateinit var layoutManager: LinearLayoutManager
+    private var lastScrollPosition = 0
+    private var currentPos = 0
+    private var isClickInFavorite = false
+    private val documentAdapter by lazy {
         RecentAdapter(onFavoriteClick = { file, index ->
+            isClickInFavorite = true
             viewModel.toggleFavoriteRecent(file)
         }, onMenuClick = { view, doc, pos ->
             popupHerper?.show(view, doc)
+            currentPos = pos
         }) {
             launchActivity<ReadDocumentActivity>(
                 hashMapOf(
@@ -48,7 +51,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                     Constant.ARG_MEDIA_MODEL to it
                 )
             )
-            viewModel.addToRecent(it)
+            viewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(this@OtherFileActivity)
     }
     var documentType = DocumentType.Doc
@@ -96,14 +99,23 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                 }.showRename(model?.path?.fileName() ?: "")
             }
             binding.lnDelete.click {
-                model?.let {
-                    viewModel.removeFavorite(model)
-                }
+                popup.dismiss()
+                DeleteDialog(this@OtherFileActivity) {
+                    model?.let {
+                        val file = File(it.path)
+                        if (file.delete()) {
+                            viewModel.removeRecent(model)
+                            documentAdapter.removeItem(currentPos)
+                        }
+                    }
+                }.show()
             }
         }
     }
 
     override fun ActivityOtherBinding.setData() {
+        layoutManager = LinearLayoutManager(this@OtherFileActivity)
+        rcvListData.layoutManager = layoutManager
         lifecycleLaunch {
             viewModel.listDocumentSearch.collect {
                 if (it.isEmpty()) {
@@ -112,15 +124,21 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
-                    pdfAdapter.submitList(it)
+                    lastScrollPosition = layoutManager.findFirstVisibleItemPosition()
+                    documentAdapter.submitList(it) {
+                        if (isClickInFavorite) {
+                            layoutManager.scrollToPositionWithOffset(lastScrollPosition, 0)
+                            isClickInFavorite = false
+                        } else {
+                            layoutManager.scrollToPositionWithOffset(0, 0)
+                        }
+                    }
                 }
             }
         }
-        rcvListData.adapter = pdfAdapter
+        rcvListData.adapter = documentAdapter
         edtSearch.afterTextChanged {
-            if (it.isEmpty()) {
-                viewModel.setSearchCriteria(edtSearch.text.toString(), documentType)
-            }
+            viewModel.setSearchCriteria(edtSearch.text.toString(), documentType)
         }
     }
 

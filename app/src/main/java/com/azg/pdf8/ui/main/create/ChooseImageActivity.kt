@@ -17,7 +17,6 @@ import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.utils.ScanState
 import com.azg.pdf8.viewmodel.ScanImageViewModel
 import com.azg.pdf8.viewmodel.ScreenType
-import com.azg.pdf8.viewmodel.UiGalleryState
 import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.gone
@@ -52,21 +51,7 @@ class ChooseImageActivity :
                 super.onSelect(recentDocument)
                 viewModel.modifyItemSelect(recentDocument)
             }
-
-            override fun onUpdateState(recentDocument: RecentDocument, position: Int) {
-                super.onUpdateState(recentDocument, position)
-                if (viewModel.headerUiState.value == UiGalleryState.Default) {
-                    viewModel.setHeaderState(UiGalleryState.Select)
-                } else {
-                    viewModel.setHeaderState(UiGalleryState.Default)
-                }
-            }
         })
-        lifecycleScope.launch {
-            viewModel.headerUiState.collect {
-                photoAdapter?.setCurrentState(it)
-            }
-        }
         lifecycleScope.launch {
             viewModel.listSelectedItem.collect {
                 binding.icCheckSelect.isVisible = it.isNotEmpty()

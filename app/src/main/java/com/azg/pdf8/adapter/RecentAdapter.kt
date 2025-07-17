@@ -31,6 +31,12 @@ class RecentAdapter(
         }
     )
 ) {
+    init {
+        setHasStableIds(true)
+    }
+    override fun getItemId(position: Int): Long {
+        return currentList[position].document.mediaId
+    }
     override fun createBinding(
         inflater: LayoutInflater,
         parent: ViewGroup,

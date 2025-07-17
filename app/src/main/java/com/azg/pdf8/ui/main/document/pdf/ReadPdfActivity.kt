@@ -2,6 +2,7 @@ package com.azg.pdf8.ui.main.document.pdf
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.RectF
@@ -23,14 +24,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
-import com.azg.pdf8.adapter.PdfDocumentAdapter
 import com.azg.pdf8.adapter.PdfPreviewAdapter
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadPdfBinding
 import com.azg.pdf8.databinding.PopupMoreActionBinding
+import com.azg.pdf8.dialog.DialogProcess
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.utils.Constant.ARG_MEDIA_MODEL
+import com.azg.pdf8.utils.Constant.ARG_SEARCH_WITH_PAGE
+import com.azg.pdf8.viewmodel.DataResponse
 import com.azg.pdf8.widget.PdfHighlightView
 import com.dong.baselib.api.parcelable
 import com.dong.baselib.base.PopupHelper
@@ -38,10 +41,14 @@ import com.dong.baselib.string.fileName
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.dimenSdp
 import com.dong.baselib.widget.doOnVisibilityChange
+import com.dong.baselib.widget.dpToPx
 import com.dong.baselib.widget.gone
+import com.dong.baselib.widget.navigationBarHeight
+import com.dong.baselib.widget.paddingRight
 import com.dong.baselib.widget.visible
 import com.github.barteksc.pdfviewer.PDFView
 import com.shockwave.pdfium.util.SizeF
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -52,17 +59,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBinding::inflate) {
     private val viewModel: ReadPdfViewModel by viewModel()
-    private var isSearchAction = false
     private var newContext: Context? = null
     private var totalPage = 1
     val pageSizes = mutableListOf<SizeF>()
     private var pdfFile: File? = null
-
-    companion object {
-        const val CONTENT_COPY = "PDF Text"
-        const val CONTENT_PRINT = "PrintJob"
-    }
-
     private val mediaModel by lazy {
         runCatching {
             intent.parcelable<RecentDocument>(ARG_MEDIA_MODEL)
@@ -91,17 +91,18 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
                 adapter = this@ReadPdfActivity.adapter
             }
         }
-        binding.lnSearchData.doOnVisibilityChange {
-            isSearchAction = it
-            binding.fileName.isVisible = !it
-        }
         popupHerper.onBind { binding, popup ->
+            val currentOrientation = resources.configuration.orientation
+            if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                binding.root.paddingRight(navigationBarHeight * 1.15)
+            }
             lifecycleScope.launch {
                 viewModel.pageViewState.collect {
                     binding.lnThumbNail.isVisible = it != PageViewType.Thumbnail
                     binding.lnPageByPage.isVisible = it != PageViewType.PageByPage
                 }
             }
+            binding.lnToPdf.gone()
             binding.lnPageByPage.click {
                 viewModel.setPageState(PageViewType.PageByPage)
                 popup.dismiss()
@@ -112,7 +113,7 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             }
             binding.lnRotate.click {
                 popup.dismiss()
-                val currentOrientation = resources.configuration.orientation
+
                 requestedOrientation = if (currentOrientation == Configuration.ORIENTATION_PORTRAIT)
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 else
@@ -123,7 +124,13 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             adapter.submitList(pages)
         }
     }
+
+    private val loadingDialog by lazy {
+        DialogProcess(this@ReadPdfActivity)
+    }
+
     override fun ActivityReadPdfBinding.setData() {
+        PDFBoxResourceLoader.init(this@ReadPdfActivity)
         lifecycleScope.launch {
             viewModel.pageViewState
                 .map { it == PageViewType.Thumbnail }
@@ -133,29 +140,47 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
                     rcvFrameData.isVisible = show
                 }
         }
-
+        lifecycleScope.launch(Dispatchers.Main) {
+            viewModel.searchQuery.collect { state ->
+                if (state is DataResponse.DataSuccess) {
+                    if (state.data.isNotEmpty()) {
+                        loadingDialog.dismiss()
+                        val intent = Intent(this@ReadPdfActivity, SearchResultActivity::class.java)
+                        intent.putExtra(ARG_SEARCH_WITH_PAGE, ArrayList(state.data))
+                        startActivity(intent)
+                    } else {
+                        loadingDialog.dismiss()
+                        toastShort(getString(R.string.not_found_search))
+                    }
+                }
+            }
+        }
     }
 
     override fun ActivityReadPdfBinding.onClick() {
-        icBack.click {
-            if (isSearchAction) {
-                binding.lnSearchData.gone()
-                binding.fileName.isVisible = true
-            } else {
-                finish()
-            }
+        icBackApp.click {
+            backPressed()
         }
 
-        icSearchData.click {
-            if (!isSearchAction) {
-                binding.fileName.gone()
-                binding.lnSearchData.visible()
+        icBackSearch.click {
+            edtSearchData.setText("")
+            binding.lnSearchData.gone()
+            binding.lnHeaderDef.visible()
+        }
 
-            } else {
-                val text = binding.edtSearchData.text.toString()
-                if (text.isNotEmpty()) {
-                    //searchAndHighlightInPdf(binding.pdfRead, text)
+        icSearchApp.click {
+            binding.lnSearchData.visible()
+            binding.lnHeaderDef.gone()
+        }
+        icSearchData.click {
+            val query = edtSearchData.text.toString()
+            if (query.isNotEmpty()) {
+                loadingDialog.show()
+                viewModel.pdfPath?.let { path ->
+                    viewModel.getSearchQuery(path, query)
                 }
+            } else {
+                toastShort(getString(R.string.please_enter_a_search))
             }
         }
 
@@ -164,8 +189,8 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         }
 
         binding.edtSearchData.onActionSearch(actionSuccess = { query ->
+            loadingDialog.show()
             viewModel.pdfPath?.let { path ->
-
                 viewModel.getSearchQuery(path, query)
             }
         }, actionFail = {
@@ -196,16 +221,19 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             }
         }
     }
+
     private val jumpPending = AtomicInteger(-1)
 
     private fun jumpToPageWhenReady(page: Int) {
         if (binding.pdfRead.isLaidOut) {
+            adapter.setCurrentPage(page)
             binding.pdfRead.jumpTo(page, true)
         } else {
             jumpPending.set(page)
             binding.pdfRead.apply {
                 onLayoutReady {
                     if (jumpPending.get() > -1) {
+                        adapter.setCurrentPage(jumpPending.get())
                         jumpTo(jumpPending.get(), true)
                         jumpPending.set(-1)
                     }
@@ -223,14 +251,17 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             }
         })
     }
+
     private fun loadPdf() {
         viewModel.pdfPath?.let {
             pdfFile = File(it)
             binding.pdfRead.fromFile(pdfFile)
                 .enableAnnotationRendering(true)
                 .defaultPage(viewModel.page - 1)
+                .spacing(8)
+                .pageFling(true)
                 .enableSwipe(true)
-                .swipeHorizontal(viewModel.isHorizontal)
+                .swipeHorizontal(false)
                 .enableDoubletap(false)
                 .nightMode(viewModel.nightMode)
                 .onLoad { pageCount ->
@@ -248,15 +279,10 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         }
     }
 
-
     override fun backPressed() {
-        if (this@ReadPdfActivity.isFinishing || this@ReadPdfActivity.isDestroyed) {
-            this@ReadPdfActivity.finishAffinity()
-            return
-        }
         if (binding.lnSearchData.isVisible) {
             binding.lnSearchData.gone()
-            binding.lnHeader.visible()
+            binding.lnHeaderDef.visible()
             binding.edtSearchData.setText("")
             return
         }

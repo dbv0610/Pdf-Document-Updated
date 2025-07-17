@@ -29,6 +29,8 @@ interface RecentDao {
             delete(mediaId)
         }
     }
+    @Query("DELETE FROM RecentDocument WHERE mediaId = :docId")
+    suspend fun deleteById(docId: Long)
     @Delete
     suspend fun delete(document: RecentDocument)
     @Update

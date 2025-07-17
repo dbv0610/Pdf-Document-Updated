@@ -1,5 +1,7 @@
 package com.azg.pdf8.viewmodel
 
+import android.content.Context
+import com.azg.pdf8.R
 import com.azg.pdf8.model.ContentWithPage
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.FolderItem
@@ -15,8 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import java.io.File
 
-class AppDataRepo {
-
+class AppDataRepo(val context: Context) {
     val _listDoc = MutableStateFlow(mutableListOf<RecentDocument>())
     val _listXls = MutableStateFlow(mutableListOf<RecentDocument>())
     val _listPpt = MutableStateFlow(mutableListOf<RecentDocument>())
@@ -27,12 +28,12 @@ class AppDataRepo {
     val documentListPpt = _listPpt.asStateFlow()
     val _listAllData = MutableStateFlow(mutableListOf<RecentDocument>())
     val listAllData = _listAllData.asStateFlow()
-
-
     val _listAllImage = MutableStateFlow(mutableListOf<RecentDocument>())
     val listAllImage = _listAllImage.asStateFlow()
 
-
+    fun removeItemInList(path: String) {
+        _listAllData.value = _listAllData.value.filter { it.path != path }.toMutableList()
+    }
 
     fun groupToFolderList(list: List<RecentDocument>): MutableList<FolderItem> {
         if (list.isEmpty()) return mutableListOf()
@@ -48,7 +49,7 @@ class AppDataRepo {
                 )
             }
         val allFolder = FolderItem(
-            folderName = "All",
+            folderName = context.getString(R.string.all_photo),
             previewPath = list.first().path,
             listData = list.toMutableList(),
             itemCount = list.size
@@ -96,7 +97,6 @@ class AppDataRepo {
             val file = File(pdfPath)
             val document = PDDocument.load(file)
             val stripper = PDFTextStripper()
-
             val totalPages = document.numberOfPages
             for (page in 1..totalPages) {
                 stripper.startPage = page
@@ -117,9 +117,6 @@ class AppDataRepo {
 
         return result
     }
-
-
-
 
     fun extractLinksWithPagesFromPdf(pdfPath: String): List<Pair<Int, String>> {
         val links = mutableListOf<Pair<Int, String>>()
@@ -149,12 +146,9 @@ class AppDataRepo {
         return links
     }
 
-
-
     fun renameAndGetPath(oldFile: File, newName: String): String? {
         val parent = oldFile.parentFile ?: return null
         val newFile = File(parent, newName)
         return newFile.absolutePath
     }
-
 }

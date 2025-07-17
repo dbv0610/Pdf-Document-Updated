@@ -23,6 +23,9 @@ class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
     }
 
     private var currentPage = MutableLiveData(0)
+    fun setCurrentPage(page:Int){
+        currentPage.value = page
+    }
     private var lifecycle: LifecycleOwner? = null
     fun attachLifecycle(lifecycle: LifecycleOwner):PdfPreviewAdapter {
         this@PdfPreviewAdapter.lifecycle = lifecycle
@@ -84,7 +87,6 @@ class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
             }
             binding.root.click {
                 currentSelPage.invoke(page)
-                currentPage.value = adapterPosition
             }
         }
 

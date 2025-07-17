@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azg.pdf8.model.CreatePdf
 import com.azg.pdf8.model.RecentDocument
+import com.dong.baselib.widget.paleGreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,7 +59,8 @@ class CreateViewModel : ViewModel() {
                 CreatePdf(
                     defId = index,
                     picture = thumbnail,
-                    indexOfList = index
+                    indexOfList = index,
+                    oldPath = doc.path
                 )
             }
             withContext(Dispatchers.Main) {
@@ -76,7 +78,7 @@ class CreateViewModel : ViewModel() {
                 CreatePdf(
                     defId = index,
                     picture = thumbnail,
-                    indexOfList = index
+                    indexOfList = index, doc.path
                 )
             }
             withContext(Dispatchers.Main) {

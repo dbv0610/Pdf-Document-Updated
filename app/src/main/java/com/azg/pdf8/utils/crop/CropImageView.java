@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
@@ -510,6 +511,8 @@ public class CropImageView extends androidx.appcompat.widget.AppCompatImageView 
         mIsInitialized = true;
         invalidate();
     }
+
+
 
     private float calcScale(int viewW, int viewH, float angle) {
         mImgWidth = getDrawable().getIntrinsicWidth();
@@ -1490,7 +1493,7 @@ public class CropImageView extends androidx.appcompat.widget.AppCompatImageView 
 
     private float lastDegree = 0;
 
-    public void rotateAngleImage(Float degrees, int durationMillis) {
+    public void rotateAngleImage(Float degrees,Float lastScale, int durationMillis) {
         if (mIsRotating) {
             getAnimator().cancelAnimation();
         }
@@ -1533,13 +1536,20 @@ public class CropImageView extends androidx.appcompat.widget.AppCompatImageView 
 
     public void setImageScale(float scale) {
         final float newScale = calcScale((int) (mViewWidth * scale), (int) (mViewHeight * scale), mAngle);
-        setupLayout((int) (mViewWidth * scale), (int) (mViewHeight * scale));
+        setupLayout((int) (mViewWidth), (int) (mViewHeight));
         mScale = newScale;
+        Log.d("ImageScale",String.format("Size:%d-%d --%f-%f",getWidth(),getHeight(),mImageRect.left,mImageRect.top));
         invalidate();
     }
 
-    public void rotateAngleImage(Float degrees) {
-        rotateAngleImage(degrees, mAnimationDurationMillis);
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mImageRect = new RectF(0f,0f,(float)w,(float)h);
+    }
+
+    public void rotateAngleImage(Float degrees,Float lastScale) {
+        rotateAngleImage(degrees, lastScale,mAnimationDurationMillis);
     }
 
     public void rotateImage(RotateDegrees degrees) {

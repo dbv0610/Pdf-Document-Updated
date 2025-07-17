@@ -170,15 +170,7 @@ class DocumentViewModel(
         }
     }
 
-    private val allDocsFlow: Flow<List<RecentDocument>> =
-        combine(
-            repo.documentListPdf,
-            repo.documentListDoc,
-            repo.documentListXls,
-            repo.documentListPpt
-        ) { pdfs, docs, xls, ppts ->
-            (pdfs + docs + xls + ppts)
-        }
+
     val listRecentSearch: StateFlow<List<RecentUi>> = combine(
         recentDocument,
         _searchKey,
@@ -218,7 +210,7 @@ class DocumentViewModel(
             initialValue = emptyList()
         )
     val listDocumentSearch: StateFlow<List<RecentUi>> = combine(
-        allDocsFlow,
+        repo.listAllData,
         favoriteDocument,
         _searchKey,
         _searchType,
@@ -250,54 +242,10 @@ class DocumentViewModel(
             SortByData.SortByDate ->
                 filteredByKey.sortedBy { it.document.lastModified }
         }
-        sorted
+        sorted.reversed()
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    //    val listRecentSearch: StateFlow<List<RecentUi>> = combine(
-//        recentDocument,
-//        favoriteDocument,
-//        _searchKey,
-//        sortByDateFlow,
-//        sortBySizeFlow,
-//        filterTypesFlow,
-//    ) { docs, favUiList, key, sortByDate, sortBySize, filterBy ->
-//
-//        val filtered = if (filterBy.isEmpty()) {
-//            mutableListOf()
-//        } else {
-//            docs.filter { doc -> filterBy.contains(doc.document.type) }
-//        }
-////
-////        val k = key.trim().lowercase()
-////        val baseList = filtered.map { doc ->
-////            val isFav = favUiList.any { it.document.mediaId == doc.document.mediaId }
-////            RecentUi(doc.document, isFav)
-////        }
-////        val filteredByType = type?.let { t ->
-////            baseList.filter { it.document.type == t }
-////        } ?: baseList
-////        val filteredByKey = if (k.isEmpty()) {
-////            filteredByType
-////        } else {
-////            filteredByType.filter { ui ->
-////                val name = File(ui.document.path).name.lowercase()
-////                val date = formatDateByMillis(ui.document.lastModified).lowercase()
-////                name.contains(k) || date.contains(k)
-////            }
-////        }
-////        val sorted = when (sortType) {
-////            SortByData.None -> filteredByKey
-////            SortByData.SortByName ->
-////                filteredByKey.sortedBy { File(it.document.path).name.lowercase() }
-////            SortByData.SortBySize ->
-////                filteredByKey.sortedBy { it.document.size }
-////            SortByData.SortByDate ->
-////                filteredByKey.sortedBy { it.document.lastModified }
-////        }
-////        sorted
-//        mutableListOf<RecentUi>()
-//    }
-//        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     init {
         viewModelScope.launch {
             combine(
@@ -377,26 +325,6 @@ class DocumentViewModel(
         filterTypesFlow.value = types
     }
 
-    init {
-        viewModelScope.launch {
-            combine(
-                repo.documentListPdf,
-                repo.documentListDoc,
-                repo.documentListXls,
-                repo.documentListPpt,
-            ) { pdf, doc, xls, ppt ->
-                listOf(
-                    "PDF: ${pdf.size}",
-                    "DOC: ${doc.size}",
-                    "XLS: ${xls.size}",
-                    "PPT: ${ppt.size}"
-                )
-            }.collect { logList ->
-                logList.forEach { Log.d("DocumentViewModel", it) }
-            }
-        }
-    }
-
     fun loadDocuments(context: Context) {
         viewModelScope.launch {
             val allDocs = AppUtils
@@ -446,14 +374,57 @@ class DocumentViewModel(
         }
     }
 
-    fun removeFavorite(model: RecentDocument) {
+    fun removeFavorite(model: FavoriteDocument) {
         viewModelScope.launch {
             favoriteDao.deleteById(model.mediaId)
         }
     }
 
+    fun removeRecent(model: RecentDocument) {
+        viewModelScope.launch {
+            repo.removeItemInList(model.path)
+            recentDao.deleteById(model.mediaId)
+        }
+    }
+
     fun renameFile(
         model: RecentDocument,
+        newBaseName: String
+    ) {
+        val oldFile = File(model.path)
+        val extension = oldFile.extension
+        val newName = "$newBaseName.$extension"
+        val newFile = File(oldFile.parentFile, newName)
+
+        if (newFile.exists()) return
+        else {
+            if (!oldFile.renameTo(newFile)) {
+                Log.e("TAG_Rename", "Failed to rename file on disk: ${oldFile.path}")
+                return
+            }
+            Log.d("TAG_Rename", "Renamed on disk to: ${newFile.absolutePath}")
+            val updatedPath = newFile.absolutePath
+
+
+            viewModelScope.launch {
+                repo._listAllData.value = repo._listAllData.value
+                    .map { data ->
+                        if (data.mediaId == model.mediaId) data.copy(path = updatedPath)
+                        else data
+                    }
+                    .toMutableList()
+
+                recentDao.updatePath(model.mediaId.toInt(), updatedPath)
+                favoriteDao.updateName(
+                    documentId = model.mediaId.toInt(),
+                    newPath = updatedPath
+                )
+            }
+        }
+    }
+
+    fun renameFile(
+        model: FavoriteDocument,
         newBaseName: String
     ) {
         val oldFile = File(model.path)

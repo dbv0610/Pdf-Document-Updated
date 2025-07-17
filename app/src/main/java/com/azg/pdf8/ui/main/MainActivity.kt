@@ -2,6 +2,7 @@ package com.azg.pdf8.ui.main
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Environment
@@ -10,6 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.az.inappupdate.AppUpdate
+import com.az.inappupdate.AppUpdateManager
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.database.RecentDao
 import com.azg.pdf8.databinding.ActivityMainBinding
@@ -25,16 +28,29 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate, true) {
-    private val permission: Permission by inject()
     override fun backPressed() {
         quitActivity.show()
     }
 
-    private var isGrantPermission = false
+    companion object {
+        var isGrantPermission = false
+    }
+
     val documentViewModel: DocumentViewModel by inject()
     private val quitActivity by lazy {
         QuitAppDialog(this@MainActivity) {
             finishAffinity()
+        }
+    }
+
+    override fun fragmentAction(data: Any) {
+        super.fragmentAction(data)
+        if (data is String) {
+            if (data == "requestPermission") {
+                requestStoragePermission()
+            } else if (data == "requestCameraPer") {
+                requestCameraLauncher.launch(permission.cameraRequest)
+            }
         }
     }
 
@@ -43,12 +59,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         backPressed()
     }
 
-
     fun isStorageAccess(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
-            permission.checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permission.arePermissionsGranted(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
         }
     }
 
@@ -74,6 +92,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 requestStoragePermission()
             }.show()
         }
+        checkUpdate()
     }
 
     override fun ActivityMainBinding.setData() {
@@ -134,6 +153,48 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         if (isGrantPermission) {
             lifecycleScope.launch {
                 documentViewModel.loadDocuments(this@MainActivity)
+            }
+        }
+    }
+
+    private fun enableAdsResume() {
+//        AppOpenManager.getInstance().enableAppResume()
+    }
+
+    private fun disableAdsResume() {
+//        AppOpenManager.getInstance().disableAppResume()
+    }
+
+    private var isCheckedUpdate = false
+    private fun checkUpdate() {
+        if (!isCheckedUpdate) {
+            isCheckedUpdate = true
+            AppUpdateManager.getInstance(this).checkUpdateApp(this) {
+                if (it) {
+                    disableAdsResume()
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == AppUpdate.REQ_CODE_VERSION_UPDATE) {
+            if (resultCode == Activity.RESULT_OK) {
+                disableAdsResume()
+            } else {
+                if (AppUpdateManager.getInstance(this)
+                        .getStyleUpdate() == AppUpdateManager.STYLE_FORCE_UPDATE
+                ) {
+                    disableAdsResume()
+                } else {
+                    enableAdsResume()
+                }
+            }
+            AppUpdateManager.getInstance(this).onCheckResultUpdate(requestCode, resultCode) {
+                if (it) {
+                    disableAdsResume()
+                }
             }
         }
     }

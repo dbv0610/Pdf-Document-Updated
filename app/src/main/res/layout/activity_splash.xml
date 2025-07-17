@@ -1,40 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.dong.baselib.widget.layout.UiConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
+    app:bgIsGradient="true"
+    app:bgGradientEnd="#830000"
+    app:bgGradientStart="#FF0000"
     android:layout_height="match_parent"
-    android:background="@drawable/img_background_splash"
     tools:context=".ui.splash.SplashActivity">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <com.dong.baselib.widget.view.RoundImageView
         android:id="@+id/imgIconApp"
-        android:layout_width="0dp"
+        android:layout_width="@dimen/_80sdp"
         android:layout_height="0dp"
-        android:src="@mipmap/ic_launcher_round"
+        android:src="@drawable/img_logo_splash"
+        app:bgColorDark="@color/transfer"
+        app:bgColorLight="@color/transfer"
+        app:cornerRadius="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35"
-        app:layout_constraintWidth_percent="0.25" />
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintWidth_percent="0.3" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        style="@style/Text_600"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_16sdp"
         android:layout_marginTop="@dimen/_16sdp"
+        android:adjustViewBounds="true"
+
+        android:includeFontPadding="false"
         android:text="@string/app_name"
+        android:fontFamily="@font/rb_700"
         android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textSize="@dimen/_16ssp"
-        app:layout_constraintTop_toBottomOf="@id/imgIconApp" />
+        android:textColor="@color/white"
+        android:textSize="@dimen/_18sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgIconApp"
+        app:layout_constraintWidth_percent="0.65" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        style="@style/Text_400"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_16sdp"
@@ -42,44 +51,22 @@
         android:text="@string/this_action_may_contain_advertising"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="@dimen/_11ssp"
+        android:textSize="@dimen/_11sdp"
         app:layout_constraintBottom_toTopOf="@id/progressIndicator" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressIndicator"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/_12sdp"
+        android:layout_marginBottom="@dimen/_16sdp"
         android:indeterminate="true"
+        android:progressBackgroundTint="#FFFFFF"
         app:indicatorColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/flBanner"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.66"
+        app:layout_constraintWidth_percent="0.65"
         app:layout_marginBaseline="@dimen/_2sdp"
-        app:trackColor="@color/white_24"
+        app:trackCornerRadius="@dimen/_12sdp"
         app:trackThickness="@dimen/_4sdp" />
-
-    <FrameLayout
-        android:id="@+id/flBanner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:visibility="visible">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="bottom"
-            android:background="@color/gntGray" />
-
-        <include
-            layout="@layout/layout_banner_control"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="1dp" />
-    </FrameLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.dong.baselib.widget.layout.UiConstraintLayout>

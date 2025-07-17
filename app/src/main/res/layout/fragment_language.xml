@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_background">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icBack"
+            android:layout_width="@dimen/_34sdp"
+            android:layout_height="@dimen/_34sdp"
+            android:padding="@dimen/_4sdp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_arrow_left" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_500"
+            android:includeFontPadding="false"
+            android:text="@string/language"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_14sdp" />
+
+        <com.dong.baselib.widget.view.UiTextView
+           app:bgColorAll="@color/white"
+            app:cornerRadius="@dimen/_18sdp"
+            android:paddingVertical="@dimen/_5sdp"
+            android:fontFamily="@font/rb_500"
+            android:textSize="@dimen/_12sdp"
+            android:includeFontPadding="false"
+            android:paddingHorizontal="@dimen/_8sdp"
+            android:textColor="@color/mainColor"
+            android:id="@+id/selectLanguage"
+            android:text="@string/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:src="@drawable/ic_view_done" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcvLanguage"
+        android:background="@drawable/bg_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="@dimen/_12sdp"
+        android:backgroundTint="@color/white"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        tools:listitem="@layout/item_language_setting" />
+</androidx.constraintlayout.widget.ConstraintLayout>

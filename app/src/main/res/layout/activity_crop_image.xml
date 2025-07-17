@@ -1,0 +1,155 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
+    android:background="@color/black"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/azCropframe"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@+id/rltControlsWrapper"
+        app:layout_constraintBottom_toTopOf="@id/rltControlsWrapper"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.yalantis.ucrop.view.AzCropView
+            android:id="@+id/azCropView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0" />
+
+    </FrameLayout>
+
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:id="@+id/text_view_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/reset"
+        android:textSize="@dimen/_10ssp"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        android:fontFamily="@font/rb_400"
+        android:paddingHorizontal="@dimen/_8sdp"
+        android:paddingVertical="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_6sdp"
+        app:bgColorAll="#5C000000"
+        app:layout_constraintBottom_toTopOf="@id/wrapper_controls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <FrameLayout
+        android:id="@+id/wrapper_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#000000"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintBottom_toTopOf="@id/rltControlsWrapper"
+        android:minHeight="@dimen/azcrop_height_wrapper_controls">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <HorizontalScrollView
+            android:id="@+id/scroll_wrapper_aspect_ratio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/layout_aspect_ratio"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal" />
+
+        </HorizontalScrollView>
+
+
+        <include
+            android:id="@+id/layout_rotate_wheel"
+            layout="@layout/layout_az_rotate_wheel" />
+
+        <include
+            android:id="@+id/layout_scale_wheel"
+            layout="@layout/layout_az_scale_wheel" />
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/rltControlsWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#000000"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/wrapper_states"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/color_azcrop_edit_background"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:minHeight="@dimen/_46sdp"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/state_az_cancel"
+                style="@style/azcrop_WrapperImageButtonState"
+                android:layout_weight="0.5"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_rounded_close"
+                android:text="@string/txt_azcrop_frame" />
+
+
+            <TextView
+                android:id="@+id/az_state_aspect_ratio"
+                style="@style/azcrop_WrapperTextButtonState"
+                android:text="@string/txt_azcrop_frame" />
+
+            <TextView
+                android:id="@+id/az_state_rotate"
+                style="@style/azcrop_WrapperTextButtonState"
+                android:text="@string/txt_azcrop_rotate" />
+
+            <TextView
+                android:id="@+id/az_state_scale"
+                style="@style/azcrop_WrapperTextButtonState"
+                android:text="@string/txt_azcrop_scale" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/state_az_save"
+                style="@style/azcrop_WrapperImageButtonState"
+                android:layout_weight="0.5"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_view_done"
+                android:tint="@color/white"
+                android:text="@string/txt_azcrop_frame" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+
+    <FrameLayout
+        android:id="@+id/loadingView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:visibility="gone">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="@dimen/_100sdp"
+            android:indeterminate="true"
+            android:indeterminateBehavior="cycle"
+            android:indeterminateTint="@color/color_E84749"
+            android:layout_height="@dimen/_100sdp"
+            android:layout_gravity="center" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

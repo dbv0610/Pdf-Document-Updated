@@ -1,40 +1,71 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.gmsGoogleServices)
     alias(libs.plugins.firebaseCrashlytics)
     id("kotlin-parcelize")
+    id(id = "com.google.devtools.ksp")
 }
 
 android {
-    namespace = "com.ag.sampleadsfirstflow"
+    namespace = "com.azg.pdf8"
     compileSdk = 35
 
+
     defaultConfig {
-        applicationId = "com.ag.sampleadsfirstflow"
+        applicationId = "com.azg.pdf8"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val formattedDate = SimpleDateFormat("MMM.dd.yyyy").format(Date())
+        base.archivesName = "PDF8-v$versionName($versionCode)_${formattedDate}"
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = "pdf8"
+            keyPassword = "silverpdf"
+            storeFile = rootProject.file("keystore/silverai.jks")
+            storePassword = "silverai"
+        }
     }
 
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+    bundle {
+        language {
+            enableSplit = false
+        }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
@@ -44,114 +75,76 @@ android {
     flavorDimensions.add("version")
     productFlavors {
         create("dev") {
-            applicationId = "com.ag.sampleadsfirstflow"
+            applicationId = "com.azg.pdf8"
             manifestPlaceholders["ad_app_id"] = "ca-app-pub-3940256099942544~3347511713"
-            buildConfigField("String", "A001", "\"ca-app-pub-3940256099942544/9257395921\"")
-            buildConfigField("String", "A002", "\"ca-app-pub-3940256099942544/9257395921\"")
-
-            buildConfigField("String", "B001", "\"ca-app-pub-3940256099942544/6300978111\"")
-            buildConfigField("String", "B002", "\"ca-app-pub-3940256099942544/6300978111\"")
-
-            buildConfigField("String", "I001", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "I002", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "I003", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "I004", "\"ca-app-pub-3940256099942544/1033173712\"")
-
-            buildConfigField("String", "N001", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N002", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N003", "\"ca-app-pub-3940256099942544/1044960115\"")
-            buildConfigField("String", "N004", "\"ca-app-pub-3940256099942544/1044960115\"")
-            buildConfigField("String", "N005", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N006", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N007", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N008", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N009", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N010", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N011", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N012", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N013", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N014", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N015", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N016", "\"ca-app-pub-3940256099942544/2247696110\"")
 
             buildConfigField("boolean", "build_debug", "true")
         }
 
         create("product") {
-            applicationId = "com.ag.sampleadsfirstflow"
-            manifestPlaceholders["ad_app_id"] = "ca-app-pub-3940256099942544~3347511713"
-            buildConfigField("String", "A001", "\"ca-app-pub-3940256099942544/9257395921\"")
-            buildConfigField("String", "A002", "\"ca-app-pub-3940256099942544/9257395921\"")
-
-            buildConfigField("String", "B001", "\"ca-app-pub-3940256099942544/6300978111\"")
-            buildConfigField("String", "B002", "\"ca-app-pub-3940256099942544/6300978111\"")
-
-            buildConfigField("String", "I001", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "I002", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "I003", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "I004", "\"ca-app-pub-3940256099942544/1033173712\"")
-
-            buildConfigField("String", "N001", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N002", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N003", "\"ca-app-pub-3940256099942544/1044960115\"")
-            buildConfigField("String", "N004", "\"ca-app-pub-3940256099942544/1044960115\"")
-            buildConfigField("String", "N005", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N006", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N007", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N008", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N009", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N010", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N011", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N012", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N013", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N014", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N015", "\"ca-app-pub-3940256099942544/2247696110\"")
-            buildConfigField("String", "N016", "\"ca-app-pub-3940256099942544/2247696110\"")
+            applicationId = "com.documentreader.manage.pdfreader.viewpdf.open"
+            manifestPlaceholders["ad_app_id"] = ""
 
             buildConfigField("boolean", "build_debug", "false")
         }
     }
 }
-
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
 dependencies {
-    implementation(platform(libs.firebase.bom))
-
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.multidex)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.app.update.ktx)
-    implementation(libs.azmoduleads)
-    implementation(libs.billing)
-    implementation(libs.billing.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.config)
-    implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
-    implementation(libs.glide)
-    implementation(libs.gson)
-    implementation(libs.inappupdate)
-    implementation(libs.koin.android)
-    implementation(libs.koin.android.compat)
-    implementation(libs.koin.core)
-    implementation(libs.lottie)
-    implementation(libs.material)
-    implementation(libs.mediation.applovin)
-    implementation(libs.mediation.facebook)
-    implementation(libs.mediation.mintegral)
-    implementation(libs.mediation.pangle)
-    implementation(libs.mediation.vungle)
-    implementation(libs.play.app.update)
-    implementation(libs.play.services.ads)
-    implementation(libs.sdp.android)
-    implementation(libs.shimmer)
-    implementation(libs.ssp.android)
-
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.fragment)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation(libs.lottie)
+    implementation(libs.inappupdate)
+    implementation(libs.app.update.ktx)
+    implementation(libs.billing.ktx)
+    implementation(libs.glide)
+    implementation(libs.gson)
+    implementation(libs.sdp.android)
+    implementation(libs.shimmer)
+    implementation(libs.ssp.android)
+    implementation(libs.review.ktx)
+
+    implementation(project(":lib"))
+
+    implementation(libs.koin.android)
+    implementation(libs.koin.android.compat)
+    implementation(libs.koin.core)
+
+    implementation(libs.androidx.lifecycle.process)
+
+
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    implementation(libs.rxjava)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+
+    implementation(libs.android.pdf.viewer)
+    implementation(libs.pdfbox.android)
+
+    implementation(libs.guava)
+    implementation(project(path = ":android_office"))
+    implementation(project(path = ":ucrop"))
 }

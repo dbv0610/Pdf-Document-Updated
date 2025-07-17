@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_background"
+    android:orientation="vertical"
+    tools:context=".ui.main.MainActivity">
+
+    <LinearLayout
+        android:id="@+id/lnHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:paddingTop="@dimen/_12sdp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_500"
+            android:includeFontPadding="false"
+            android:text="@string/pdf_reader"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_16sdp" />
+
+        <com.dong.baselib.widget.layout.UiLinearLayout
+            android:id="@+id/btnCreate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/_8sdp"
+            android:paddingVertical="@dimen/_4sdp"
+            app:cornerRadius="@dimen/_50sdp"
+            app:stColorAll="@color/white"
+            app:strokeWidth="1.2dp">
+
+            <ImageView
+                android:layout_width="@dimen/_16sdp"
+                android:layout_height="@dimen/_16sdp"
+                android:src="@drawable/ic_round_add"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/rb_600"
+                android:includeFontPadding="false"
+                android:text="@string/create"
+                android:textColor="@color/white" />
+        </com.dong.baselib.widget.layout.UiLinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_bottom_sheet"
+        android:backgroundTint="@color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:fontFamily="@font/rb_500"
+            android:includeFontPadding="false"
+            android:text="@string/document"
+            android:textSize="@dimen/_12sdp" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_12sdp"
+            android:columnCount="2"
+            android:rowCount="2">
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/lnPdf"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/_12sdp"
+                app:bgColorAll="#FFF4F4"
+                app:cornerRadius="@dimen/_8sdp"
+                app:stColorAll="#D9070B"
+                app:strokeWidth="1.2dp">
+
+                <ImageView
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:src="@drawable/ic_app_pdf" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/rb_700"
+                        android:includeFontPadding="false"
+                        android:text="@string/pdf"
+                        android:textColor="#D9070B"
+                        android:textSize="@dimen/_12sdp" />
+
+                    <TextView
+                        android:id="@+id/countFilePdf"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_4sdp"
+                        android:includeFontPadding="false"
+                        android:text="@string/files"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/lnDocx"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/_12sdp"
+                app:bgColorAll="#F1F9FF"
+                app:cornerRadius="@dimen/_8sdp"
+                app:stColorAll="#0B69D9"
+                app:strokeWidth="1.2dp">
+
+                <ImageView
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:src="@drawable/ic_app_docx" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/rb_700"
+                        android:includeFontPadding="false"
+                        android:text="@string/doc"
+                        android:textColor="#0B69D9"
+                        android:textSize="@dimen/_12sdp" />
+
+                    <TextView
+                        android:id="@+id/countFileDocx"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_4sdp"
+                        android:includeFontPadding="false"
+                        android:text="@string/files"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/lnXls"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/_12sdp"
+                app:bgColorAll="#E8FBF2"
+                app:cornerRadius="@dimen/_8sdp"
+                app:stColorAll="#00733B"
+                app:strokeWidth="1.2dp">
+
+                <ImageView
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:src="@drawable/ic_app_xls" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/rb_700"
+                        android:includeFontPadding="false"
+                        android:text="@string/xls"
+                        android:textColor="#00733B"
+                        android:textSize="@dimen/_12sdp" />
+
+                    <TextView
+                        android:id="@+id/countFileXls"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_4sdp"
+                        android:includeFontPadding="false"
+                        android:text="@string/files"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/lnPpt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/_12sdp"
+                app:bgColorAll="#FFF1E6"
+                app:cornerRadius="@dimen/_8sdp"
+                app:stColorAll="#FF6A00"
+                app:strokeWidth="1.2dp">
+
+                <ImageView
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:src="@drawable/ic_app_ppt" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/rb_700"
+                        android:includeFontPadding="false"
+                        android:text="@string/ppt"
+                        android:textColor="#FF6A00"
+                        android:textSize="@dimen/_12sdp" />
+
+                    <TextView
+                        android:id="@+id/countFilePpt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_4sdp"
+                        android:includeFontPadding="false"
+                        android:text="@string/files"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+        </GridLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:background="@drawable/bg_bottom_sheet"
+            android:backgroundTint="@color/white"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:layout_weight="1"
+                android:textColor="@color/color_8c8c8c"
+                android:fontFamily="@font/rb_500"
+                android:includeFontPadding="false"
+                android:text="@string/recents_files"
+                android:textSize="@dimen/_12sdp" />
+
+            <TextView
+                android:id="@+id/tvShowAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:fontFamily="@font/rb_600"
+                android:includeFontPadding="false"
+                android:text="@string/show_all"
+                android:paddingVertical="@dimen/_2sdp"
+                android:textColor="@color/mainColor"
+                android:textSize="@dimen/_11sdp" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lnNoPer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_weight="1"
+            tools:ignore="NestedWeights">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_12sdp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/_18sdp"
+                app:cornerRadius="@dimen/_8sdp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.25">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/_12sdp">
+
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/img_permission"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.dong.baselib.widget.layout.UiLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_16sdp"
+                        android:clickable="false"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/_8sdp"
+                        app:bgColorAll="@color/white"
+                        app:cornerRadius="@dimen/_8sdp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/imageView2"
+                        tools:layout_editor_absoluteX="16dp">
+
+                        <ImageView
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:clickable="false"
+                            android:src="@drawable/img_per_file" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/_12sdp"
+                            android:layout_weight="1"
+                            android:clickable="false"
+                            android:fontFamily="@font/rb_600"
+                            android:includeFontPadding="false"
+                            android:text="@string/allow_access_to_manage_all_files"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/_10sdp" />
+
+                        <ImageView
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:clickable="false"
+                            android:src="@drawable/img_per_switch" />
+                    </com.dong.baselib.widget.layout.UiLinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:clickable="false"
+                    android:fontFamily="@font/rb_400"
+                    android:includeFontPadding="false"
+                    android:text="@string/pdf_reader_requires_file_access_to_function_properly_please_allow_permission"
+                    android:textAlignment="center"
+                    android:textColor="@color/color_8c8c8c"
+                    android:textSize="@dimen/_11sdp" />
+
+                <com.dong.baselib.widget.view.UiTextView
+                    android:id="@+id/btnGranted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:fontFamily="@font/rb_500"
+                    android:gravity="center"
+                    android:textSize="@dimen/_11sdp"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="@dimen/_26sdp"
+                    android:paddingVertical="@dimen/_10sdp"
+                    android:text="@string/allow_access"
+                    android:textColor="@color/white"
+                    app:bgColorAll="@color/mainColor"
+                    app:cornerRadius="@dimen/_8sdp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lnGrantPer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            tools:ignore="NestedWeights">
+
+            <LinearLayout
+                android:id="@+id/lnNoData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginHorizontal="@dimen/_18sdp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.35">
+
+                <ImageView
+                    android:layout_width="@dimen/_78sdp"
+                    android:layout_height="@dimen/_78sdp"
+                    android:src="@drawable/img_no_data" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_18sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:fontFamily="@font/rb_400"
+                    android:text="@string/no_file_found"
+                    android:textAlignment="center"
+                    android:textColor="@color/_8c8c8c"
+                    android:textSize="@dimen/_12sdp" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvListData"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/_8sdp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="NestedWeights"
+                tools:layout_editor_absoluteY="10dp"
+                tools:listitem="@layout/item_document_view" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</LinearLayout>

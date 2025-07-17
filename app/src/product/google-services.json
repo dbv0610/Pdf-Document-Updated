@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "381485162782",
+    "project_id": "as005--pdf-8",
+    "storage_bucket": "as005--pdf-8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381485162782:android:689de8063a3cc96749e90f",
+        "android_client_info": {
+          "package_name": "com.documentreader.manage.pdfreader.viewpdf.open"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgBRjvz7GUHsB5_j_crB4NAvkSzNg8yro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

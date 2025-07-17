@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:backgroundTint="@color/color_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_f8f8f8"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingVertical="@dimen/_6sdp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/_12sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icBack"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_24sdp"
+            android:padding="@dimen/_5sdp"
+            android:src="@drawable/ic_arrow_left"
+            tools:ignore="Suspicious0dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/_34sdp"
+            android:layout_weight="1"
+            android:fontFamily="@font/rb_500"
+            android:gravity="start"
+            android:includeFontPadding="false"
+            android:text="@string/settings"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_16sdp"/>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:backgroundTint="@color/white"
+        android:background="@drawable/bg_bottom_sheet"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:padding="@dimen/_12sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+            app:layout_constraintVertical_bias="0.0">
+
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/llLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/_6sdp"
+                app:bgColorAll="@color/color_fafafa"
+                app:cornerRadius="@dimen/_8sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:padding="@dimen/_5sdp"
+                    android:src="@drawable/ic_setting_lang" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/language"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_13sdp" />
+                <TextView
+                    android:id="@+id/langCurrent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:fontFamily="@font/rb_400"
+                    android:includeFontPadding="false"
+                    android:text="@string/language"
+                    android:textColor="#FF6F00"
+                    android:textSize="@dimen/_13sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/llShareApp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/_6sdp"
+                app:bgColorAll="@color/color_fafafa"
+                app:cornerRadius="@dimen/_8sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:padding="@dimen/_5sdp"
+                    android:src="@drawable/ic_setting_share" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/share_app"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_13sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/llRateApp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/_6sdp"
+                app:bgColorAll="@color/color_fafafa"
+                app:cornerRadius="@dimen/_8sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:padding="@dimen/_5sdp"
+                    android:src="@drawable/ic_setting_rate" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/rate_app"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_13sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/llPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/_6sdp"
+                app:bgColorAll="@color/color_fafafa"
+                app:cornerRadius="@dimen/_8sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:padding="@dimen/_5sdp"
+                    android:src="@drawable/ic_setting_policy" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/privacy_policy"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_13sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/llTeamOfService"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/_6sdp"
+                app:bgColorAll="@color/color_fafafa"
+                app:cornerRadius="@dimen/_8sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:padding="@dimen/_5sdp"
+                    android:src="@drawable/ic_setting_temservice" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/term_of_service"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_13sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
+
+
+
+
+

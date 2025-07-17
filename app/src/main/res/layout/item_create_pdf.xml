@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.dong.baselib.widget.layout.UiConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/_2sdp"
+    android:clipChildren="true"
+    app:cornerRadius="@dimen/_5sdp"
+    app:stColorDark="@color/transfer"
+    app:stColorLight="@color/transfer"
+    app:strokeWidth="@dimen/_1sdp">
+
+    <com.dong.baselib.widget.view.RoundImageView
+        android:id="@+id/viewData"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="1:1"
+        tools:src="@tools:sample/avatars" />
+
+    <com.dong.baselib.widget.layout.UiLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:bgColorAll="#33000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.dong.baselib.widget.view.RoundImageView
+        android:id="@+id/icDelete"
+        android:layout_width="@dimen/_24sdp"
+        android:layout_height="@dimen/_24sdp"
+        android:padding="@dimen/_2sdp"
+        app:tint="@color/white"
+        android:layout_margin="@dimen/_4sdp"
+        android:src="@drawable/ic_app_delete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.dong.baselib.widget.view.RoundImageView
+        android:id="@+id/icCrop"
+        android:layout_width="@dimen/_24sdp"
+        android:layout_height="@dimen/_24sdp"
+        android:padding="@dimen/_2sdp"
+        android:layout_margin="@dimen/_4sdp"
+        android:src="@drawable/ic_app_crop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <com.dong.baselib.widget.view.RoundImageView
+        android:id="@+id/icMove"
+        android:layout_width="@dimen/_24sdp"
+        android:layout_height="@dimen/_24sdp"
+        android:layout_margin="@dimen/_4sdp"
+        android:padding="@dimen/_2sdp"
+        android:src="@drawable/ic_app_move"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+</com.dong.baselib.widget.layout.UiConstraintLayout>

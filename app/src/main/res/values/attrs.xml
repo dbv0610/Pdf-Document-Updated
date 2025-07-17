@@ -1,12 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="IndicatorView">
-        <attr name="max_count" format="integer" />
-        <attr name="spacing" format="dimension" />
-        <attr name="radius" format="dimension" />
-        <attr name="active_color" format="color" />
-        <attr name="default_color" format="color" />
-        <attr name="active_count" format="integer" />
-        <attr name="scale_value" format="integer" />
+    <declare-styleable name="NavigationItem">
+        <attr name="navIcon" format="reference" />
+        <attr name="navText" format="string" />
+        <attr name="isActive" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="scv_CropImageView">
+        <attr name="scv_img_src" format="reference" />
+        <attr name="scv_crop_mode">
+            <enum name="fit_image" value="0" />
+            <enum name="ratio_4_3" value="1" />
+            <enum name="ratio_3_4" value="2" />
+            <enum name="square" value="3" />
+            <enum name="ratio_16_9" value="4" />
+            <enum name="ratio_9_16" value="5" />
+            <enum name="free" value="6" />
+            <enum name="custom" value="7" />
+            <enum name="circle" value="8" />
+            <enum name="circle_square" value="9" />
+        </attr>
+        <attr name="scv_background_color" format="reference|color" />
+        <attr name="scv_overlay_color" format="reference|color" />
+        <attr name="scv_frame_color" format="reference|color" />
+        <attr name="scv_handle_color" format="reference|color" />
+        <attr name="scv_guide_color" format="reference|color" />
+        <attr name="scv_guide_show_mode">
+            <enum name="show_always" value="1" />
+            <enum name="show_on_touch" value="2" />
+            <enum name="not_show" value="3" />
+        </attr>
+        <attr name="scv_handle_show_mode">
+            <enum name="show_always" value="1" />
+            <enum name="show_on_touch" value="2" />
+            <enum name="not_show" value="3" />
+        </attr>
+        <attr name="scv_handle_size" format="dimension" />
+        <attr name="scv_touch_padding" format="dimension" />
+        <attr name="scv_min_frame_size" format="dimension" />
+        <attr name="scv_frame_stroke_weight" format="dimension" />
+        <attr name="scv_guide_stroke_weight" format="dimension" />
+        <attr name="scv_crop_enabled" format="boolean" />
+        <attr name="scv_initial_frame_scale" format="float" />
+        <attr name="scv_animation_enabled" format="boolean" />
+        <attr name="scv_animation_duration" format="integer" />
+        <attr name="scv_handle_shadow_enabled" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="Ruler">
+        <attr name="min_unit_size" format="dimension" />
+        <attr name="max_unit_count" format="integer" />
+        <attr name="per_unit_count" format="integer" />
+        <attr name="unit_bmp_height" format="dimension" />
+        <attr name="ruler_mode" format="enum">
+            <enum name="ruler" value="0" />
+            <enum name="timeline" value="1" />
+        </attr>
+        <attr name="unit_visible" format="enum">
+            <enum name="max" value="0x1" />
+            <enum name="mid" value="0x2" />
+            <enum name="min" value="0x4" />
+        </attr>
+        <attr name="min_unit" format="float" />
+        <!-- 刻度的颜色 -->
+        <attr name="unit_color" format="color"/>
+        <!-- 标记的颜色 -->
+        <attr name="mark_color" format="color"/>
+    </declare-styleable>
+
+    <attr name="ruler_style" format="reference" />
+
+    <declare-styleable name="RulerDrawView">
+        <attr name="maxUnitCount"     format="integer"/>
+        <attr name="perUnitCount"     format="integer"/>
+        <attr name="maxTickHeight"    format="dimension"/>
+        <attr name="labelTextSize"    format="dimension"/>
+        <attr name="baselineColor"    format="color"/>
+        <attr name="tickColor"        format="color"/>
+        <attr name="labelColor"       format="color"/>
+    </declare-styleable>
+
+    <declare-styleable name="azcrop_AspectRatioTextView">
+
+        <attr name="azcrop_artv_ratio_title" format="string"/>
+        <attr name="azcrop_artv_enable_dot" format="boolean"/>
+        <attr name="azcrop_artv_ratio_x" format="float"/>
+        <attr name="azcrop_artv_ratio_y" format="float"/>
+
     </declare-styleable>
 </resources>

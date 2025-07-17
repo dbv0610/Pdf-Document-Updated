@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="@dimen/_12sdp"
-        android:paddingVertical="@dimen/_6sdp">
+        android:paddingBottom="@dimen/_8sdp"
+        android:paddingTop="@dimen/_12sdp">
 
         <TextView
             android:layout_width="0dp"
@@ -26,32 +27,6 @@
             android:text="@string/favorite"
             android:textColor="@color/white"
             android:textSize="@dimen/_16sdp" />
-
-        <com.dong.baselib.widget.layout.UiLinearLayout
-            android:id="@+id/btnCreate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingHorizontal="@dimen/_8sdp"
-            android:paddingVertical="@dimen/_4sdp"
-            app:cornerRadius="@dimen/_50sdp"
-            app:stColorAll="@color/white"
-            app:strokeWidth="1.2dp">
-
-            <ImageView
-                android:layout_width="@dimen/_16sdp"
-                android:layout_height="@dimen/_16sdp"
-                android:src="@drawable/ic_round_add"
-                app:tint="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/rb_600"
-                android:includeFontPadding="false"
-                android:text="@string/create"
-                android:textColor="@color/white" />
-        </com.dong.baselib.widget.layout.UiLinearLayout>
     </LinearLayout>
 
     <LinearLayout

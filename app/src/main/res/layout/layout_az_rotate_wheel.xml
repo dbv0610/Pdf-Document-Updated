@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rlRootView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:showIn="@layout/activity_crop_image"
+    tools:visibility="gone">
+
+    <com.yalantis.ucrop.view.widget.HorizontalProgressWheelView
+        android:id="@+id/rotate_scroll_wheel"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_66sdp"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_below="@id/rotate_scroll_wheel"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/wrapper_left_rotate"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="@dimen/_4sdp"
+            android:layout_width="@dimen/_70sdp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                style="@style/azcrop_ImageViewWidgetIcon"
+                android:src="@drawable/ic_rotate_left" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/azcrop_left"
+                android:textSize="@dimen/_9ssp"
+                android:textColor="@color/white"
+                android:layout_marginTop="@dimen/_6sdp"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/wrapper_right_rotate"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="@dimen/_4sdp"
+            android:layout_width="@dimen/_70sdp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                style="@style/azcrop_ImageViewWidgetIcon"
+                android:src="@drawable/ic_rotate_right" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/azcrop_right"
+                android:textSize="@dimen/_9ssp"
+                android:textColor="@color/white"
+                android:layout_marginTop="@dimen/_6sdp"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

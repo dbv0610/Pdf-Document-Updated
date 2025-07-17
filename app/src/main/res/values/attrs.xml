@@ -77,4 +77,13 @@
         <attr name="tickColor"        format="color"/>
         <attr name="labelColor"       format="color"/>
     </declare-styleable>
+
+    <declare-styleable name="azcrop_AspectRatioTextView">
+
+        <attr name="azcrop_artv_ratio_title" format="string"/>
+        <attr name="azcrop_artv_enable_dot" format="boolean"/>
+        <attr name="azcrop_artv_ratio_x" format="float"/>
+        <attr name="azcrop_artv_ratio_y" format="float"/>
+
+    </declare-styleable>
 </resources>

@@ -21,6 +21,12 @@ class Permission {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    fun arePermissionsGranted(vararg permissions: String): Boolean {
+        return permissions.all { perm ->
+            ContextCompat.checkSelfPermission(context, perm) ==
+                    PackageManager.PERMISSION_GRANTED
+        }
+    }
     fun checkPermission(vararg permissions: String): Boolean {
         return permissions.all { perm ->
             ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED

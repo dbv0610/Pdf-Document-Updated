@@ -61,7 +61,7 @@
                 android:id="@+id/icOpenTools"
                 android:layout_width="@dimen/_28sdp"
                 android:layout_height="@dimen/_28sdp"
-                android:padding="@dimen/_4sdp"
+                android:padding="@dimen/_6sdp"
                 android:src="@drawable/ic_office_menu"
                 app:tint="@color/white" />
         </LinearLayout>
@@ -97,12 +97,12 @@
                     android:layout_weight="1"
                     android:background="@color/transparent"
                     android:fontFamily="@font/rb_400"
-                    android:hint="@string/search"
+                    android:hint="@string/search_for_file"
                     android:imeOptions="actionSearch"
                     android:includeFontPadding="false"
                     android:inputType="text"
                     android:textColor="@color/white"
-                    android:textColorHint="#88FFFFFF"
+                    android:textColorHint="#FFFFFF"
                     android:textSize="@dimen/_12sdp" />
 
                 <ImageView
@@ -143,6 +143,7 @@
             android:id="@+id/rcvFrameData"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@color/color_bfbfbf"
             android:orientation="vertical"
             android:paddingVertical="@dimen/_6sdp"
             android:visibility="visible"
@@ -151,6 +152,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.2" />
+
+        <ProgressBar
+            android:id="@+id/progressLoad"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:indeterminateTint="@color/mainColor"
+            android:progressTint="@color/mainColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/rcvFrameData"
+            app:layout_constraintTop_toTopOf="@+id/rcvFrameData" />
 
         <com.dong.baselib.widget.view.UiTextView
             android:id="@+id/txtNumberPage"

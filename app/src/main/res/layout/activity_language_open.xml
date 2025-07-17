@@ -27,7 +27,7 @@
             android:includeFontPadding="false"
             android:text="@string/language"
             android:textColor="@color/black"
-            android:textSize="@dimen/_14sdp" />
+            android:textSize="@dimen/_16sdp" />
 
         <View
             android:layout_width="0dp"

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/_4sdp"
+    android:layout_margin="@dimen/_2sdp"
     app:cornerRadius="@dimen/_4sdp">
 
     <com.dong.baselib.widget.view.RoundImageView
@@ -28,14 +28,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/imgSelect"
-        android:layout_width="@dimen/_14sdp"
-        android:layout_height="@dimen/_14sdp"
+        android:layout_width="@dimen/_16sdp"
+        android:layout_height="@dimen/_16sdp"
         android:layout_margin="@dimen/_4sdp"
-        android:src="@drawable/ic_language_unselected"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:src="@drawable/ic_view_selectecd"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.dong.baselib.widget.layout.UiLinearLayout
         android:id="@+id/lnVideDetail"

@@ -58,10 +58,10 @@
             android:gravity="center"
             android:padding="@dimen/_10sdp"
             android:text="@string/cancels"
-            android:textColor="@color/mainColor"
+            android:textColor="@color/black"
             android:textSize="@dimen/_13sdp"
             app:cornerRadius="@dimen/_8sdp"
-            app:stColorAll="@color/mainColor"
+            app:stColorAll="@color/black"
             app:strokeWidth="@dimen/_1sdp" />
 
         <com.dong.baselib.widget.view.UiTextView

@@ -39,12 +39,20 @@
             android:textColor="@color/white"
             android:textSize="@dimen/_14sdp" />
 
-        <ImageView
-            app:tint="@color/white"
+        <com.dong.baselib.widget.view.UiTextView
+           app:bgColorAll="@color/white"
+            app:cornerRadius="@dimen/_18sdp"
+            android:paddingVertical="@dimen/_5sdp"
+            android:fontFamily="@font/rb_500"
+            android:textSize="@dimen/_12sdp"
+            android:includeFontPadding="false"
+            android:paddingHorizontal="@dimen/_8sdp"
+            android:textColor="@color/mainColor"
             android:id="@+id/selectLanguage"
-            android:layout_width="@dimen/_34sdp"
-            android:layout_height="@dimen/_34sdp"
-            android:padding="@dimen/_5sdp"
+            android:text="@string/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
             android:src="@drawable/ic_view_done" />
     </LinearLayout>
 

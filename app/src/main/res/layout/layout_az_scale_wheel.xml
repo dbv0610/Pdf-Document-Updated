@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/flRootView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    tools:showIn="@layout/activity_crop_image"
+    tools:visibility="visible">
+
+    <SeekBar
+        android:id="@+id/seekbar_view_scale"
+        android:layout_width="match_parent"
+        android:progress="50"
+        android:layout_gravity="center"
+        android:max="100"
+        android:maxHeight="@dimen/_2sdp"
+        android:thumb="@drawable/ic_thumb"
+        android:progressDrawable="@drawable/ic_custom_seekbar"
+        android:layout_height="wrap_content" />
+
+
+</FrameLayout>

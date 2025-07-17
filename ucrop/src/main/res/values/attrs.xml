@@ -1,0 +1,35 @@
+<resources>
+
+    <declare-styleable name="azcrop_CropView">
+
+        <!--Crop image view-->
+        <attr name="azcrop_aspect_ratio_x" format="float"/>
+        <attr name="azcrop_aspect_ratio_y" format="float"/>
+
+        <!--Overlay view-->
+        <attr name="azcrop_show_oval_crop_frame" format="boolean"/>
+        <attr name="azcrop_circle_dimmed_layer" format="boolean"/>
+        <attr name="azcrop_dimmed_color" format="color"/>
+
+        <attr name="azcrop_grid_stroke_size" format="dimension"/>
+        <attr name="azcrop_grid_color" format="color"/>
+        <attr name="azcrop_grid_row_count" format="integer"/>
+        <attr name="azcrop_grid_column_count" format="integer"/>
+        <attr name="azcrop_show_grid" format="boolean"/>
+
+        <attr name="azcrop_frame_stroke_size" format="dimension"/>
+        <attr name="azcrop_frame_color" format="color"/>
+        <attr name="azcrop_show_frame" format="boolean"/>
+
+    </declare-styleable>
+
+    <declare-styleable name="azcrop_AspectRatioTextView">
+
+        <attr name="azcrop_artv_ratio_title" format="string"/>
+        <attr name="azcrop_artv_enable_dot" format="boolean"/>
+        <attr name="azcrop_artv_ratio_x" format="float"/>
+        <attr name="azcrop_artv_ratio_y" format="float"/>
+
+    </declare-styleable>
+
+</resources>

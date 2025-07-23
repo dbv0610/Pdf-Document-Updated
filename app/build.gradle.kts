@@ -100,6 +100,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.config)
+    implementation(platform(libs.firebase.bom))
+
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.crashlytics)
     implementation(libs.androidx.navigation.fragment.ktx)
@@ -139,6 +141,14 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    implementation(libs.mediation.facebook)
+    implementation(libs.mediation.mintegral)
+    implementation(libs.mediation.pangle)
+    implementation(libs.play.app.update)
+    implementation(libs.play.services.ads)
+    implementation(libs.androidx.multidex)
+    implementation(libs.azmoduleads)
 
 
     implementation(libs.android.pdf.viewer)

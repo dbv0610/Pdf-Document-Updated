@@ -21,15 +21,14 @@ lottie = "6.6.7"
 review-ktx = "2.0.2"
 shimmer = "0.5.0"
 koin-android = "4.1.0"
-appUpdateKtx = "2.1.0"
-inappupdate = "1.1.0"
 sdpAndroid = "1.1.1"
 sspAndroid = "1.1.1"
-azmoduleads = "1.1.9"
+firebaseBom ="33.16.0"
 firebaseAnalytics = "22.5.0"
 firebaseConfig = "22.1.2"
 firebaseMessaging = "24.1.2"
 firebaseCrashlytics = "19.4.4"
+
 navigationFragmentKtx = "2.9.0"
 navigationUiKtx = "2.9.0"
 roomRuntime = "2.7.2"
@@ -40,6 +39,17 @@ rxjava = "3.1.10"
 exifinterface = "1.4.1"
 transition = "1.6.0"
 okhttp = "5.1.0"
+
+appUpdateKtx = "2.1.0"
+inappupdate = "1.1.0"
+azmoduleads = "1.2.1"
+appUpdateVersion ="2.1.0"
+mintegral = "16.9.71.0"
+facebook = "6.20.0.0"
+multidex = "2.0.1"
+pangle = "7.3.0.3.0"
+playServicesAds = "24.4.0"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,17 +73,20 @@ shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 ssp-android = { module = "com.intuit.ssp:ssp-android", version.ref = "sspAndroid" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 
-
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 inappupdate = { module = "com.azuraglobal:inappupdate", version.ref = "inappupdate" }
 app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdateKtx" }
 azmoduleads = { module = "com.azuraglobal:azmoduleads", version.ref = "azmoduleads" }
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billingKtx" }
+
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebaseConfig" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
@@ -95,6 +108,15 @@ androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraView" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraView" }
 rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
+
+
+
+mediation-facebook = { group = "com.google.ads.mediation", name = "facebook", version.ref = "facebook" }
+mediation-mintegral = { group = "com.google.ads.mediation", name = "mintegral", version.ref = "mintegral" }
+mediation-pangle = { group = "com.google.ads.mediation", name = "pangle", version.ref = "pangle" }
+play-app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdateVersion" }
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

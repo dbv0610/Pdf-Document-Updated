@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.azg.pdf8.BuildConfig
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -68,6 +69,6 @@ class AppPdfReader : Application() {
         })
     }
 }
-
-val sharedPreference get() = SharedPreference.Companion.getInstance()
-val remoteConfig get() = RemoteConfig.Companion.getInstance()
+val isAppDebug = BuildConfig.build_debug == true
+val sharedPreference get() = SharedPreference.getInstance()
+val remoteConfig get() = RemoteConfig.getInstance()

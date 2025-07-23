@@ -1,7 +1,6 @@
 package com.azg.pdf8.ui.language
 
 import com.azg.pdf8.R
-import com.azg.pdf8.app.avgWalkingSpeed
 import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.base.SystemUtil
 import com.azg.pdf8.databinding.ActivityLangApplyBinding

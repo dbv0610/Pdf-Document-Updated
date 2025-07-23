@@ -21,8 +21,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding::inflate) {
-    private val TIME_OUT = 30000L
-    private val TIME_DELAY = 3000L
+
     private var isNextAction = false
     private var isAcceptUmp = true
     override fun backPressed() {

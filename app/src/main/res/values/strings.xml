@@ -156,4 +156,6 @@
     <string name="request_permission_need_to_use_fun">Grant permission to use the application functions</string>
     <string name="search_for_file">Search for file</string>
     <string name="file_have_exit_file">File name have exit</string>
+    <string name="skip">Skip</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
 </resources>

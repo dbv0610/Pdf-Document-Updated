@@ -71,17 +71,6 @@ class SharedPreference(context: Context) {
         }
     }
 
-    fun getBoolean(key: String, default: Boolean = false): Boolean {
-        return sharedPreferences!!.getBoolean(key, default)
-    }
-
-    fun putBoolean(key: String, value: Boolean) {
-        edit {
-            onValueChange?.onPreferenceChanged(key)
-            putBoolean(key, value)
-        }
-    }
-
     fun getString(key: String, default: String? = ""): String? {
         return sharedPreferences?.getString(key, default)
     }
@@ -93,59 +82,43 @@ class SharedPreference(context: Context) {
         }
     }
 
-    fun getInt(key: String, default: Int = 0): Int {
-        return sharedPreferences!!.getInt(key, default)
-    }
+    inline fun <reified T> dataObject(
+        key: String,
+        default: T
+    ): ReadWriteProperty<Any?, T> {
+        val gson = Gson()
+        val type = object : TypeToken<T>() {}.type
 
-    fun putInt(key: String, value: Int) {
-        edit {
-            onValueChange?.onPreferenceChanged(key)
-            putInt(key, value)
-        }
-    }
+        return object : ReadWriteProperty<Any?, T> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+                val json = getString(key, default.toString())
+                if (json.isNullOrBlank()) {
+                    return default
+                }
+                val parsed: T? = runCatching {
+                    gson.fromJson<T>(json, type)
+                }.getOrNull()
+                return parsed ?: default
+            }
 
-    fun getFloat(key: String, default: Float = 0.0f): Float {
-        return sharedPreferences!!.getFloat(key, default)
-    }
-
-    fun getDouble(key: String, default: Double = 0.0): Double {
-        val longValue =
-            sharedPreferences!!.getLong(key, java.lang.Double.doubleToRawLongBits(default))
-        return java.lang.Double.longBitsToDouble(longValue)
-    }
-
-    fun putDouble(key: String, value: Double) {
-        edit {
-            onValueChange?.onPreferenceChanged(key)
-            putLong(key, java.lang.Double.doubleToRawLongBits(value))
-        }
-    }
-
-    fun putFloat(key: String, value: Float) {
-        edit {
-            onValueChange?.onPreferenceChanged(key)
-            putFloat(key, value)
-        }
-    }
-
-    fun getLong(key: String, default: Long = 0L): Long {
-        return sharedPreferences!!.getLong(key, default)
-    }
-
-    fun putLong(key: String, value: Long) {
-        edit {
-            putLong(key, value)
+            override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+                val json = gson.toJson(value, type)
+                putString(key, json)
+            }
         }
     }
 
     fun boolean(key: String, default: Boolean = false): ReadWriteProperty<Any?, Boolean> {
         return object : ReadWriteProperty<Any?, Boolean> {
             override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean {
-                return getBoolean(key, default)
+                return sharedPreferences?.getBoolean(key, default) ?: default
             }
 
             override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-                putBoolean(key, value)
+                edit {
+                    onValueChange?.onPreferenceChanged(key)
+                    putBoolean(key, value)
+                }
             }
         }
     }
@@ -153,11 +126,14 @@ class SharedPreference(context: Context) {
     fun string(key: String, default: String = ""): ReadWriteProperty<Any?, String> {
         return object : ReadWriteProperty<Any?, String> {
             override fun getValue(thisRef: Any?, property: KProperty<*>): String {
-                return getString(key, default).toString()
+                return sharedPreferences?.getString(key, default) ?: default
             }
 
             override fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
-                putString(key, value)
+                edit {
+                    onValueChange?.onPreferenceChanged(key)
+                    putString(key, value)
+                }
             }
         }
     }
@@ -165,11 +141,14 @@ class SharedPreference(context: Context) {
     fun int(key: String, default: Int = 0): ReadWriteProperty<Any?, Int> {
         return object : ReadWriteProperty<Any?, Int> {
             override fun getValue(thisRef: Any?, property: KProperty<*>): Int {
-                return getInt(key, default)
+                return sharedPreferences?.getInt(key, default) ?: default
             }
 
             override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
-                putInt(key, value)
+                edit {
+                    onValueChange?.onPreferenceChanged(key)
+                    putInt(key, value)
+                }
             }
         }
     }
@@ -194,6 +173,37 @@ class SharedPreference(context: Context) {
         }
     }
     @Suppress("UNCHECKED_CAST")
+    fun float(key: String, default: Float = 0f): ReadWriteProperty<Any?, Float> =
+        object : ReadWriteProperty<Any?, Float> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) =
+                sharedPreferences.getFloat(key, default) ?: default
+
+            override fun setValue(thisRef: Any?, property: KProperty<*>, value: Float) = edit {
+                onValueChange?.onPreferenceChanged(key)
+                putLong(key, java.lang.Double.doubleToRawLongBits(value.toDouble()))
+            }
+        }
+
+    fun long(key: String, default: Long = 0L): ReadWriteProperty<Any?, Long> =
+        object : ReadWriteProperty<Any?, Long> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) =
+                sharedPreferences.getLong(key, default) ?: default
+
+            override fun setValue(thisRef: Any?, property: KProperty<*>, value: Long) = edit {
+                onValueChange?.onPreferenceChanged(key)
+                putLong(key, value)
+            }
+        }
+
+    fun double(key: String, default: Double = 0.0): ReadWriteProperty<Any?, Double> =
+        object : ReadWriteProperty<Any?, Double> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = sharedPreferences!!.getString(key, default.toString())?.toDoubleOrNull() ?:0.0
+
+            override fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) = edit {
+                onValueChange?.onPreferenceChanged(key)
+                putString(key, value.toString())
+            }
+        }
     private fun <T> getValueFor(key: String, default: T): T = when (default) {
         is String -> sharedPreferences.getString(key, default)!!
         is Int -> sharedPreferences.getInt(key, default)
@@ -234,7 +244,6 @@ class SharedPreference(context: Context) {
             getValueFor(key, default)
 
         override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
-
             sharedPreferences.edit().apply {
                 when (value) {
                     is String -> putString(key, value)
@@ -260,28 +269,6 @@ class SharedPreference(context: Context) {
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
         awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
     }.distinctUntilChanged()
-
-    fun float(key: String, default: Float = 0f): ReadWriteProperty<Any?, Float> =
-        object : ReadWriteProperty<Any?, Float> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = getFloat(key, default)
-            override fun setValue(thisRef: Any?, property: KProperty<*>, value: Float) =
-                putFloat(key, value)
-        }
-
-    fun long(key: String, default: Long = 0L): ReadWriteProperty<Any?, Long> =
-        object : ReadWriteProperty<Any?, Long> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = getLong(key, default)
-            override fun setValue(thisRef: Any?, property: KProperty<*>, value: Long) =
-                putLong(key, value)
-        }
-
-    fun double(key: String, default: Double = 0.0): ReadWriteProperty<Any?, Double> =
-        object : ReadWriteProperty<Any?, Double> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = getDouble(key, default)
-            override fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) =
-                putDouble(key, value)
-        }
-
     fun clear() {
         edit {
             clear()

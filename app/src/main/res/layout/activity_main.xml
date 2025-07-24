@@ -10,16 +10,22 @@
     tools:context=".ui.main.MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mainContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/mainContainer"
-        android:background="@color/transparent"
         android:layout_marginBottom="-4dp"
+        android:background="@color/transparent"
         app:layout_constraintBottom_toTopOf="@+id/navigationBar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.azg.pdf8.widget.NavigationBar
         android:id="@+id/navigationBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/bannerAdView" />
+
+    <com.azg.pdf8.widget.BannerAdView
+        android:id="@+id/bannerAdView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />

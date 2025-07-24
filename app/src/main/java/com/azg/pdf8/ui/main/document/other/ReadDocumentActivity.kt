@@ -24,6 +24,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadFileBinding
@@ -130,6 +132,9 @@ class ReadDocumentActivity :
             }
         )
         listDataSlideShow.value = mutableListOf()
+        binding.bannerAdView
+            .setBannerPlacement(this@ReadDocumentActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
     }
 
     fun EditText.onActionSearch(actionSuccess: (query: String) -> Unit, actionFail: () -> Unit) {
@@ -269,6 +274,21 @@ class ReadDocumentActivity :
                 else
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+                if (!isInternetAvailable()) {
+                    binding.bannerAdView.gone()
+                }
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                binding.bannerAdView.gone()
+            }
+            else -> Unit
         }
     }
 

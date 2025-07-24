@@ -6,6 +6,7 @@ import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
+import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.firebase.Analytics
 import com.azg.pdf8.ui.feature.FeatureActivity
 import com.azg.pdf8.ui.feature.FeatureScreenType
@@ -44,6 +45,15 @@ class Language1Activity : LanguageOpenActivity() {
                     2,
                     true
                 )
+            } else {
+                if (!BaseActivity.isGrantPermission) {
+                    NativeAdPreloadManager.preloadAd(
+                        this@Language1Activity,
+                        NativePlacement.PERMISSION,
+                        1,
+                        false
+                    )
+                }
             }
         }
 

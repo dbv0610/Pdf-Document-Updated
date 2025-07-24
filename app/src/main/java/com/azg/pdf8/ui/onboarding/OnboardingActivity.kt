@@ -9,11 +9,13 @@ import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.app.isFinishFirstFlow
 import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.databinding.ActivityOnboardingBinding
 import com.azg.pdf8.ui.feature.FeatureActivity
 import com.azg.pdf8.ui.feature.FeatureScreenType
+import com.azg.pdf8.ui.main.MainActivity
 import com.dong.baselib.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +68,6 @@ class OnboardingActivity :
         4 to { !isShowNativeFullScreen1() && !isShowNativeFullScreen2() && remoteConfig.OnboardingConfig.isEnableScreen4 },
         5 to { remoteConfig.OnboardingConfig.isEnableScreen4 }
     )
-    // Adapter
     private val adapter by lazy { OnboardingViewPagerAdapter(this, listFragment) }
 
     override fun initialize() = Unit
@@ -122,9 +123,10 @@ class OnboardingActivity :
                 isForce = true
             )
         } else if (position == listFragment.lastIndex && !viewModel.isPreloadNativeFeature) {
-            
-            viewModel.isPreloadNativeFeature = true
-            NativeAdPreloadManager.preloadAd(this, NativePlacement.FEATURE, buffer = 2, false)
+            if (remoteConfig.WellComeEnable) {
+                viewModel.isPreloadNativeFeature = true
+                NativeAdPreloadManager.preloadAd(this, NativePlacement.FEATURE, buffer = 2, false)
+            }
         }
         val idx = position.coerceIn(0, titles.lastIndex)
         binding.tvTitle.text = getString(titles[idx])
@@ -134,7 +136,12 @@ class OnboardingActivity :
     fun nextPage() {
         val current = binding.viewPager.currentItem
         if (current == listFragment.lastIndex) {
-            FeatureActivity.start(this@OnboardingActivity, FeatureScreenType.Feature1)
+            if (remoteConfig.WellComeEnable) {
+                FeatureActivity.start(this@OnboardingActivity, FeatureScreenType.Feature1)
+            } else {
+                launchActivity<MainActivity>()
+                isFinishFirstFlow = true
+            }
             finish()
         } else {
             binding.viewPager.setCurrentItem(current + 1, false)

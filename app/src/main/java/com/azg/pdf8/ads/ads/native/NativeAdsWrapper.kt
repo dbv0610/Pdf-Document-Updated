@@ -323,7 +323,7 @@ enum class NativePlacement(
         layoutMeta = { LayoutSelector.getMetaLayout(isFullScreen = true) },
     ),
 
-    FEATURE_PROFILE(
+    FEATURE(
         listId = {
             remoteConfig.N109Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },

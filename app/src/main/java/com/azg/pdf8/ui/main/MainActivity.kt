@@ -11,8 +11,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.az.inappupdate.AppUpdate
 import com.az.inappupdate.AppUpdateManager
+import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.database.RecentDao
 import com.azg.pdf8.databinding.ActivityMainBinding
@@ -30,10 +32,6 @@ import org.koin.android.ext.android.inject
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate, true) {
     override fun backPressed() {
         quitActivity.show()
-    }
-
-    companion object {
-        var isGrantPermission = false
     }
 
     val documentViewModel: DocumentViewModel by inject()
@@ -59,17 +57,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         backPressed()
     }
 
-    fun isStorageAccess(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            permission.arePermissionsGranted(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-        }
-    }
-
     private val storagePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val readGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
@@ -84,11 +71,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     override fun initialize() {
         addFragment(DocumentFragment(), binding.mainContainer.id, false)
         documentViewModel.loadDocuments(this@MainActivity)
-        val isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             isStorageAccess()
         } else permission.checkGrantedStorage_24_33
         if (!isGrantPermission) {
-            DialogPermission(this@MainActivity).onAllowAccess {
+            DialogPermission(this@MainActivity).attachActivity(this@MainActivity).onAllowAccess {
                 requestStoragePermission()
             }.show()
         }
@@ -147,13 +134,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     override fun onResume() {
         super.onResume()
-        isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            isStorageAccess()
-        } else permission.checkGrantedStorage_24_33
         if (isGrantPermission) {
             lifecycleScope.launch {
                 documentViewModel.loadDocuments(this@MainActivity)
             }
+        } else {
+            NativeAdPreloadManager.preloadAd(
+                this@MainActivity,
+                NativePlacement.PERMISSION,
+                1,
+                false
+            )
         }
     }
 

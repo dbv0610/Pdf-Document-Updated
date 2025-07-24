@@ -62,10 +62,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
                 android:fontFamily="@font/rb_600"
                 android:includeFontPadding="false"
                 android:text="@string/create"
-                android:layout_marginStart="@dimen/_4sdp"
                 android:textColor="@color/white" />
         </com.dong.baselib.widget.layout.UiLinearLayout>
 
@@ -104,8 +104,8 @@
                 android:background="@color/transfer"
                 android:fontFamily="@font/rb_400"
                 android:hint="@string/search"
-                android:inputType="text"
                 android:imeOptions="actionSearch"
+                android:inputType="text"
                 android:paddingHorizontal="@dimen/_12sdp"
                 android:paddingVertical="@dimen/_8sdp"
                 android:textColor="@color/black"
@@ -124,13 +124,12 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_marginTop="@dimen/_8sdp"
             android:layout_height="0dp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_weight="1"
             tools:ignore="NestedWeights">
 
             <LinearLayout
-                android:visibility="gone"
                 android:id="@+id/lnNoData"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -138,6 +137,7 @@
                 android:layout_marginHorizontal="@dimen/_18sdp"
                 android:gravity="center"
                 android:orientation="vertical"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -161,17 +161,32 @@
                     android:textSize="@dimen/_12sdp" />
             </LinearLayout>
 
+            <FrameLayout
+                android:id="@+id/flNativeAd"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include
+                    android:id="@+id/shimmerNativeAd"
+                    layout="@layout/layout_native_shimer_small_cta_right"
+                    android:visibility="visible" />
+            </FrameLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcvListData"
+                android:layout_marginTop="@dimen/_4sdp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/_8sdp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/flNativeAd"
                 tools:ignore="NestedWeights"
-                tools:layout_editor_absoluteY="10dp"
                 tools:listitem="@layout/item_document_view" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>

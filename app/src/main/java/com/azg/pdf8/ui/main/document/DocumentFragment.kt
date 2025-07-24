@@ -6,8 +6,11 @@ import android.os.Build
 import android.os.Environment
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.base.BaseFragment
 import com.azg.pdf8.databinding.FragmentDocumentBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
@@ -48,6 +51,7 @@ class DocumentFragment :
     private val createDialog by lazy {
         DialogCreatePdf(this@DocumentFragment.appActivity, object : CreateEventHandle {
             override fun createImage() {
+                NativeAdPreloadManager.preloadAd(appActivity, NativePlacement.PERMISSION,2,false)
                 launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
             }
 
@@ -59,7 +63,7 @@ class DocumentFragment :
                 }
 
             }
-        })
+        }).attachActivity(appActivity)
     }
 
     override fun backPress() {
@@ -91,7 +95,6 @@ class DocumentFragment :
                     )
                 )
             }
-
             documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(viewLifecycleOwner)
     }
@@ -172,10 +175,10 @@ class DocumentFragment :
 
     override fun FragmentDocumentBinding.onClick() {
         btnCreate.click {
-            if (MainActivity.isGrantPermission) {
+            if (BaseActivity.isGrantPermission) {
                 createDialog.show()
             } else {
-                DialogPermission(appActivity).onAllowAccess {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
                     fragmentAttach?.fragmentAction("requestPermission")
                 }.show()
             }
@@ -184,10 +187,10 @@ class DocumentFragment :
             launchActivity<PdfActivity>()
         }
         tvShowAll.click {
-            if (MainActivity.isGrantPermission) {
+            if (BaseActivity.isGrantPermission) {
                 launchActivity<RecentActivity>()
             } else {
-                DialogPermission(appActivity).onAllowAccess {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
                     fragmentAttach?.fragmentAction("requestPermission")
                 }.show()
             }

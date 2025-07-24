@@ -1,19 +1,20 @@
 package com.azg.pdf8.ads.ads.native
 
+import android.app.Activity
 import android.content.res.ColorStateList
-import android.graphics.Color
+import android.graphics.PorterDuff
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.LinearLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.toColorInt
-import androidx.core.view.ViewCompat
-import androidx.core.view.children
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ads.control.ads.AzAdCallback
@@ -33,8 +34,8 @@ import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.ads.model.type.LayoutNativeType
 import com.azg.pdf8.app.remoteConfig
-import com.dong.baselib.widget.red
 import com.facebook.shimmer.ShimmerFrameLayout
+import com.google.android.gms.ads.nativead.NativeAdView
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.lang.ref.WeakReference
@@ -105,6 +106,104 @@ class NativeAdsWrapper(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    fun setupNativeAd(tag: String? = null, layoutId: Int, block: NativeAdView.() -> Unit = {}) {
+        nativeAdHelper.apply {
+            setNativeContentView(adContainer.invoke())
+            setShimmerLayoutView(shimmerView.invoke())
+            tag?.let { setTagForDebug(it) }
+            activityRef.get()?.let { activity ->
+                setCustomContentView { nativeAd ->
+                    nativeAd.layoutCustomNative = layoutId
+                    populateNativeAdView(
+                        activity,
+                        nativeAd,
+                        layoutId,
+                        adContainer(),
+                        shimmerView(), AzAds.getInstance().mediationProvider, block
+                    )
+                }
+            }
+        }
+    }
+
+    private fun populateUnifiedNativeAdView(
+        nativeAd: com.google.android.gms.ads.nativead.NativeAd,
+        adView: NativeAdView, block: NativeAdView.() -> Unit = {}
+    ) {
+        adView.mediaView = adView.findViewById(R.id.ad_media)
+        adView.headlineView = adView.findViewById(R.id.ad_headline)
+        adView.bodyView = adView.findViewById(R.id.ad_body)
+        adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
+        adView.iconView = adView.findViewById(R.id.ad_app_icon)
+        (adView.headlineView as TextView).text = nativeAd.headline
+        nativeAd.body?.let {
+            (adView.bodyView as TextView).apply {
+                visibility = View.VISIBLE
+                text = it
+            }
+        } ?: run { adView.bodyView?.visibility = View.GONE }
+
+        nativeAd.callToAction?.let {
+            (adView.callToActionView as Button).apply {
+                visibility = View.VISIBLE
+                text = it
+            }
+        } ?: run { adView.callToActionView?.visibility = View.GONE }
+
+        nativeAd.icon?.let {
+            (adView.iconView as ImageView).apply {
+                visibility = View.VISIBLE
+                setImageDrawable(it.drawable)
+            }
+        } ?: run { adView.iconView?.visibility = View.GONE }
+        adView.setNativeAd(nativeAd)
+        adView.block()
+    }
+
+    private fun populateNativeAdView(
+        activity: Activity,
+        apNativeAd: ApNativeAd,
+        layoutId: Int,
+        adPlaceHolder: FrameLayout,
+        containerShimmerLoading: ShimmerFrameLayout,
+        mediationProvider: Int, block: NativeAdView.() -> Unit = {}
+    ) {
+        if (apNativeAd.admobNativeAd == null && apNativeAd.nativeView == null) {
+            containerShimmerLoading.visibility = View.GONE
+            Log.e("AzAds", "populateNativeAdView failed: native ad is not loaded")
+            return
+        }
+        containerShimmerLoading.stopShimmer()
+        containerShimmerLoading.visibility = View.GONE
+        when (mediationProvider) {
+            0 -> {
+                val adView = LayoutInflater.from(activity)
+                    .inflate(layoutId, adPlaceHolder, false) as NativeAdView
+                apNativeAd.admobNativeAd?.let { admobAd ->
+                    populateUnifiedNativeAdView(
+                        admobAd,
+                        adView,
+                    ) { block() }
+                }
+                adPlaceHolder.removeAllViews()
+                adPlaceHolder.visibility = View.VISIBLE
+                adPlaceHolder.addView(adView)
+            }
+            1 -> {
+                adPlaceHolder.removeAllViews()
+                adPlaceHolder.visibility = View.VISIBLE
+                apNativeAd.nativeView?.parent
+                    .let { parent -> (parent as? ViewGroup)?.removeAllViews() }
+                apNativeAd.nativeView?.let { view ->
+                    adPlaceHolder.addView(view)
+                }
+            }
+            else -> {
+                Log.w("AzAds", "Unknown mediation provider: $mediationProvider")
             }
         }
     }
@@ -358,7 +457,7 @@ enum class NativePlacement(
     /**
      * Helper object for layout selection with memory-efficient caching
      */
-    private object LayoutSelector {
+    object LayoutSelector {
         private var cachedFullScreenLayout: Int = 0
         private var cachedCommonLayout: Int = 0
         /**

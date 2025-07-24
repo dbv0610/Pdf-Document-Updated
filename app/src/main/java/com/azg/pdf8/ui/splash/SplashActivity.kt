@@ -20,17 +20,12 @@ import com.azg.pdf8.app.isFinishFirstFlow
 import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
+import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivitySplashBinding
 import com.azg.pdf8.firebase.Analytics
-import com.azg.pdf8.ui.language.LanguageOpenActivity
-import com.azg.pdf8.ui.language.LanguageScreenType
 import com.azg.pdf8.ui.language.LanguageWaitingActivity
 import com.azg.pdf8.ui.main.MainActivity
-import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.permission.Permission
-import com.dong.baselib.widget.delay
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -38,17 +33,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import kotlin.getValue
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding::inflate),
     AdSplashCompleteListener {
     override fun backPressed() = Unit
-
-    private val permission: Permission by inject()
     override fun initialize() = Unit
 
     override fun ActivitySplashBinding.onClick() = Unit
@@ -116,8 +105,21 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
             adSplashManager?.loadAds()
             observeAds()
             if (!isFinishFirstFlow) {
-                NativeAdPreloadManager.preloadAd(this, NativePlacement.LANGUAGE_1,2, isForce = true)
+                NativeAdPreloadManager.preloadAd(
+                    this,
+                    NativePlacement.LANGUAGE_1,
+                    2,
+                    isForce = true
+                )
             } else {
+                if (!isGrantPermission) {
+                    NativeAdPreloadManager.preloadAd(
+                        this@SplashActivity,
+                        NativePlacement.PERMISSION,
+                        1,
+                        false
+                    )
+                }
             }
         } else {
             InterstitialAdManager.isCloseInterSplash.postValue(true)

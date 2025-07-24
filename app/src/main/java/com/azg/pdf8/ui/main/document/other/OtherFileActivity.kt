@@ -1,8 +1,15 @@
 package com.azg.pdf8.ui.main.document.other
 
+import android.content.res.ColorStateList
+import android.graphics.PorterDuff
+import android.widget.Button
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
+import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityOtherBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
@@ -14,6 +21,7 @@ import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.docColor
+import com.azg.pdf8.widget.pdfColor
 import com.azg.pdf8.widget.pptColor
 import com.azg.pdf8.widget.xlsColor
 import com.dong.baselib.base.PopupDataHelper
@@ -24,6 +32,7 @@ import com.dong.baselib.widget.afterTextChanged
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
+import com.wxiwei.office.java.awt.Color
 import org.koin.android.ext.android.inject
 import java.io.File
 
@@ -57,6 +66,37 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
     var documentType = DocumentType.Doc
     var docKey = Constant.Doc
     var popupHerper: PopupDataHelper<PopupMenuActionBinding, RecentDocument>? = null
+    val nativeAdsWrapper by lazy {
+        NativeAdsWrapper(
+            activity = this@OtherFileActivity,
+            config = NativePlacement.NATIVE_DOC.apply {
+                NativePlacement.LayoutSelector.getLayout(
+                    remoteConfig.N110Config1.layout
+                )
+            },
+            lifecycleOwner = this,
+            adContainer = { binding.flNativeAd },
+            shimmerView = { binding.shimmerNativeAd.shimmerContainerNative }
+        )
+    }
+
+    fun requestAds(color: Int) {
+        with(nativeAdsWrapper) {
+            setupNativeAd(
+                "native_choose_image", NativePlacement.LayoutSelector.getLayout(
+                    remoteConfig.N110Config2.layout
+                )
+            ) {
+                (callToActionView as? Button)?.let { btn ->
+                    val wrapped = DrawableCompat.wrap(btn.background.mutate())
+                    DrawableCompat.setTintList(wrapped, ColorStateList.valueOf(color))
+                    DrawableCompat.setTintMode(wrapped, PorterDuff.Mode.SRC_IN)
+                    btn.background = wrapped
+                }
+            }
+            requestAds()
+        }
+    }
 
     override fun initialize() {
         docKey = getData<String>(Constant.DOCUMENT_TYPE).toString()
@@ -111,6 +151,13 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                 }.show()
             }
         }
+        requestAds(
+            when (documentType) {
+                DocumentType.Doc -> docColor
+                DocumentType.Excel -> xlsColor
+                else -> pptColor
+            }
+        )
     }
 
     override fun ActivityOtherBinding.setData() {

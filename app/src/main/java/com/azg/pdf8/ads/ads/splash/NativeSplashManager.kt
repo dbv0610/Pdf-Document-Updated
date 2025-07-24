@@ -6,7 +6,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.remoteConfig
-import com.azg.pdf8.databinding.ActivitySplashBinding
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -47,7 +46,7 @@ class NativeSplashManager(
     }
 
     fun loadNative() {
-        if (remoteConfig.N101Config1.enable) {
+        if (remoteConfig.n101Config1.enable) {
             shimmerFrameLayout.visible()
             nativeAdsWrapper.apply {
                 setupNativeAd(TAG)

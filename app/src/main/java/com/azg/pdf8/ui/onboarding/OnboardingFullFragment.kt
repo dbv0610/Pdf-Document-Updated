@@ -39,8 +39,8 @@ class OnboardingFullFragment :
         runCatching { arguments?.getInt(ARG_POSITION) }.getOrNull() ?: 0
     }
     private val nativeFullConfig by lazy {
-        if (position == 0) remoteConfig.N107Config2
-        else remoteConfig.N108Config2
+        if (position == 0) remoteConfig.n107Config2
+        else remoteConfig.n108Config2
     }
     private var nativeAdsWrapper: NativeAdsWrapper? = null
 
@@ -65,9 +65,7 @@ class OnboardingFullFragment :
             }, onImpression = ::initListener)
             requestAds()
         }
-        if (nativeFullConfig.timeDelaySkip != 0L) {
-            countDownSkip()
-        }
+        countDownSkip()
     }
 
     override fun FragmentOnboardingFullBinding.onClick() = Unit

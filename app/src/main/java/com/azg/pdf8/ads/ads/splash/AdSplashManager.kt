@@ -127,14 +127,14 @@ class AdSplashManager(
     }
 
     fun loadAds() {
-        if (remoteConfig.I101Config.enable
+        if (remoteConfig.i101Config.enable
             && remoteConfig.isAdEnable
             && activity.isInternetAvailable()
             && !AppPurchase.getInstance().isPurchased
         ) {
             isTimeOut = false
             startLoadAdsTimeout()
-            splashAdList = remoteConfig.I101Config.listAds.toMutableList()
+            splashAdList = remoteConfig.i101Config.listAds.toMutableList()
             loadNextAdSplash(true)
         } else {
             splashType = null
@@ -325,7 +325,7 @@ class AdSplashManager(
     private fun startLoadAdsTimeout() {
         timeoutJob?.cancel()
         timeoutJob = activity.lifecycleScope.launch {
-            delay(remoteConfig.I101Config.totalTimeout)
+            delay(remoteConfig.i101Config.totalTimeout)
             if (isActive) handleTimeOut()
         }
     }

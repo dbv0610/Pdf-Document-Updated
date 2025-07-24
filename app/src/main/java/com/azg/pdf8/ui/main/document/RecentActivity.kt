@@ -2,17 +2,12 @@ package com.azg.pdf8.ui.main.document
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
-import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.remoteConfig
@@ -29,6 +24,7 @@ import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.pdfColor
+import com.azg.pdf8.widget.setBackgroundTintCompat
 import com.dong.baselib.base.PopupDataHelper
 import com.dong.baselib.file.shareFileWithPath
 import com.dong.baselib.lifecycle.lifecycleLaunch
@@ -87,18 +83,13 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
     fun requestAds() {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_choose_image", NativePlacement.LayoutSelector.getLayout(
-                    remoteConfig.N110Config2.layout
+                "native_recent_file", LayoutSelector.getLayout(
+                    remoteConfig.n110Config2.layout
                 )
             ) {
-                (callToActionView as? Button)?.let { btn ->
-                    val wrapped = DrawableCompat.wrap(btn.background.mutate())
-                    DrawableCompat.setTintList(wrapped, ColorStateList.valueOf(pdfColor))
-                    DrawableCompat.setTintMode(wrapped, PorterDuff.Mode.SRC_IN)
-                    btn.background = wrapped
-                }
+                (callToActionView as? Button)?.setBackgroundTintCompat(pdfColor)
             }
-            requestAdsFragment()
+            requestAds()
         }
     }
 

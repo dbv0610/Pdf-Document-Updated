@@ -29,7 +29,7 @@ class DialogCreatePdf(context: Context, val eventHandle: CreateEventHandle) :
             dismiss()
         }
     }
-    val isSmallNative = remoteConfig.N110Config1.layout.contains("small")
+    val isSmallNative = remoteConfig.n110Config1.layout.contains("small")
     fun attachActivity(activity: AppCompatActivity): DialogCreatePdf {
         val nativeAdsWrapper by lazy {
             NativeAdsWrapper(

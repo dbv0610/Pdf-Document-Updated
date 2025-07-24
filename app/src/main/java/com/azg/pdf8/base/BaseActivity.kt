@@ -29,11 +29,6 @@ abstract class BaseActivity<VB : ViewBinding>(
     private var fullStatus: Boolean = false,
 ) : BaseActivity<VB>(bindingFactory, fullStatus) {
     val permission by inject<Permission>()
-
-    companion object {
-        var isGrantPermission = false
-    }
-
     var requestCameraLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -99,9 +94,8 @@ abstract class BaseActivity<VB : ViewBinding>(
         return super.dispatchTouchEvent(ev)
     }
 
-    override fun onResume() {
-        super.onResume()
-        isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+   protected fun isGrantedPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             isStorageAccess()
         } else permission.checkGrantedStorage_24_33
     }

@@ -6,15 +6,10 @@ import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
-import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.firebase.Analytics
-import com.azg.pdf8.ui.feature.FeatureActivity
-import com.azg.pdf8.ui.feature.FeatureScreenType
-import com.azg.pdf8.ui.main.MainActivity
-import com.azg.pdf8.ui.onboarding.OnboardingActivity
 
 class Language1Activity : LanguageOpenActivity() {
-    val isSmallNative = remoteConfig.N103Config1.layout.contains("small")
+    val isSmallNative = remoteConfig.n103Config1.layout.contains("small")
     private val nativeAdsWrapper by lazy {
         NativeAdsWrapper(
             activity = this,
@@ -30,7 +25,7 @@ class Language1Activity : LanguageOpenActivity() {
         if (isUfo()) {
             Analytics.track("ufo_language")
         }
-        if (remoteConfig.OnboardingEnable) {
+        if (remoteConfig.onboardingEnable) {
             NativeAdPreloadManager.preloadAd(
                 this,
                 NativePlacement.ONBOARDING,
@@ -38,7 +33,7 @@ class Language1Activity : LanguageOpenActivity() {
                 true
             )
         } else {
-            if (remoteConfig.WellComeEnable) {
+            if (remoteConfig.wellComeEnable) {
                 NativeAdPreloadManager.preloadAd(
                     this,
                     NativePlacement.FEATURE,
@@ -46,12 +41,12 @@ class Language1Activity : LanguageOpenActivity() {
                     true
                 )
             } else {
-                if (!BaseActivity.isGrantPermission) {
+                if (isGrantedPermission()) {
                     NativeAdPreloadManager.preloadAd(
                         this@Language1Activity,
                         NativePlacement.PERMISSION,
                         1,
-                        false
+                        true
                     )
                 }
             }
@@ -65,10 +60,10 @@ class Language1Activity : LanguageOpenActivity() {
 
     private fun isSizeEnableNativeOnb(): Int {
         return listOf(
-            remoteConfig.OnboardingConfig.isEnableScreen1,
-            remoteConfig.OnboardingConfig.isEnableScreen2,
-            remoteConfig.OnboardingConfig.isEnableScreen3,
-            remoteConfig.OnboardingConfig.isEnableScreen4,
+            remoteConfig.onboardingConfig.isEnableScreen1,
+            remoteConfig.onboardingConfig.isEnableScreen2,
+            remoteConfig.onboardingConfig.isEnableScreen3,
+            remoteConfig.onboardingConfig.isEnableScreen4,
         ).count { it }
     }
 }

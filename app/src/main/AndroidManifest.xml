@@ -103,7 +103,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".s"
+            android:name=".ui.splash.NativeSplashActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />

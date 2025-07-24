@@ -1,7 +1,6 @@
 package com.azg.pdf8.ui.language
 
 import android.os.Bundle
-import android.view.View
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.isUfo
@@ -10,7 +9,7 @@ import com.azg.pdf8.databinding.ActivityLanguageOpenBinding
 import com.azg.pdf8.firebase.Analytics
 
 class Language2Activity : LanguageOpenActivity() {
-    val isSmallNative = remoteConfig.N104Config1.layout.contains("small")
+    val isSmallNative = remoteConfig.n104Config1.layout.contains("small")
     private val nativeAdsWrapper by lazy {
         NativeAdsWrapper(
             activity = this,

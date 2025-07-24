@@ -5,7 +5,7 @@ import android.content.Intent
 import com.azg.pdf8.R
 import com.azg.pdf8.app.isFinishFirstFlow
 import com.azg.pdf8.app.toastShort
-import com.dong.baselib.base.BaseActivity
+import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityFeatureBinding
 import com.azg.pdf8.ui.main.MainActivity
 import com.azg.pdf8.widget.color_86909c
@@ -62,7 +62,6 @@ abstract class FeatureActivity :
     }
 
     override fun ActivityFeatureBinding.onClick() = Unit
-
     override fun backPressed() {
         finishAffinity()
     }

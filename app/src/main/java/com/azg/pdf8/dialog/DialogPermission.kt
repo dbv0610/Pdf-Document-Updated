@@ -1,15 +1,11 @@
 package com.azg.pdf8.dialog
 
 import android.content.Context
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
-import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.databinding.DialogGrantPermissionBinding
-import com.azg.pdf8.firebase.Analytics
-import com.azg.pdf8.ui.main.MainActivity
 import com.dong.baselib.base.BaseDialog
 import com.dong.baselib.widget.click
 
@@ -21,7 +17,7 @@ class DialogPermission(context: Context) :
         return this@DialogPermission
     }
 
-    val isSmallNative = remoteConfig.N110Config1.layout.contains("small")
+    val isSmallNative = remoteConfig.n110Config1.layout.contains("small")
     fun attachActivity(activity: AppCompatActivity): DialogPermission {
         val nativeAdsWrapper by lazy {
             NativeAdsWrapper(

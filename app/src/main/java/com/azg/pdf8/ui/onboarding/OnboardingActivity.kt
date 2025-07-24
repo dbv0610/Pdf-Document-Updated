@@ -24,7 +24,7 @@ import org.koin.android.ext.android.inject
 class OnboardingActivity :
     BaseActivity<ActivityOnboardingBinding>(ActivityOnboardingBinding::inflate, true) {
     private val viewModel: OnboardingViewModel by inject()
-    private val isSmallNative get() = remoteConfig.N104Config1.layout.contains("small")
+    private val isSmallNative get() = remoteConfig.n104Config1.layout.contains("small")
     private val nativeAdsWrapper by lazy {
         NativeAdsWrapper(
             activity = this,
@@ -58,15 +58,15 @@ class OnboardingActivity :
         R.string.content_onboarding_4
     )
     private val showAdConfig: Map<Int, () -> Boolean> = mapOf(
-        0 to { remoteConfig.OnboardingConfig.isEnableScreen1 },
-        1 to { remoteConfig.OnboardingConfig.isEnableScreen2 },
-        2 to { !isShowNativeFullScreen1() && remoteConfig.OnboardingConfig.isEnableScreen3 },
+        0 to { remoteConfig.onboardingConfig.isEnableScreen1 },
+        1 to { remoteConfig.onboardingConfig.isEnableScreen2 },
+        2 to { !isShowNativeFullScreen1() && remoteConfig.onboardingConfig.isEnableScreen3 },
         3 to {
-            if (isShowNativeFullScreen1()) remoteConfig.OnboardingConfig.isEnableScreen3
-            else !isShowNativeFullScreen2() && remoteConfig.OnboardingConfig.isEnableScreen4
+            if (isShowNativeFullScreen1()) remoteConfig.onboardingConfig.isEnableScreen3
+            else !isShowNativeFullScreen2() && remoteConfig.onboardingConfig.isEnableScreen4
         },
-        4 to { !isShowNativeFullScreen1() && !isShowNativeFullScreen2() && remoteConfig.OnboardingConfig.isEnableScreen4 },
-        5 to { remoteConfig.OnboardingConfig.isEnableScreen4 }
+        4 to { !isShowNativeFullScreen1() && !isShowNativeFullScreen2() && remoteConfig.onboardingConfig.isEnableScreen4 },
+        5 to { remoteConfig.onboardingConfig.isEnableScreen4 }
     )
     private val adapter by lazy { OnboardingViewPagerAdapter(this, listFragment) }
 
@@ -123,7 +123,7 @@ class OnboardingActivity :
                 isForce = true
             )
         } else if (position == listFragment.lastIndex && !viewModel.isPreloadNativeFeature) {
-            if (remoteConfig.WellComeEnable) {
+            if (remoteConfig.wellComeEnable) {
                 viewModel.isPreloadNativeFeature = true
                 NativeAdPreloadManager.preloadAd(this, NativePlacement.FEATURE, buffer = 2, false)
             }
@@ -136,7 +136,7 @@ class OnboardingActivity :
     fun nextPage() {
         val current = binding.viewPager.currentItem
         if (current == listFragment.lastIndex) {
-            if (remoteConfig.WellComeEnable) {
+            if (remoteConfig.wellComeEnable) {
                 FeatureActivity.start(this@OnboardingActivity, FeatureScreenType.Feature1)
             } else {
                 launchActivity<MainActivity>()
@@ -170,7 +170,7 @@ class OnboardingActivity :
             && isInternetAvailable()
             && !AppPurchase.getInstance().isPurchased
 
-    private fun isShowNativeFullScreen2() = remoteConfig.N108Config1.enable
+    private fun isShowNativeFullScreen2() = remoteConfig.n108Config1.enable
             && remoteConfig.isAdEnable
             && isInternetAvailable()
             && !AppPurchase.getInstance().isPurchased

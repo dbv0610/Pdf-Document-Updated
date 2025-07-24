@@ -47,7 +47,6 @@ import org.koin.androidx.viewmodel.ext.android.activityViewModel
 class DocumentFragment :
     BaseFragment<FragmentDocumentBinding>(FragmentDocumentBinding::inflate, true) {
     val documentViewModel: DocumentViewModel by activityViewModel()
-    val permission: Permission by inject()
     private val createDialog by lazy {
         DialogCreatePdf(this@DocumentFragment.appActivity, object : CreateEventHandle {
             override fun createImage() {
@@ -165,17 +164,9 @@ class DocumentFragment :
         binding.lnNoPer.isVisible = !isGrantPermission
     }
 
-    fun isStorageAccess(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            permission.checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-    }
-
     override fun FragmentDocumentBinding.onClick() {
         btnCreate.click {
-            if (BaseActivity.isGrantPermission) {
+            if (isStorageAccess()) {
                 createDialog.show()
             } else {
                 DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
@@ -187,7 +178,7 @@ class DocumentFragment :
             launchActivity<PdfActivity>()
         }
         tvShowAll.click {
-            if (BaseActivity.isGrantPermission) {
+            if (isStorageAccess()) {
                 launchActivity<RecentActivity>()
             } else {
                 DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {

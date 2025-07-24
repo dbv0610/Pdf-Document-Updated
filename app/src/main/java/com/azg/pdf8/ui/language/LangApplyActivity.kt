@@ -73,10 +73,10 @@ class LangApplyActivity :
                     this@LangApplyActivity,
                     LanguageOpenActivity.currentLang.value?.code ?: "en"
                 )
-                if(remoteConfig.OnboardingEnable){
+                if(remoteConfig.onboardingEnable){
                     launchActivity<OnboardingActivity>()
                 } else {
-                    if(remoteConfig.WellComeEnable){
+                    if(remoteConfig.wellComeEnable){
                         FeatureActivity.start(this@LangApplyActivity, FeatureScreenType.Feature1)
                     } else {
                         launchActivity<MainActivity>()

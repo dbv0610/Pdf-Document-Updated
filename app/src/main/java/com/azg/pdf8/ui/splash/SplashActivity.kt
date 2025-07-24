@@ -25,14 +25,12 @@ import com.azg.pdf8.databinding.ActivitySplashBinding
 import com.azg.pdf8.firebase.Analytics
 import com.azg.pdf8.ui.language.LanguageWaitingActivity
 import com.azg.pdf8.ui.main.MainActivity
-import com.dong.baselib.permission.Permission
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.koin.android.ext.android.inject
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding::inflate),
@@ -67,7 +65,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
         nativeSplashManager = NativeSplashManager(
             this,
             binding.flNativeAd,
-            if (remoteConfig.N101Config1.layout.contains("small"))
+            if (remoteConfig.n101Config1.layout.contains("small"))
                 binding.shimmerAdSmall.shimmerContainerNative
             else binding.shimmerAdMedium.shimmerContainerNative,
             this@SplashActivity
@@ -85,7 +83,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
     private suspend fun initAds() {
         InterstitialAdManager.resetInterAllConfig()
         val manager = AppOpenManager.getInstance()
-        remoteConfig.A001Config
+        remoteConfig.a001Config
             .takeIf { it.enable && isEnableAds() }
             ?.listAds
             ?.let { ads ->
@@ -112,7 +110,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
                     isForce = true
                 )
             } else {
-                if (!isGrantPermission) {
+                if (!isGrantedPermission()) {
                     NativeAdPreloadManager.preloadAd(
                         this@SplashActivity,
                         NativePlacement.PERMISSION,
@@ -173,7 +171,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
     private fun handleWaitingAdSplash() {
         jobAdSplash?.cancel()
         jobAdSplash = lifecycleScope.launch {
-            kotlinx.coroutines.delay(remoteConfig.TimeOutSplash.waitingMs)
+            kotlinx.coroutines.delay(remoteConfig.timeOutSplash.waitingMs)
             adSplashManager?.showCurrentAd()
             jobNativeSplash?.cancel()
         }
@@ -182,7 +180,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
     private fun handleDelayAdNative() {
         jobNativeSplash?.cancel()
         jobNativeSplash = lifecycleScope.launch {
-            kotlinx.coroutines.delay(remoteConfig.TimeOutSplash.delayMs)
+            kotlinx.coroutines.delay(remoteConfig.timeOutSplash.delayMs)
             isFinishAdNative = true
             if (isFinishAdSplash) {
                 adSplashManager?.showCurrentAd()
@@ -198,7 +196,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
             isFirstResume = false
             return
         }
-        if (remoteConfig.N101Config1.enable && isEnableAds()) {
+        if (remoteConfig.n101Config1.enable && isEnableAds()) {
             if (isFinishAdSplash && isFinishAdNative) {
                 adSplashManager?.onCheckShowAdsWhenFail()
             }
@@ -226,8 +224,8 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
 
     private fun setupInAppUpdate() {
         AppUpdateManager.getInstance(this@SplashActivity).setupUpdate(
-            remoteConfig.InAppUpdate,
-            remoteConfig.TimesShowUpdate,
+            remoteConfig.inAppUpdate,
+            remoteConfig.timesShowUpdate,
         )
     }
 }

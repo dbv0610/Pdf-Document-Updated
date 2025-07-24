@@ -20,7 +20,7 @@ import kotlinx.coroutines.tasks.await
 import kotlin.jvm.java
 
 class RemoteConfig(
-    private val sharedPreference: SharedPreference
+    sharedPreference: SharedPreference
 ) {
     companion object {
         @Volatile
@@ -50,47 +50,47 @@ class RemoteConfig(
         "timeNotiLockReminder",
         listOf(3, 8, 13, 18, 23)
     )
-    var A001Config by sharedPreference.dataObject<AppOpenConfig>(
+    var a001Config by sharedPreference.dataObject<AppOpenConfig>(
         "A101_config",
         AppOpenConfig.defaultAll
     )
         private set
-    var B100Config by sharedPreference.dataObject<AdBannerConfig>(
+    var b100Config by sharedPreference.dataObject<AdBannerConfig>(
         "B100_config",
         AdBannerConfig.defaultAll
     )
         private set
-    var I101Config by sharedPreference.dataObject<AdSplashConfig>(
+    var i101Config by sharedPreference.dataObject<AdSplashConfig>(
         "I101_config",
         AdSplashConfig.defaultSplash
     )
         private set
-    var I102Config by sharedPreference.dataObject<AdInterConfig>(
+    var i102Config by sharedPreference.dataObject<AdInterConfig>(
         "I102_config",
         AdInterConfig.I102_InterHome
     )
         private set
-    var N101Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n101Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N101_config_1",
         AdNativeConfig.N101_Config1
     )
         private set
-    var N103Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n103Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N103_config_1",
         AdNativeConfig.N103_Config1
     )
         private set
-    var N104Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n104Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N104_config_1",
         AdNativeConfig.N104_Config1
     )
         private set
-    var N105Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n105Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N105_config_1",
         AdNativeConfig.N105_Config1
     )
         private set
-    var OnboardingConfig by sharedPreference.dataObject<OnboardingScreen>(
+    var onboardingConfig by sharedPreference.dataObject<OnboardingScreen>(
         "onboarding_config",
         OnboardingScreen.defaultConfig
     )
@@ -100,41 +100,41 @@ class RemoteConfig(
         AdNativeConfig.N107_Config1
     )
         private set
-    var N107Config2 by sharedPreference.dataObject<NativeFullConfig>(
+    var n107Config2 by sharedPreference.dataObject<NativeFullConfig>(
         "N107_config_2",
         NativeFullConfig.defaultFull1()
     )
         private set
-    var N108Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n108Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N108_config_1",
         AdNativeConfig.N108_Config1
     )
         private set
-    var N108Config2 by sharedPreference.dataObject<NativeFullConfig>(
+    var n108Config2 by sharedPreference.dataObject<NativeFullConfig>(
         "N108_config_2",
         NativeFullConfig.defaultFull2()
     )
         private set
-    var N109Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n109Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N109_config_1",
         AdNativeConfig.N109_Config1
     )
         private set
-    var N110Config1 by sharedPreference.dataObject<AdNativeConfig>(
+    var n110Config1 by sharedPreference.dataObject<AdNativeConfig>(
         "N110_config_1",
         AdNativeConfig.N110_Config1
     )
         private set
-    var N110Config2 by sharedPreference.dataObject<AdNativeConfig>(
+    var n110Config2 by sharedPreference.dataObject<AdNativeConfig>(
         "N110_config_2",
         AdNativeConfig.N110_Config2
     )
         private set
-    var InAppUpdate by sharedPreference.string("update_app", "off_pop_up_update")
-    var TimesShowUpdate by sharedPreference.int("update_app_times", 3)
-    var WellComeEnable by sharedPreference.boolean("onboarding_enable", true)
-    var OnboardingEnable by sharedPreference.boolean("onboarding_enable", true)
-    var TimeOutSplash by sharedPreference.dataObject("splash_timeout", SplashTimeout.defaultTimeout)
+    var inAppUpdate by sharedPreference.string("update_app", "off_pop_up_update")
+    var timesShowUpdate by sharedPreference.int("update_app_times", 3)
+    var wellComeEnable by sharedPreference.boolean("onboarding_enable", true)
+    var onboardingEnable by sharedPreference.boolean("onboarding_enable", true)
+    var timeOutSplash by sharedPreference.dataObject("splash_timeout", SplashTimeout.defaultTimeout)
 
     inline fun <reified T> listFromCsv(
         value: String,
@@ -161,77 +161,77 @@ class RemoteConfig(
     }
 
     fun syncRemote(remoteConfig: FirebaseRemoteConfig) {
-        InAppUpdate = remoteConfig.getString("update_app")
-        TimesShowUpdate = remoteConfig.getLong("update_app_times").toInt()
+        inAppUpdate = remoteConfig.getString("update_app")
+        timesShowUpdate = remoteConfig.getLong("update_app_times").toInt()
         isAdEnable = remoteConfig.getBoolean("ad_enable")
 
         rattingConfig = listFromCsv(
             remoteConfig.getString("ratting_config")
         ) { it.toIntOrNull() }
             .ifEmpty { listOf(1, 2, 3, 4, 5) }
-        A001Config = getAndApply<AppOpenConfig>(
+        a001Config = getAndApply<AppOpenConfig>(
             remoteConfig.getString("A101_config"),
             AppOpenConfig.defaultAll
         ) {
             enable = enable && isAdEnable
         }
-        A001Config = getAndApply(
+        a001Config = getAndApply(
             remoteConfig.getString("A101_config"),
             AppOpenConfig.defaultAll
         ) {
             enable = enable && isAdEnable
         }
 
-        B100Config = getAndApply(
+        b100Config = getAndApply(
             remoteConfig.getString("B100_config"),
             AdBannerConfig.defaultAll
         ) {
             enable = enable && isAdEnable
         }
 
-        I101Config = getAndApply(
+        i101Config = getAndApply(
             remoteConfig.getString("I101_config"),
             AdSplashConfig.defaultSplash
         ) {
             enable = enable && isAdEnable
         }
 
-        I102Config = getAndApply(
+        i102Config = getAndApply(
             remoteConfig.getString("I102_config"),
             AdInterConfig.I102_InterHome
         ) {
             enable = enable && isAdEnable
         }
 
-        N101Config1 = getAndApply(
+        n101Config1 = getAndApply(
             remoteConfig.getString("N101_config_1"),
             AdNativeConfig.N101_Config1
         ) {
             enable = enable && isAdEnable
         }
 
-        N103Config1 = getAndApply(
+        n103Config1 = getAndApply(
             remoteConfig.getString("N103_config_1"),
             AdNativeConfig.N103_Config1
         ) {
             enable = enable && isAdEnable
         }
 
-        N104Config1 = getAndApply(
+        n104Config1 = getAndApply(
             remoteConfig.getString("N104_config_1"),
             AdNativeConfig.N104_Config1
         ) {
             enable = enable && isAdEnable
         }
 
-        N105Config1 = getAndApply(
+        n105Config1 = getAndApply(
             remoteConfig.getString("N105_config_1"),
             AdNativeConfig.N105_Config1
         ) {
             enable = enable && isAdEnable
         }
 
-        OnboardingConfig = getAndApply(
+        onboardingConfig = getAndApply(
             remoteConfig.getString("onboarding_config"),
             OnboardingScreen.defaultConfig
         )
@@ -243,45 +243,45 @@ class RemoteConfig(
             enable = enable && isAdEnable
         }
 
-        N107Config2 = getAndApply(
+        n107Config2 = getAndApply(
             remoteConfig.getString("N107_config_2"),
             NativeFullConfig.defaultFull1()
         )
 
-        N108Config1 = getAndApply(
+        n108Config1 = getAndApply(
             remoteConfig.getString("N108_config_1"),
             AdNativeConfig.N108_Config1
         ) {
             enable = enable && isAdEnable
         }
 
-        N108Config2 = getAndApply(
+        n108Config2 = getAndApply(
             remoteConfig.getString("N108_config_2"),
             NativeFullConfig.defaultFull2()
         )
 
-        N109Config1 = getAndApply(
+        n109Config1 = getAndApply(
             remoteConfig.getString("N109_config_1"),
             AdNativeConfig.N109_Config1
         ) {
             enable = enable && isAdEnable
         }
-        N110Config1 = getAndApply(
+        n110Config1 = getAndApply(
             remoteConfig.getString("N110_config_1"),
             AdNativeConfig.N110_Config1
         ) {
             enable = enable && isAdEnable
         }
 
-        N110Config2 = getAndApply(
+        n110Config2 = getAndApply(
             remoteConfig.getString("N110_config_2"),
             AdNativeConfig.N110_Config2
         ) {
             enable = enable && isAdEnable
         }
-        WellComeEnable = remoteConfig.getBoolean("onboarding_enable")
-        OnboardingEnable = remoteConfig.getBoolean("onboarding_enable")
-        TimeOutSplash =
+        wellComeEnable = remoteConfig.getBoolean("onboarding_enable")
+        onboardingEnable = remoteConfig.getBoolean("onboarding_enable")
+        timeOutSplash =
             getAndApply(remoteConfig.getString("splash_timeout"), SplashTimeout.defaultTimeout)
     }
 

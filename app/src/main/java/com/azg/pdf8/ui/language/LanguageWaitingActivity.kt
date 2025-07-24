@@ -2,8 +2,6 @@ package com.azg.pdf8.ui.language
 
 import android.content.res.Resources
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.lifecycleScope
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
@@ -58,7 +56,7 @@ class LanguageWaitingActivity :
         }
     }
 
-    val isSmallNative = remoteConfig.N103Config1.layout.contains("small")
+    val isSmallNative = remoteConfig.n103Config1.layout.contains("small")
     private val nativeAdsWrapper by lazy {
         NativeAdsWrapper(
             activity = this,

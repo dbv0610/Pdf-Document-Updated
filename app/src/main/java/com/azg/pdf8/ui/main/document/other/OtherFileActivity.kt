@@ -7,6 +7,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.remoteConfig
@@ -23,6 +24,7 @@ import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.docColor
 import com.azg.pdf8.widget.pdfColor
 import com.azg.pdf8.widget.pptColor
+import com.azg.pdf8.widget.setBackgroundTintCompat
 import com.azg.pdf8.widget.xlsColor
 import com.dong.baselib.base.PopupDataHelper
 import com.dong.baselib.file.shareFileWithPath
@@ -32,7 +34,6 @@ import com.dong.baselib.widget.afterTextChanged
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
-import com.wxiwei.office.java.awt.Color
 import org.koin.android.ext.android.inject
 import java.io.File
 
@@ -69,11 +70,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
     val nativeAdsWrapper by lazy {
         NativeAdsWrapper(
             activity = this@OtherFileActivity,
-            config = NativePlacement.NATIVE_DOC.apply {
-                NativePlacement.LayoutSelector.getLayout(
-                    remoteConfig.N110Config1.layout
-                )
-            },
+            config = NativePlacement.NATIVE_DOC,
             lifecycleOwner = this,
             adContainer = { binding.flNativeAd },
             shimmerView = { binding.shimmerNativeAd.shimmerContainerNative }
@@ -83,16 +80,11 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
     fun requestAds(color: Int) {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_choose_image", NativePlacement.LayoutSelector.getLayout(
-                    remoteConfig.N110Config2.layout
+                "native_choose_image", LayoutSelector.getLayout(
+                    remoteConfig.n110Config2.layout
                 )
             ) {
-                (callToActionView as? Button)?.let { btn ->
-                    val wrapped = DrawableCompat.wrap(btn.background.mutate())
-                    DrawableCompat.setTintList(wrapped, ColorStateList.valueOf(color))
-                    DrawableCompat.setTintMode(wrapped, PorterDuff.Mode.SRC_IN)
-                    btn.background = wrapped
-                }
+                (callToActionView as? Button)?.setBackgroundTintCompat(color)
             }
             requestAds()
         }

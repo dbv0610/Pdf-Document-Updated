@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.ads.control.admob.AppOpenManager
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.az.inappupdate.AppUpdate
 import com.az.inappupdate.AppUpdateManager
@@ -61,20 +62,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val readGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
             val writeGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true
-            isGrantPermission = readGranted && writeGranted
+
         }
     private val manageStorageLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            isGrantPermission = isStorageAccess()
         }
     @SuppressLint("SetTextI18n")
     override fun initialize() {
         addFragment(DocumentFragment(), binding.mainContainer.id, false)
         documentViewModel.loadDocuments(this@MainActivity)
-        isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            isStorageAccess()
-        } else permission.checkGrantedStorage_24_33
-        if (!isGrantPermission) {
+        if (!isGrantedPermission()) {
             DialogPermission(this@MainActivity).attachActivity(this@MainActivity).onAllowAccess {
                 requestStoragePermission()
             }.show()
@@ -134,7 +131,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     override fun onResume() {
         super.onResume()
-        if (isGrantPermission) {
+        if (isGrantedPermission()) {
             lifecycleScope.launch {
                 documentViewModel.loadDocuments(this@MainActivity)
             }
@@ -149,11 +146,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
 
     private fun enableAdsResume() {
-//        AppOpenManager.getInstance().enableAppResume()
+        AppOpenManager.getInstance().enableAppResume()
     }
 
     private fun disableAdsResume() {
-//        AppOpenManager.getInstance().disableAppResume()
+        AppOpenManager.getInstance().disableAppResume()
     }
 
     private var isCheckedUpdate = false

@@ -3,6 +3,7 @@ package com.azg.pdf8.ui.main.create;
 import android.content.Intent
 import android.os.Parcelable
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -11,7 +12,11 @@ import com.azg.pdf8.R;
 import com.azg.pdf8.adapter.FolderGalleryAdapter
 import com.azg.pdf8.adapter.PhotoGalleryAdapter
 import com.azg.pdf8.adapter.ViewActionHandle
+import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
+import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.databinding.ActivityChooseImageBinding
+import com.azg.pdf8.dialog.DialogCreatePdf
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.utils.ScanState
@@ -36,6 +41,7 @@ class ChooseImageActivity :
     private var screenAction = ""
     private var photoAdapter: PhotoGalleryAdapter? = null
     val viewModel: ScanImageViewModel by inject()
+    private var isFirstRequest = false
     val adapter by lazy {
         FolderGalleryAdapter {
             viewModel.setCurrentPhotoModel(it)
@@ -43,12 +49,26 @@ class ChooseImageActivity :
             binding.folderName.text = it.folderName
         }
     }
+    val isSmallNative = remoteConfig.N110Config1.layout.contains("small")
+    val nativeAdsWrapper by lazy {
+        NativeAdsWrapper(
+            activity = this@ChooseImageActivity,
+            config = NativePlacement.PERMISSION,
+            lifecycleOwner = this,
+            adContainer = { binding.flNativeAd },
+            shimmerView = { if (isSmallNative) binding.shimmerAdSmall.shimmerContainerNative else binding.shimmerAdMedium.shimmerContainerNative }
+        )
+    }
 
     override fun initialize() {
         screenAction = getData<String>(Constant.KEY_ACTION).toString()
         photoAdapter = PhotoGalleryAdapter(object : ViewActionHandle {
             override fun onSelect(recentDocument: RecentDocument) {
                 super.onSelect(recentDocument)
+                if (!isFirstRequest) {
+                    requestAds()
+                    isFirstRequest = true
+                }
                 viewModel.modifyItemSelect(recentDocument)
             }
         })
@@ -57,6 +77,14 @@ class ChooseImageActivity :
                 binding.icCheckSelect.isVisible = it.isNotEmpty()
                 photoAdapter?.checkStateSelect(it.toMutableList())
             }
+        }
+        requestAds()
+    }
+
+    fun requestAds() {
+        with(nativeAdsWrapper) {
+            setupNativeAd("native_choose_image")
+            requestAds()
         }
     }
 

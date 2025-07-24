@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 
 data class AdSplashConfig(
     @SerializedName("enable")
-    val enable: Boolean,
+    var enable: Boolean,
     @SerializedName("total_timeout_ms")
     val totalTimeout: Long,
     @SerializedName("list_ads")
@@ -21,7 +21,7 @@ data class AdSplashConfig(
                     enableAd = true,
                     type = SplashType.Inter.type,
                     timeout = 30000,
-                    adUnit = if(isAppDebug) "ca-app-pub-3940256099942544/1033173712"  else "ca-app-pub-6745384043882937/4077233343"
+                    adUnit = if(isAppDebug) "ca-app-pub-3940256099942544/1033173712"  else "ca-app-pub-5417263955398589/4720225003"
                 ),
             )
         )

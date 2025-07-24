@@ -333,35 +333,26 @@ enum class NativePlacement(
         },
         layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N109Config1.layout) },
     ),
-    NATIVE_HOME(
-        listId = {
-            remoteConfig.N120Config1.listAds.filter { it.enableAd }.map { it.adUnit }
-        },
-        canShowAds = { remoteConfig.N120Config1.enable && remoteConfig.isAdEnable },
-        preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N120Config1.layout)
-        },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N120Config1.layout) },
-    ),
-    NATIVE_ALL(
-        listId = {
-            remoteConfig.N121Config1.listAds.filter { it.enableAd }.map { it.adUnit }
-        },
-        canShowAds = { remoteConfig.N121Config1.enable && remoteConfig.isAdEnable },
-        preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N121Config1.layout)
-        },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N121Config1.layout) },
-    ),
+
     PERMISSION(
         listId = {
-            remoteConfig.N122Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.N110Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N122Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.N110Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N122Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.N110Config1.layout)
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N121Config1.layout) },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N110Config1.layout) },
+    ),
+    NATIVE_DOC(
+        listId = {
+            remoteConfig.N110Config2.listAds.filter { it.enableAd }.map { it.adUnit }
+        },
+        canShowAds = { remoteConfig.N110Config2.enable && remoteConfig.isAdEnable },
+        preloadLayoutId = {
+            LayoutSelector.getLayout(remoteConfig.N110Config2.layout)
+        },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N110Config2.layout) },
     ),
     ;
     /**

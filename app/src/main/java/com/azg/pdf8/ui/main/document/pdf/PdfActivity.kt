@@ -1,14 +1,17 @@
 package com.azg.pdf8.ui.main.document.pdf
 
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityPdfBinding

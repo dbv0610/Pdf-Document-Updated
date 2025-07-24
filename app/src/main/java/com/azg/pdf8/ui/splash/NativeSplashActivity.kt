@@ -1,7 +1,6 @@
 package com.azg.pdf8.ui.splash
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.view.View
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
@@ -87,7 +86,7 @@ class NativeSplashActivity :
     }
 
     private fun navigateToNextScreen() {
-        setResult(Activity.RESULT_OK)
+        setResult(RESULT_OK)
         finish()
     }
 

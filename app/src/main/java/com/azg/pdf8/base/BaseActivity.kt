@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -28,8 +29,11 @@ abstract class BaseActivity<VB : ViewBinding>(
     private var fullStatus: Boolean = false,
 ) : BaseActivity<VB>(bindingFactory, fullStatus) {
     val permission by inject<Permission>()
-    private var yDown = 0f
-    private var isMove = false
+
+    companion object {
+        var isGrantPermission = false
+    }
+
     var requestCameraLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -71,29 +75,15 @@ abstract class BaseActivity<VB : ViewBinding>(
         intent.setData(uri)
         startActivity(intent)
     }
-    @SuppressLint("ClickableViewAccessibility")
-    fun hideKeyboardScrollView(scrollView: NestedScrollView, action: (() -> Unit)? = {}) {
-        scrollView.setOnTouchListener { _, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    yDown = motionEvent.y
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (!isMove) {
-                        hideKeyboard()
-                        action?.invoke()
-                    }
-                    isMove = false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val yMove = motionEvent.y
-                    val distY: Float = yMove - yDown
-                    if (abs(distY) >= 10) {
-                        isMove = true
-                    }
-                }
-            }
-            false
+
+    fun isStorageAccess(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            permission.arePermissionsGranted(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
         }
     }
 
@@ -108,47 +98,11 @@ abstract class BaseActivity<VB : ViewBinding>(
         }
         return super.dispatchTouchEvent(ev)
     }
-    @SuppressLint("ClickableViewAccessibility")
-    fun hideKeyboardByView(scrollView: View, action: (() -> Unit)? = {}) {
-        scrollView.setOnTouchListener { _, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    yDown = motionEvent.y
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (!isMove) {
-                        hideKeyboard()
-                        action?.invoke()
-                    }
-                    isMove = false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val yMove = motionEvent.y
-                    val distY: Float = yMove - yDown
-                    if (abs(distY) >= 10) {
-                        isMove = true
-                    }
-                }
-            }
-            false
-        }
-    }
 
-    fun scrollKeyboardShow() {
-        binding.root.post {
-            binding.root.viewTreeObserver.addOnGlobalLayoutListener {
-                val rect = Rect()
-                binding.root.getWindowVisibleDisplayFrame(rect)
-                val screenHeight = binding.root.rootView.height
-                val keypadHeight = screenHeight - rect.bottom
-                val isKeyboardVisible = keypadHeight > screenHeight * 0.15
-                binding.root.setPadding(
-                    binding.root.paddingLeft,
-                    binding.root.paddingTop,
-                    binding.root.paddingRight,
-                    if (isKeyboardVisible) keypadHeight else 12
-                )
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        isGrantPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            isStorageAccess()
+        } else permission.checkGrantedStorage_24_33
     }
 }

@@ -7,6 +7,10 @@ import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.firebase.Analytics
+import com.azg.pdf8.ui.feature.FeatureActivity
+import com.azg.pdf8.ui.feature.FeatureScreenType
+import com.azg.pdf8.ui.main.MainActivity
+import com.azg.pdf8.ui.onboarding.OnboardingActivity
 
 class Language1Activity : LanguageOpenActivity() {
     val isSmallNative = remoteConfig.N103Config1.layout.contains("small")
@@ -25,12 +29,24 @@ class Language1Activity : LanguageOpenActivity() {
         if (isUfo()) {
             Analytics.track("ufo_language")
         }
-        NativeAdPreloadManager.preloadAd(
-            this,
-            NativePlacement.ONBOARDING,
-            isSizeEnableNativeOnb(),
-            true
-        )
+        if (remoteConfig.OnboardingEnable) {
+            NativeAdPreloadManager.preloadAd(
+                this,
+                NativePlacement.ONBOARDING,
+                isSizeEnableNativeOnb(),
+                true
+            )
+        } else {
+            if (remoteConfig.WellComeEnable) {
+                NativeAdPreloadManager.preloadAd(
+                    this,
+                    NativePlacement.FEATURE,
+                    2,
+                    true
+                )
+            }
+        }
+
         with(nativeAdsWrapper) {
             setupNativeAd("native_language_1")
             requestAds()

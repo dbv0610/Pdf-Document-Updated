@@ -13,16 +13,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:overScrollMode="never" >
-
-
-    </androidx.viewpager2.widget.ViewPager2>
+        android:overScrollMode="never"></androidx.viewpager2.widget.ViewPager2>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/llTabLayout"
         android:layout_width="match_parent"
-        android:paddingTop="@dimen/_12sdp"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:paddingTop="@dimen/_12sdp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
@@ -52,13 +50,13 @@
             android:lines="2"
             android:textColor="@color/color_86909c"
             android:textSize="@dimen/_11sdp"
-            app:layout_constraintBottom_toTopOf="@id/llTabLayout"
+            app:layout_constraintBottom_toTopOf="@id/llTabContent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="@tools:sample/lorem" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/llTabLayout"
+            android:id="@+id/llTabContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/_3sdp"
@@ -98,11 +96,18 @@
         <FrameLayout
             android:id="@+id/flNativeAd"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="5:3"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <include
+                android:id="@+id/shimmerAdSmall"
+                layout="@layout/layout_native_shimmer_small"
+                android:visibility="invisible" />
+
+            <include
+                android:id="@+id/shimmerAdMedium"
+                layout="@layout/layout_native_shimmer_medium"
+                android:visibility="visible" />
+        </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

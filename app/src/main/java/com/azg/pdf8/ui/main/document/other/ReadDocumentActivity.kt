@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
 import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
@@ -233,7 +234,9 @@ class ReadDocumentActivity :
                                     viewModel.addToRecent(document.apply {
                                         lastTimeView = System.currentTimeMillis()
                                     })
-                                    launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                    InterstitialAdManager.showInterAll(this@ReadDocumentActivity) {
+                                        launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                    }
                                     finish()
                                 }
 

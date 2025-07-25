@@ -7,6 +7,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
@@ -55,13 +56,15 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
             popupHerper?.show(view, doc)
             currentPos = pos
         }) {
-            launchActivity<ReadDocumentActivity>(
-                hashMapOf(
-                    Constant.DOCUMENT_TYPE to docKey,
-                    Constant.ARG_MEDIA_MODEL to it
-                )
-            )
             viewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
+            InterstitialAdManager.showInterAll(this@OtherFileActivity) {
+                launchActivity<ReadDocumentActivity>(
+                    hashMapOf(
+                        Constant.DOCUMENT_TYPE to docKey,
+                        Constant.ARG_MEDIA_MODEL to it
+                    )
+                )
+            }
         }.attachLifecycle(this@OtherFileActivity)
     }
     var documentType = DocumentType.Doc

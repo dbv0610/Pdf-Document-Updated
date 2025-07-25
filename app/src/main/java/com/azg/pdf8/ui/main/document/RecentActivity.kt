@@ -7,6 +7,7 @@ import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
@@ -51,22 +52,23 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
         }, onMenuClick = { view, doc, pos ->
             popupHerper?.show(view, doc)
         }) {
-            if (it.type == DocumentType.Pdf) {
-                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
-            } else {
-                val docKey = when (it.type) {
-                    DocumentType.Doc -> Constant.Doc
-                    DocumentType.Excel -> Constant.Xls
-                    else -> Constant.Ppt
-                }
-                launchActivity<ReadDocumentActivity>(
-                    hashMapOf(
-                        Constant.DOCUMENT_TYPE to docKey,
-                        Constant.ARG_MEDIA_MODEL to it
+            InterstitialAdManager.showInterAll(this@RecentActivity) {
+                if (it.type == DocumentType.Pdf) {
+                    launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+                } else {
+                    val docKey = when (it.type) {
+                        DocumentType.Doc -> Constant.Doc
+                        DocumentType.Excel -> Constant.Xls
+                        else -> Constant.Ppt
+                    }
+                    launchActivity<ReadDocumentActivity>(
+                        hashMapOf(
+                            Constant.DOCUMENT_TYPE to docKey,
+                            Constant.ARG_MEDIA_MODEL to it
+                        )
                     )
-                )
+                }
             }
-
             documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(this@RecentActivity)
     }

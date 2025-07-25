@@ -8,6 +8,7 @@ import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.adapter.FavoriteAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
@@ -78,7 +79,9 @@ class FavoriteFragment :
         }, onMenuClick = { view, doc, pos ->
             popupHerper?.show(view, doc)
         }) {
-            launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+            }
             documentViewModel.addToRecent(it)
         }.attachLifecycle(viewLifecycleOwner)
     }

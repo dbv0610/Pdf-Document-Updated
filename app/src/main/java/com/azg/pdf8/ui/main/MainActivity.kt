@@ -15,6 +15,7 @@ import com.ads.control.admob.AppOpenManager
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.az.inappupdate.AppUpdate
 import com.az.inappupdate.AppUpdateManager
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.database.RecentDao
@@ -77,6 +78,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }.show()
         }
         checkUpdate()
+        binding.bannerAdView
+            .setBannerPlacement(this@MainActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
     }
 
     override fun ActivityMainBinding.setData() {

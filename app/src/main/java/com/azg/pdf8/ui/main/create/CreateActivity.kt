@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.CreatePdfAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
@@ -218,6 +219,9 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
         adapter.dragStartListener = { viewHolder ->
             touchHelper.startDrag(viewHolder)
         }
+        binding.bannerAdView
+            .setBannerPlacement(this@CreateActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
     }
 
     override fun ActivityCreateBinding.setData() {

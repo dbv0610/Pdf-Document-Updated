@@ -46,7 +46,13 @@
         android:background="@color/color_F2F2F7"
         android:paddingBottom="@dimen/_12sdp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_content_search"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llAppBar" />
+        app:layout_constraintBottom_toTopOf="@+id/bannerAdView"
+        app:layout_constraintTop_toBottomOf="@+id/llAppBar"
+        tools:listitem="@layout/item_content_search" />
+    <com.azg.pdf8.widget.BannerAdView
+        android:id="@+id/bannerAdView"
+        android:background="@color/color_f5f5f5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

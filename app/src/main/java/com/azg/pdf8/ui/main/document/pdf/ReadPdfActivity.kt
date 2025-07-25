@@ -25,6 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadPdfBinding
@@ -122,6 +124,25 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         }
         viewModel.pagesState.observe(this) { pages ->
             adapter.submitList(pages)
+        }
+        binding.bannerAdView
+            .setBannerPlacement(this@ReadPdfActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+                if (!isInternetAvailable()) {
+                    binding.bannerAdView.gone()
+                }
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                binding.bannerAdView.gone()
+            }
+            else -> Unit
         }
     }
 

@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.SearchAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivitySearchResultBinding
 import com.azg.pdf8.model.ContentWithPage
@@ -36,6 +37,9 @@ class SearchResultActivity :
     }
 
     override fun initialize() {
+        binding.bannerAdView
+            .setBannerPlacement(this@SearchResultActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
     }
     @SuppressLint("SetTextI18n")
     override fun ActivitySearchResultBinding.setData() {

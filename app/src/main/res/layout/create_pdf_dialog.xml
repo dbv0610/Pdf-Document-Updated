@@ -36,63 +36,86 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:gravity="center"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="@dimen/_12sdp">
 
-        <com.dong.baselib.widget.layout.UiLinearLayout
-            android:id="@+id/lnCreateImage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="@dimen/_16sdp"
-            app:bgColorAll="@color/color_f8f8f8"
-            app:cornerRadius="@dimen/_8sdp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <ImageView
-                android:layout_width="@dimen/_26sdp"
-                android:layout_height="@dimen/_26sdp"
-                android:src="@drawable/ic_create_image" />
-
-            <TextView
-                android:layout_width="wrap_content"
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/lnCreateImage"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_6sdp"
-                android:fontFamily="@font/rb_500"
-                android:includeFontPadding="false"
-                android:text="@string/image_to_pdf"
-                android:textSize="@dimen/_12sdp" />
-        </com.dong.baselib.widget.layout.UiLinearLayout>
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/_16sdp"
+                app:bgColorAll="@color/color_f8f8f8"
+                app:cornerRadius="@dimen/_8sdp">
 
-        <View
-            android:layout_width="@dimen/_8sdp"
-            android:layout_height="0dp" />
+                <ImageView
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/ic_create_image" />
 
-        <com.dong.baselib.widget.layout.UiLinearLayout
-            android:id="@+id/lnCreateScan"
-            android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_6sdp"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/image_to_pdf"
+                    android:textSize="@dimen/_12sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+
+            <View
+                android:layout_width="@dimen/_8sdp"
+                android:layout_height="0dp" />
+
+            <com.dong.baselib.widget.layout.UiLinearLayout
+                android:id="@+id/lnCreateScan"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/_16sdp"
+                app:bgColorAll="@color/color_f8f8f8"
+                app:cornerRadius="@dimen/_8sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/ic_create_scan" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_6sdp"
+                    android:fontFamily="@font/rb_500"
+                    android:includeFontPadding="false"
+                    android:text="@string/scan_document"
+                    android:textSize="@dimen/_12sdp" />
+            </com.dong.baselib.widget.layout.UiLinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/flNativeAd"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="@dimen/_16sdp"
-            app:bgColorAll="@color/color_f8f8f8"
-            app:cornerRadius="@dimen/_8sdp">
+            android:layout_marginTop="@dimen/_8sdp"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageView
-                android:layout_width="@dimen/_26sdp"
-                android:layout_height="@dimen/_26sdp"
-                android:src="@drawable/ic_create_scan" />
+            <include
+                android:id="@+id/shimmerAdSmall"
+                layout="@layout/layout_native_shimmer_small"
+                android:visibility="visible" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_6sdp"
-                android:fontFamily="@font/rb_500"
-                android:includeFontPadding="false"
-                android:text="@string/scan_document"
-                android:textSize="@dimen/_12sdp" />
-        </com.dong.baselib.widget.layout.UiLinearLayout>
+            <include
+                android:id="@+id/shimmerAdMedium"
+                layout="@layout/layout_native_shimmer_medium"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 </com.dong.baselib.widget.layout.UiLinearLayout>

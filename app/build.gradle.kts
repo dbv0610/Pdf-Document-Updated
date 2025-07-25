@@ -77,13 +77,12 @@ android {
         create("dev") {
             applicationId = "com.azg.pdf8"
             manifestPlaceholders["ad_app_id"] = "ca-app-pub-3940256099942544~3347511713"
-
             buildConfigField("boolean", "build_debug", "true")
         }
 
         create("product") {
             applicationId = "com.documentreader.manage.pdfreader.viewpdf.open"
-            manifestPlaceholders["ad_app_id"] = ""
+            manifestPlaceholders["ad_app_id"] = "ca-app-pub-5417263955398589~7174217706"
 
             buildConfigField("boolean", "build_debug", "false")
         }

@@ -18,7 +18,7 @@ data class AdBannerConfig(
             listAds = listOf(
                 AdConfig(
                     enableAd = true,
-                    adUnit = if(isAppDebug) "ca-app-pub-3940256099942544/6300978111" else "ca-app-pub-6745384043882937/1717312240"
+                    adUnit = if(isAppDebug) "ca-app-pub-3940256099942544/6300978111" else "ca-app-pub-5417263955398589/7245266242"
                 )
             )
         )

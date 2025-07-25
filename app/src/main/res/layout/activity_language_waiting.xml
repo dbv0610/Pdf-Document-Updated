@@ -61,11 +61,26 @@
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/_6sdp"
         android:paddingHorizontal="@dimen/_12sdp"
-        android:paddingBottom="@dimen/_10sdp"
+        android:paddingBottom="@dimen/_6sdp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/flNativeAd"
         app:layout_constraintTop_toBottomOf="@id/tvDescription"
         tools:listitem="@layout/item_view_language" />
 
+    <FrameLayout
+        android:id="@+id/flNativeAd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <include
+            android:id="@+id/shimmerAdSmall"
+            layout="@layout/layout_native_shimmer_small"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/shimmerAdMedium"
+            layout="@layout/layout_native_shimmer_medium"
+            android:visibility="visible" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

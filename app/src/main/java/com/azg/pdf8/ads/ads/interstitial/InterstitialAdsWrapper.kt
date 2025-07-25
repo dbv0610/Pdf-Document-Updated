@@ -200,11 +200,11 @@ enum class InterstitialPlacement(
 ) {
     INTER_ALL(
         listId = {
-            remoteConfig.I102Config.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.i102Config.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.I102Config.enable && remoteConfig.isAdEnable },
-        timeInterval = { remoteConfig.I102Config.timeInterval },
-        timeSteps = { remoteConfig.I102Config.timeSteps },
+        canShowAds = { remoteConfig.i102Config.enable && remoteConfig.isAdEnable },
+        timeInterval = { remoteConfig.i102Config.timeInterval },
+        timeSteps = { remoteConfig.i102Config.timeSteps },
     ),
     ;
 }

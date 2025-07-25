@@ -150,9 +150,9 @@ enum class BannerPlacement(
 ) {
     BANNER_ALL(
         listId = {
-            remoteConfig.B100Config.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.b100Config.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.B100Config.enable  && remoteConfig.isAdEnable },
-        isCollapsible = { remoteConfig.B100Config.isCollapsible },
+        canShowAds = { remoteConfig.b100Config.enable  && remoteConfig.isAdEnable },
+        isCollapsible = { remoteConfig.b100Config.isCollapsible },
     )
 }

@@ -7,7 +7,17 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.ads.control.admob.Admob
+import com.ads.control.admob.AppOpenManager
+import com.ads.control.ads.AzAds
+import com.ads.control.application.AdsMultiDexApplication
+import com.ads.control.config.AdjustConfig
+import com.ads.control.config.AppsflyerConfig
+import com.ads.control.config.AzAdConfig
 import com.azg.pdf8.BuildConfig
+import com.azg.pdf8.ui.splash.NativeSplashActivity
+import com.azg.pdf8.ui.splash.SplashActivity
+import com.google.firebase.FirebaseApp
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -23,7 +33,7 @@ interface ActivityLifecycleCallbacksImpl : Application.ActivityLifecycleCallback
     override fun onActivityStopped(activity: Activity) {}
 }
 
-class AppPdfReader : Application() {
+class AppPdfReader : AdsMultiDexApplication() {
     companion object {
         var isAppForeground = false
     }
@@ -42,6 +52,24 @@ class AppPdfReader : Application() {
         }
         SharedPreference.Companion.init(this@AppPdfReader)
         registerLifecycleCallback()
+        FirebaseApp.initializeApp(this)
+        initAds()
+    }
+
+    private fun initAds() {
+        val environment = if (BuildConfig.build_debug) {
+            AzAdConfig.ENVIRONMENT_DEVELOP
+        } else {
+            AzAdConfig.ENVIRONMENT_PRODUCTION
+        }
+        azAdConfig = AzAdConfig(this, AzAdConfig.PROVIDER_ADMOB, environment)
+        azAdConfig.adjustConfig = AdjustConfig("z9lkseui8t8g")
+        azAdConfig.appsflyerConfig = AppsflyerConfig(false, "")
+        azAdConfig.listDeviceTest = listOf("C01E9C6F78D783B443CEA36BFBCBB212")
+        AzAds.getInstance().init(this, azAdConfig, false)
+        AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity::class.java)
+        AppOpenManager.getInstance().disableAppResumeWithActivity(NativeSplashActivity::class.java)
+        Admob.getInstance().setOpenActivityAfterShowInterAds(true)
     }
 
     private fun registerLifecycleCallback() {

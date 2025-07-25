@@ -1,14 +1,16 @@
 package com.azg.pdf8.ui.main.document
 
-import android.os.Bundle
+import android.content.res.ColorStateList
+import android.graphics.PorterDuff
 import android.view.inputmethod.EditorInfo
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.widget.Button
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.native.LayoutSelector
+import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
+import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityRecentBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
@@ -21,6 +23,8 @@ import com.azg.pdf8.ui.main.document.other.ReadDocumentActivity
 import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
+import com.azg.pdf8.widget.pdfColor
+import com.azg.pdf8.widget.setBackgroundTintCompat
 import com.dong.baselib.base.PopupDataHelper
 import com.dong.baselib.file.shareFileWithPath
 import com.dong.baselib.lifecycle.lifecycleLaunch
@@ -66,6 +70,28 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
             documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(this@RecentActivity)
     }
+    val nativeAdsWrapper by lazy {
+        NativeAdsWrapper(
+            activity = this@RecentActivity,
+            config = NativePlacement.NATIVE_DOC,
+            lifecycleOwner = this@RecentActivity,
+            adContainer = { binding.flNativeAd },
+            shimmerView = { binding.shimmerNativeAd.shimmerContainerNative }
+        )
+    }
+
+    fun requestAds() {
+        with(nativeAdsWrapper) {
+            setupNativeAd(
+                "native_recent_file", LayoutSelector.getLayout(
+                    remoteConfig.n110Config2.layout
+                )
+            ) {
+                (callToActionView as? Button)?.setBackgroundTintCompat(pdfColor)
+            }
+            requestAds()
+        }
+    }
 
     override fun initialize() {
         popupHerper?.onBindData { binding, popup, model ->
@@ -98,9 +124,12 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
                 if (it.isEmpty()) {
                     rcvListData.gone()
                     lnNoData.visible()
+                    nativeAdsWrapper.cancelRequest()
+                    binding.flNativeAd.gone()
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
+                    requestAds()
                     val lm = rcvListData.layoutManager as LinearLayoutManager
                     recentAdapter.submitList(it) {
                         lm.scrollToPositionWithOffset(0, 0)

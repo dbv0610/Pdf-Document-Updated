@@ -1,25 +1,24 @@
 package com.azg.pdf8.ads.ads.native
 
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.LinearLayout
-import androidx.annotation.ColorInt
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.toColorInt
-import androidx.core.view.ViewCompat
-import androidx.core.view.children
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ads.control.ads.AzAdCallback
 import com.ads.control.ads.AzAds
 import com.ads.control.ads.wrapper.ApAdError
 import com.ads.control.ads.wrapper.ApNativeAd
+import com.ads.control.config.AzAdConfig
 import com.ads.control.helper.AdOptionVisibility
 import com.ads.control.helper.adnative.NativeAdConfig
 import com.ads.control.helper.adnative.NativeAdHelper
@@ -33,8 +32,8 @@ import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.ads.model.type.LayoutNativeType
 import com.azg.pdf8.app.remoteConfig
-import com.dong.baselib.widget.red
 import com.facebook.shimmer.ShimmerFrameLayout
+import com.google.android.gms.ads.nativead.NativeAdView
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.lang.ref.WeakReference
@@ -105,6 +104,104 @@ class NativeAdsWrapper(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    fun setupNativeAd(tag: String? = null, layoutId: Int, block: NativeAdView.() -> Unit = {}) {
+        nativeAdHelper.apply {
+            setNativeContentView(adContainer.invoke())
+            setShimmerLayoutView(shimmerView.invoke())
+            tag?.let { setTagForDebug(it) }
+            activityRef.get()?.let { activity ->
+                setCustomContentView { nativeAd ->
+                    nativeAd.layoutCustomNative = layoutId
+                    populateNativeAdView(
+                        activity,
+                        nativeAd,
+                        adContainer(),
+                        shimmerView(), block
+                    )
+                }
+            }
+        }
+    }
+
+    private fun populateUnifiedNativeAdView(
+        nativeAd: com.google.android.gms.ads.nativead.NativeAd,
+        adView: NativeAdView, block: NativeAdView.() -> Unit = {}
+    ) {
+        adView.mediaView = adView.findViewById(R.id.ad_media)
+        adView.headlineView = adView.findViewById(R.id.ad_headline)
+        adView.bodyView = adView.findViewById(R.id.ad_body)
+        adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
+        adView.iconView = adView.findViewById(R.id.ad_app_icon)
+        (adView.headlineView as TextView).text = nativeAd.headline
+        nativeAd.body?.let {
+            (adView.bodyView as TextView).apply {
+                visibility = View.VISIBLE
+                text = it
+            }
+        } ?: run { adView.bodyView?.visibility = View.GONE }
+
+        nativeAd.callToAction?.let {
+            (adView.callToActionView as Button).apply {
+                visibility = View.VISIBLE
+                text = it
+            }
+        } ?: run { adView.callToActionView?.visibility = View.GONE }
+
+        nativeAd.icon?.let {
+            (adView.iconView as ImageView).apply {
+                visibility = View.VISIBLE
+                setImageDrawable(it.drawable)
+            }
+        } ?: run { adView.iconView?.visibility = View.GONE }
+        adView.setNativeAd(nativeAd)
+        adView.block()
+    }
+    @SuppressLint("InflateParams")
+    fun populateNativeAdView(
+        activity: Activity,
+        apNativeAd: ApNativeAd,
+        adPlaceHolder: FrameLayout,
+        containerShimmerLoading: ShimmerFrameLayout, block: NativeAdView.() -> Unit = {}
+    ) {
+        if (apNativeAd.admobNativeAd == null && apNativeAd.nativeView == null) {
+            containerShimmerLoading.visibility = View.GONE
+            Log.e("AzAds", "populateNativeAdView failed : native is not loaded ")
+            return
+        }
+        val mediationProvider = AzAds.getInstance().mediationProvider
+        when (mediationProvider) {
+            AzAdConfig.PROVIDER_ADMOB -> {
+                val adView = LayoutInflater.from(activity)
+                    .inflate(apNativeAd.layoutCustomNative, null) as NativeAdView
+
+                containerShimmerLoading.stopShimmer()
+                containerShimmerLoading.visibility = View.GONE
+                adPlaceHolder.visibility = View.VISIBLE
+                apNativeAd.admobNativeAd?.let { admobAd ->
+                    populateUnifiedNativeAdView(
+                        admobAd,
+                        adView,
+                    ) { block() }
+                }
+                adPlaceHolder.removeAllViews()
+                adPlaceHolder.addView(adView)
+            }
+            AzAdConfig.PROVIDER_MAX -> {
+                containerShimmerLoading.stopShimmer()
+                containerShimmerLoading.visibility = View.GONE
+                adPlaceHolder.visibility = View.VISIBLE
+
+                adPlaceHolder.removeAllViews()
+                apNativeAd.nativeView?.parent
+                    ?.let { (it as? ViewGroup)?.removeAllViews() }
+                apNativeAd.nativeView?.let { adPlaceHolder.addView(it) }
+            }
+            else -> {
+                Log.w("AzAds", "Unknown mediation provider: $mediationProvider")
             }
         }
     }
@@ -259,46 +356,46 @@ enum class NativePlacement(
 ) {
     SPLASH(
         listId = {
-            remoteConfig.N101Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n101Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N101Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.n101Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N101Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.n101Config1.layout)
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N101Config1.layout) },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.n101Config1.layout) },
     ),
 
     LANGUAGE_1(
         listId = {
-            remoteConfig.N103Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n103Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N103Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.n103Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N103Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.n103Config1.layout)
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N103Config1.layout) },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.n103Config1.layout) },
     ),
     LANGUAGE_2(
         listId = {
-            remoteConfig.N104Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n104Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N104Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.n104Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N104Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.n104Config1.layout)
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N104Config1.layout) },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.n104Config1.layout) },
     ),
 
     ONBOARDING(
         listId = {
-            remoteConfig.N105Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n105Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N105Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.n105Config1.enable && remoteConfig.isAdEnable },
         adVisibility = AdOptionVisibility.INVISIBLE,
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N105Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.n105Config1.layout)
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N105Config1.layout) },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.n105Config1.layout) },
     ),
 
     ONBOARDING_FULL_1(
@@ -314,7 +411,7 @@ enum class NativePlacement(
 
     ONBOARDING_FULL_2(
         listId = {
-            remoteConfig.N108Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n108Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
         canShowAds = { remoteConfig.N107Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
@@ -323,103 +420,93 @@ enum class NativePlacement(
         layoutMeta = { LayoutSelector.getMetaLayout(isFullScreen = true) },
     ),
 
-    FEATURE_PROFILE(
+    FEATURE(
         listId = {
-            remoteConfig.N109Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n109Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N109Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.n109Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N109Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.n109Config1.layout)
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N109Config1.layout) },
+        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.n109Config1.layout) },
     ),
-    NATIVE_HOME(
-        listId = {
-            remoteConfig.N120Config1.listAds.filter { it.enableAd }.map { it.adUnit }
-        },
-        canShowAds = { remoteConfig.N120Config1.enable && remoteConfig.isAdEnable },
-        preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N120Config1.layout)
-        },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N120Config1.layout) },
-    ),
-    NATIVE_ALL(
-        listId = {
-            remoteConfig.N121Config1.listAds.filter { it.enableAd }.map { it.adUnit }
-        },
-        canShowAds = { remoteConfig.N121Config1.enable && remoteConfig.isAdEnable },
-        preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N121Config1.layout)
-        },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N121Config1.layout) },
-    ),
+
     PERMISSION(
         listId = {
-            remoteConfig.N122Config1.listAds.filter { it.enableAd }.map { it.adUnit }
+            remoteConfig.n110Config1.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        canShowAds = { remoteConfig.N122Config1.enable && remoteConfig.isAdEnable },
+        canShowAds = { remoteConfig.n110Config1.enable && remoteConfig.isAdEnable },
         preloadLayoutId = {
-            LayoutSelector.getLayout(remoteConfig.N122Config1.layout)
+            LayoutSelector.getLayout(remoteConfig.n110Config1.layout)
+        }
+    ),
+    NATIVE_DOC(
+        listId = {
+            remoteConfig.n110Config2.listAds.filter { it.enableAd }.map { it.adUnit }
         },
-        layoutMeta = { LayoutSelector.getMetaLayout(type = remoteConfig.N121Config1.layout) },
+        canShowAds = { remoteConfig.n110Config2.enable && remoteConfig.isAdEnable },
+        preloadLayoutId = {
+            LayoutSelector.getLayout(remoteConfig.n110Config2.layout)
+        },
     ),
     ;
     /**
      * Helper object for layout selection with memory-efficient caching
      */
-    private object LayoutSelector {
-        private var cachedFullScreenLayout: Int = 0
-        private var cachedCommonLayout: Int = 0
-        /**
-         * Returns the appropriate meta layout based on CTR
-         * @param isFullScreen Whether to return a full screen layout
-         * @return Layout resource ID
-         */
-        fun getMetaLayout(isFullScreen: Boolean = false, type: String = ""): Int {
-            return if (isFullScreen) {
-                if (remoteConfig.metaCtrLow) {
-                    R.layout.layout_native_full_screen_meta_low
-                } else {
-                    R.layout.layout_native_full_screen_meta_high
+}
+
+object LayoutSelector {
+    private var cachedFullScreenLayout: Int = 0
+    private var cachedCommonLayout: Int = 0
+    /**
+     * Returns the appropriate meta layout based on CTR
+     * @param isFullScreen Whether to return a full screen layout
+     * @return Layout resource ID
+     */
+    fun getMetaLayout(isFullScreen: Boolean = false, type: String = ""): Int {
+        return if (isFullScreen) {
+            if (remoteConfig.metaCtrLow) {
+                R.layout.layout_native_full_screen_meta_low
+            } else {
+                R.layout.layout_native_full_screen_meta_high
+            }
+        } else {
+            if (remoteConfig.metaCtrLow) {
+                when (type) {
+                    LayoutNativeType.NativeSmallCtaBottom.type -> R.layout.layout_native_small_meta_cta_bot_low
+                    LayoutNativeType.NativeSmallCtaTop.type -> R.layout.layout_native_small_meta_cta_top_low
+                    LayoutNativeType.NativeSmallCtaRight.type -> R.layout.layout_native_small_cta_right
+                    LayoutNativeType.NativeMediumCtaBottom.type -> R.layout.layout_native_medium_meta_cta_bot_low
+                    LayoutNativeType.NativeMediumCtaTop.type -> R.layout.layout_native_medium_meta_cta_top_low
+                    LayoutNativeType.MediumCtaRightBottom.type -> R.layout.layout_native_medium_cta_bot_right_meta
+                    LayoutNativeType.MediumCtaRightTop.type -> R.layout.layout_native_medium_cta_top_right_meta
+                    else -> R.layout.layout_native_small_meta_cta_bot_low
                 }
             } else {
-                if (remoteConfig.metaCtrLow) {
-                    when (type) {
-                        LayoutNativeType.NativeSmallCtaBottom.type -> R.layout.layout_native_small_meta_cta_bot_low
-                        LayoutNativeType.NativeSmallCtaTop.type -> R.layout.layout_native_small_meta_cta_top_low
-                        LayoutNativeType.NativeSmallCtaRight.type -> R.layout.layout_native_small_cta_right
-                        LayoutNativeType.NativeMediumCtaBottom.type -> R.layout.layout_native_medium_meta_cta_bot_low
-                        LayoutNativeType.NativeMediumCtaTop.type -> R.layout.layout_native_medium_meta_cta_top_low
-                        LayoutNativeType.MediumCtaRightBottom.type -> R.layout.layout_native_medium_cta_bot_right_meta
-                        LayoutNativeType.MediumCtaRightTop.type -> R.layout.layout_native_medium_cta_top_right_meta
-                        else -> R.layout.layout_native_small_meta_cta_bot_low
-                    }
-                } else {
-                    when (type) {
-                        LayoutNativeType.NativeSmallCtaBottom.type -> R.layout.layout_native_small_meta_cta_bot_high
-                        LayoutNativeType.NativeSmallCtaTop.type -> R.layout.layout_native_small_meta_cta_top_high
-                        LayoutNativeType.NativeSmallCtaRight.type -> R.layout.layout_native_small_cta_right
-                        LayoutNativeType.NativeMediumCtaBottom.type -> R.layout.layout_native_medium_meta_cta_bot_high
-                        LayoutNativeType.NativeMediumCtaTop.type -> R.layout.layout_native_medium_meta_cta_top_high
-                        LayoutNativeType.MediumCtaRightBottom.type -> R.layout.layout_native_medium_cta_bot_right_meta
-                        LayoutNativeType.MediumCtaRightTop.type -> R.layout.layout_native_medium_cta_top_right_meta
-                        else -> R.layout.layout_native_small_meta_cta_bot_high
-                    }
+                when (type) {
+                    LayoutNativeType.NativeSmallCtaBottom.type -> R.layout.layout_native_small_meta_cta_bot_high
+                    LayoutNativeType.NativeSmallCtaTop.type -> R.layout.layout_native_small_meta_cta_top_high
+                    LayoutNativeType.NativeSmallCtaRight.type -> R.layout.layout_native_small_cta_right
+                    LayoutNativeType.NativeMediumCtaBottom.type -> R.layout.layout_native_medium_meta_cta_bot_high
+                    LayoutNativeType.NativeMediumCtaTop.type -> R.layout.layout_native_medium_meta_cta_top_high
+                    LayoutNativeType.MediumCtaRightBottom.type -> R.layout.layout_native_medium_cta_bot_right_meta
+                    LayoutNativeType.MediumCtaRightTop.type -> R.layout.layout_native_medium_cta_top_right_meta
+                    else -> R.layout.layout_native_small_meta_cta_bot_high
                 }
             }
         }
+    }
 
-        fun getLayout(type: String): Int {
-            return when (type) {
-                LayoutNativeType.NativeSmallCtaBottom.type -> LayoutNativeType.NativeSmallCtaBottom.resLayout
-                LayoutNativeType.NativeSmallCtaTop.type -> LayoutNativeType.NativeSmallCtaTop.resLayout
-                LayoutNativeType.NativeSmallCtaRight.type -> LayoutNativeType.NativeSmallCtaRight.resLayout
-                LayoutNativeType.NativeMediumCtaBottom.type -> LayoutNativeType.NativeMediumCtaBottom.resLayout
-                LayoutNativeType.NativeMediumCtaTop.type -> LayoutNativeType.NativeMediumCtaTop.resLayout
-                LayoutNativeType.MediumCtaRightBottom.type -> LayoutNativeType.MediumCtaRightBottom.resLayout
-                LayoutNativeType.MediumCtaRightTop.type -> LayoutNativeType.MediumCtaRightTop.resLayout
-                else -> LayoutNativeType.NativeSmallCtaBottom.resLayout
-            }
+    fun getLayout(type: String): Int {
+        return when (type) {
+            LayoutNativeType.NativeSmallCtaBottom.type -> LayoutNativeType.NativeSmallCtaBottom.resLayout
+            LayoutNativeType.NativeSmallCtaTop.type -> LayoutNativeType.NativeSmallCtaTop.resLayout
+            LayoutNativeType.NativeSmallCtaRight.type -> LayoutNativeType.NativeSmallCtaRight.resLayout
+            LayoutNativeType.NativeMediumCtaBottom.type -> LayoutNativeType.NativeMediumCtaBottom.resLayout
+            LayoutNativeType.NativeMediumCtaTop.type -> LayoutNativeType.NativeMediumCtaTop.resLayout
+            LayoutNativeType.MediumCtaRightBottom.type -> LayoutNativeType.MediumCtaRightBottom.resLayout
+            LayoutNativeType.MediumCtaRightTop.type -> LayoutNativeType.MediumCtaRightTop.resLayout
+            else -> LayoutNativeType.NativeSmallCtaBottom.resLayout
         }
     }
 }

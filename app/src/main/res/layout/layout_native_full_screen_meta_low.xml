@@ -21,6 +21,7 @@
             android:paddingHorizontal="@dimen/_10sdp"
             android:paddingVertical="@dimen/_3sdp"
             android:text="@string/skip"
+            android:visibility="gone"
             android:textAllCaps="true"
             android:textColor="@color/black"
             android:textSize="@dimen/_11ssp"
@@ -165,6 +166,7 @@
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnNext"
+
                 android:layout_width="0dp"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_marginStart="@dimen/_6sdp"

@@ -176,13 +176,22 @@ class ChooseImageActivity :
         }
         icCheckSelect.click {
             if (screenAction == Constant.IMAGE_ADD_LIST) {
-                val intentData = Intent()
-                intentData.putParcelableArrayListExtra(
-                    Constant.IMAGE_ADD_LIST,
-                    ArrayList(viewModel.listSelectedItem.value as List<Parcelable>)
-                )
-                setResult(RESULT_OK, intentData)
-                finish()
+                val lisCast = viewModel.listSelectedItem.value as? List<Parcelable>
+                lisCast?.let {
+                    val intentData = Intent()
+                    intentData.putParcelableArrayListExtra(
+                        Constant.IMAGE_ADD_LIST,
+                        ArrayList(lisCast)
+                    )
+                    setResult(RESULT_OK, intentData)
+                    finish()
+                } ?: run {
+                    Toast.makeText(
+                        this@ChooseImageActivity,
+                        getString(R.string.can_create_pdf),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             } else if (screenAction == "createNew") {
                 launchActivity<CreateActivity>(mapOf(Constant.IMAGE_ADD_NEW to viewModel.listSelectedItem.value))
             }

@@ -8,6 +8,7 @@ import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.CreatePdfAdapter
 import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
@@ -60,34 +61,38 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                     2,
                     false
                 )
-                launcherForResult<ChooseImageActivity>(
-                    hashMapOf(
-                        Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
-                    )
-                ) { acResult ->
-                    acResult.getResultData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_LIST)
-                        ?.let { data ->
-                            if (data.isNotEmpty()) {
-                                viewModel.addDataToList(data)
-                                binding.progressBar.gone()
-                            } else {
-                                binding.progressBar.visible()
+                InterstitialAdManager.showInterAll(this@CreateActivity) {
+                    launcherForResult<ChooseImageActivity>(
+                        hashMapOf(
+                            Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
+                        )
+                    ) { acResult ->
+                        acResult.getResultData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_LIST)
+                            ?.let { data ->
+                                if (data.isNotEmpty()) {
+                                    viewModel.addDataToList(data)
+                                    binding.progressBar.gone()
+                                } else {
+                                    binding.progressBar.visible()
+                                }
                             }
-                        }
+                    }
                 }
             }
 
             override fun scanDocument() {
                 if (permission.checkGrantedCamera) {
-                    launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
-                        it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
-                            val randomId = Random.nextInt()
-                            val bitmap = BitmapFactory.decodeFile(path)
-                            val model = CreatePdf(
-                                randomId, bitmap, randomId
-                            )
-                            viewModel.addData(model)
-                            binding.progressBar.gone()
+                    InterstitialAdManager.showInterAll(this@CreateActivity) {
+                        launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
+                            it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
+                                val randomId = Random.nextInt()
+                                val bitmap = BitmapFactory.decodeFile(path)
+                                val model = CreatePdf(
+                                    randomId, bitmap, randomId
+                                )
+                                viewModel.addData(model)
+                                binding.progressBar.gone()
+                            }
                         }
                     }
                 } else {
@@ -161,7 +166,14 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                 docViewModel.addToRecent(document.apply {
                                     lastTimeView = System.currentTimeMillis()
                                 })
-                                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                InterstitialAdManager.showInterAll(this@CreateActivity) {
+                                    launchActivity<ReadPdfActivity>(
+                                        hashMapOf(
+                                            Constant.ARG_MEDIA_MODEL to document,
+                                            Constant.RateWhenCreate to true
+                                        )
+                                    )
+                                }
                                 finish()
                             }
                         }

@@ -3,11 +3,14 @@ package com.azg.pdf8.ui.main.document.pdf
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.PorterDuff
+import android.view.View
 import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
@@ -58,8 +61,10 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
             currentPos = pos
             popupHerper?.show(view, doc)
         }) {
-            launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
             viewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
+            InterstitialAdManager.showInterAll(this@PdfActivity) {
+                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+            }
         }.attachLifecycle(this@PdfActivity)
     }
     val nativeAdsWrapper by lazy {
@@ -75,11 +80,8 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
     fun requestAds() {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_read_pdf", LayoutSelector.getLayout(
-                    remoteConfig.n110Config2.layout
-                )
-            ) {
-                (callToActionView as? Button)?.setBackgroundTintCompat(pdfColor)
+                "native_read_pdf") {
+                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(pdfColor)
             }
             requestAds()
         }
@@ -168,12 +170,16 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                         2,
                         false
                     )
-                    launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                    InterstitialAdManager.showInterAll(this@PdfActivity) {
+                        launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                    }
                 }
 
                 override fun scanDocument() {
                     if (permission.checkGrantedCamera) {
-                        launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                        InterstitialAdManager.showInterAll(this@PdfActivity) {
+                            launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                        }
                     } else {
                         requestCameraLauncher.launch(permission.cameraRequest)
                     }

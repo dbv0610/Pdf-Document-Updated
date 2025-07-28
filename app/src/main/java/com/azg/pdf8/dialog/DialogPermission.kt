@@ -44,4 +44,14 @@ class DialogPermission(context: Context) :
             dismiss()
         }
     }
+
+    override fun dismiss() {
+        super.dismiss()
+        onDismiss.invoke()
+    }
+    private var onDismiss: ()-> Unit = {}
+    fun dismissRate(onDismiss: ()-> Unit = {}): DialogPermission{
+        this@DialogPermission.onDismiss = onDismiss
+        return this@DialogPermission
+    }
 }

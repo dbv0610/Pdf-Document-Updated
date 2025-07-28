@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.dong.baselib.widget.layout.UiLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/_12sdp"
+    android:gravity="center"
+    app:bgColorAll="@color/white"
+    app:cornerRadius="@dimen/_8sdp"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/_12sdp"
+    android:paddingVertical="@dimen/_18sdp">
+
+    <ImageView
+        android:id="@+id/ivNotify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_notification_fill"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:text="@string/to_send_you_notifications"
+        android:textAlignment="center"
+        android:textColor="#1D2129"
+        android:textSize="@dimen/_12sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivNotify" />
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:id="@+id/btnOk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:fontFamily="@font/rb_500"
+        android:gravity="center"
+        android:paddingVertical="@dimen/_10sdp"
+        android:text="@string/allow"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_13sdp"
+        app:bgGdOrientation="left_right"
+        app:bgGradientEnd="@color/mainColor"
+        app:bgGradientStart="@color/mainColor"
+        app:bgIsGradient="true"
+        app:cornerRadius="@dimen/_20sdp" />
+
+    <com.dong.baselib.widget.view.UiTextView
+        android:id="@+id/btnLater"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:fontFamily="@font/rb_500"
+        android:gravity="center"
+        android:paddingVertical="@dimen/_10sdp"
+        android:text="@string/do_not_allow"
+        android:textColor="@color/_8c8c8c"
+        android:textSize="@dimen/_13sdp"
+        app:bgColorAll="@color/color_f5f5f5"
+        app:cornerRadius="@dimen/_20sdp" />
+</com.dong.baselib.widget.layout.UiLinearLayout>
+

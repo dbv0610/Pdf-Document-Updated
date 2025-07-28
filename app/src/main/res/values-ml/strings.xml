@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">അപ്ലിക്കേഷൻ ഫംഗ്ഷനുകൾ ഉപയോഗിക്കാൻ അനുമതി നൽകുക</string>
     <string name="search_for_file">ഫയലിനായി തിരയുക</string>
     <string name="file_have_exit_file">ഫയലിന്റെ പേര് പുറത്തുകടക്കുന്നു</string>
+    <string name="skip">ചാടിക്കുക</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANEL_ID</string>
+    <string name="show_lock_screen">ലോക്ക് സ്ക്രീൻ PDF റീഡർ കാണിക്കുക</string>
+    <string name="des_1">പിഡിഎഫ്, വാക്ക്, എക്സൽ, കൂടുതൽ തുറക്കുക!</string>
+    <string name="cta_1">ഇപ്പോൾ ശ്രമിക്കുക</string>
+    <string name="des_2">ഒരു ടാപ്പിൽ ഇമേജുകൾ PDF ലേക്ക് പരിവർത്തനം ചെയ്യുക!</string>
+    <string name="cta_2">ഇപ്പോൾ ശ്രമിക്കുക</string>
+    <string name="des_3">A ഏതെങ്കിലും ഫയൽ അൺലോക്കുചെയ്യുക - കാണുക, എഡിറ്റുചെയ്യുക, എളുപ്പത്തിൽ പരിവർത്തനം ചെയ്യുക!</string>
+    <string name="cta_3">ഇപ്പോൾ ശ്രമിക്കുക</string>
+    <string name="des_4">എഡിറ്റ് പ്രമാണങ്ങൾ എപ്പോൾ വേണമെങ്കിലും, എവിടെയും - ലാപ്ടോപ്പ് ആവശ്യമില്ല!</string>
+    <string name="cta_4">ഇപ്പോൾ ശ്രമിക്കുക</string>
+    <string name="des_5">1 അപ്ലിക്കേഷനിൽ എല്ലാ ഓഫീസ് ഫയലുകളും വായിച്ച് നിയന്ത്രിക്കുക!</string>
+    <string name="cta_5">ഇപ്പോൾ ശ്രമിക്കുക</string>
+    <string name="now">ഇപ്പോള്</string>
+    <string name="do_not_allow">അനുവദിക്കരുത്</string>
+    <string name="to_send_you_notifications">നിങ്ങൾക്ക് \ nnotimigations അയയ്ക്കാൻ</string>
+    <string name="allow">അനുവദിക്കുക</string>
 </resources>

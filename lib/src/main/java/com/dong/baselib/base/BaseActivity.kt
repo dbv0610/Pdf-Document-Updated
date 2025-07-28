@@ -104,7 +104,7 @@ abstract class BaseActivity<VB : ViewBinding>(
         }
     }
 
-    inline fun <reified T : Any> Activity.getData(key: String?): T? {
+    inline fun <reified T : Any?> Activity.getData(key: String?): T? {
         if (key == null || intent?.extras?.containsKey(key) != true) return null
 
         @Suppress("UNCHECKED_CAST", "DEPRECATION")

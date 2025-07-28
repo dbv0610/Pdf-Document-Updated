@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Kebenaran pemberian untuk menggunakan fungsi aplikasi</string>
     <string name="search_for_file">Cari fail</string>
     <string name="file_have_exit_file">Nama fail telah keluar</string>
+    <string name="skip">Langkau</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Tunjukkan pembaca pdf skrin kunci</string>
+    <string name="des_1">Buka &amp; edit PDF, Word, Excel, dan banyak lagi!</string>
+    <string name="cta_1">Cuba sekarang</string>
+    <string name="des_2">Tukar imej ke PDF dalam satu ketuk!</string>
+    <string name="cta_2">Cuba sekarang</string>
+    <string name="des_3">🔓 Buka kunci sebarang fail - Lihat, edit, tukar dengan mudah!</string>
+    <string name="cta_3">Cuba sekarang</string>
+    <string name="des_4">Edit dokumen pada bila -bila masa, di mana sahaja - tiada komputer riba diperlukan!</string>
+    <string name="cta_4">Cuba sekarang</string>
+    <string name="des_5">📂 Baca &amp; mengurus semua fail pejabat dalam 1 aplikasi!</string>
+    <string name="cta_5">Cuba sekarang</string>
+    <string name="now">Sekarang</string>
+    <string name="do_not_allow">Jangan biarkan</string>
+    <string name="to_send_you_notifications">untuk menghantar anda \ notifications</string>
+    <string name="allow">Benarkan</string>
 </resources>

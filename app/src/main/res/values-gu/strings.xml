@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">એપ્લિકેશન કાર્યોનો ઉપયોગ કરવાની મંજૂરી આપો</string>
     <string name="search_for_file">ફાઇલ માટે શોધ</string>
     <string name="file_have_exit_file">ફાઇલ નામ બહાર નીકળો છે</string>
+    <string name="skip">છોડો</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">લ screen ક સ્ક્રીન પીડીએફ રીડર બતાવો</string>
+    <string name="des_1">પીડીએફ, વર્ડ, એક્સેલ અને વધુ ખોલો અને સંપાદિત કરો!</string>
+    <string name="cta_1">હવે પ્રયાસ કરવો</string>
+    <string name="des_2">એક નળમાં છબીઓને પીડીએફમાં કન્વર્ટ કરો!</string>
+    <string name="cta_2">હવે પ્રયાસ કરવો</string>
+    <string name="des_3">Any કોઈપણ ફાઇલને અનલ lock ક કરો - જુઓ, સંપાદિત કરો, સરળતાથી કન્વર્ટ કરો!</string>
+    <string name="cta_3">હવે પ્રયાસ કરવો</string>
+    <string name="des_4">કોઈપણ સમયે, કોઈપણ જગ્યાએ દસ્તાવેજો સંપાદિત કરો - કોઈ લેપટોપની જરૂર નથી!</string>
+    <string name="cta_4">હવે પ્રયાસ કરવો</string>
+    <string name="des_5">1 એપ્લિકેશનમાં બધી office ફિસ ફાઇલો વાંચો અને મેનેજ કરો!</string>
+    <string name="cta_5">હવે પ્રયાસ કરવો</string>
+    <string name="now">હવે</string>
+    <string name="do_not_allow">મંજૂરી આપશો નહીં</string>
+    <string name="to_send_you_notifications">તમને મોકલવા માટે n નોટિફિકેશન</string>
+    <string name="allow">મંજૂરી આપવી</string>
 </resources>

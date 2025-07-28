@@ -25,5 +25,5 @@ object Constant {
     const val Doc= "Doc"
     const val Xls= "Xls"
     const val Ppt= "Ppt"
-
+    const val RateWhenCreate = "RateWhenCreate"
 }

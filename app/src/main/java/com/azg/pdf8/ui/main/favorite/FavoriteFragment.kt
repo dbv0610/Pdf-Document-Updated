@@ -3,11 +3,14 @@ package com.azg.pdf8.ui.main.favorite
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.FavoriteAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
@@ -60,12 +63,9 @@ class FavoriteFragment :
     fun requestAds() {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_favorite",
-                LayoutSelector.getLayout(
-                    remoteConfig.n110Config2.layout
-                ),
+                "native_favorite"
             ) {
-                (callToActionView as? Button)?.setBackgroundTintCompat(pdfColor)
+                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(pdfColor)
             }
             requestAdsFragment()
         }
@@ -78,7 +78,9 @@ class FavoriteFragment :
         }, onMenuClick = { view, doc, pos ->
             popupHerper?.show(view, doc)
         }) {
-            launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+            }
             documentViewModel.addToRecent(it)
         }.attachLifecycle(viewLifecycleOwner)
     }

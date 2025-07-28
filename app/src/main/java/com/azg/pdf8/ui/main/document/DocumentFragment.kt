@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.base.BaseFragment
@@ -50,17 +51,20 @@ class DocumentFragment :
     private val createDialog by lazy {
         DialogCreatePdf(this@DocumentFragment.appActivity, object : CreateEventHandle {
             override fun createImage() {
-                NativeAdPreloadManager.preloadAd(appActivity, NativePlacement.PERMISSION,2,false)
-                launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                NativeAdPreloadManager.preloadAd(appActivity, NativePlacement.PERMISSION, 2, false)
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                }
             }
 
             override fun scanDocument() {
-                if(permission.checkGrantedCamera){
-                    launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                if (permission.checkGrantedCamera) {
+                    InterstitialAdManager.showInterAll(appActivity) {
+                        launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                    }
                 } else {
                     fragmentAttach?.fragmentAction("requestCameraPer")
                 }
-
             }
         }).attachActivity(appActivity)
     }
@@ -175,7 +179,9 @@ class DocumentFragment :
             }
         }
         lnPdf.click {
-            launchActivity<PdfActivity>()
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<PdfActivity>()
+            }
         }
         tvShowAll.click {
             if (isStorageAccess()) {
@@ -190,13 +196,19 @@ class DocumentFragment :
             fragmentAttach?.fragmentAction("requestPermission")
         }
         lnDocx.click {
-            launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))
+            }
         }
         lnXls.click {
-            launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Xls))
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Xls))
+            }
         }
         lnPpt.click {
-            launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
+            }
         }
     }
 }

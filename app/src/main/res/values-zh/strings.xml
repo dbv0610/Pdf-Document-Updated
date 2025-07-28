@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">授予使用应用程序功能的权限</string>
     <string name="search_for_file">搜索文件</string>
     <string name="file_have_exit_file">文件名有退出</string>
+    <string name="skip">跳过</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">显示锁定屏幕PDF阅读器</string>
+    <string name="des_1">打开和编辑PDF，Word，Excel等！</string>
+    <string name="cta_1">现在尝试</string>
+    <string name="des_2">一口气将图像转换为PDF！</string>
+    <string name="cta_2">现在尝试</string>
+    <string name="des_3">🔓解锁任何文件 - 查看，编辑，轻松转换！</string>
+    <string name="cta_3">现在尝试</string>
+    <string name="des_4">随时随地编辑文档 - 无需笔记本电脑！</string>
+    <string name="cta_4">现在尝试</string>
+    <string name="des_5">📂在1个应用程序中读取和管理所有办公文件！</string>
+    <string name="cta_5">现在尝试</string>
+    <string name="now">现在</string>
+    <string name="do_not_allow">不允许</string>
+    <string name="to_send_you_notifications">向您发送\ nnotifications</string>
+    <string name="allow">允许</string>
 </resources>

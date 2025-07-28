@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">ಅಪ್ಲಿಕೇಶನ್ ಕಾರ್ಯಗಳನ್ನು ಬಳಸಲು ಅನುಮತಿ ನೀಡಿ</string>
     <string name="search_for_file">ಫೈಲ್‌ಗಾಗಿ ಹುಡುಕಿ</string>
     <string name="file_have_exit_file">ಫೈಲ್ ಹೆಸರು ನಿರ್ಗಮನವನ್ನು ಹೊಂದಿದೆ</string>
+    <string name="skip">ಬಿಟ್ಟುಬಿಡು</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಪಿಡಿಎಫ್ ರೀಡರ್ ಅನ್ನು ತೋರಿಸಿ</string>
+    <string name="des_1">ಪಿಡಿಎಫ್, ವರ್ಡ್, ಎಕ್ಸೆಲ್ ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ತೆರೆಯಿರಿ ಮತ್ತು ಸಂಪಾದಿಸಿ!</string>
+    <string name="cta_1">ಈಗ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="des_2">ಚಿತ್ರಗಳನ್ನು ಒಂದೇ ಟ್ಯಾಪ್‌ನಲ್ಲಿ ಪಿಡಿಎಫ್‌ಗೆ ಪರಿವರ್ತಿಸಿ!</string>
+    <string name="cta_2">ಈಗ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="des_3">File ಯಾವುದೇ ಫೈಲ್ ಅನ್ನು ಅನ್ಲಾಕ್ ಮಾಡಿ - ವೀಕ್ಷಿಸಿ, ಸಂಪಾದಿಸಿ, ಸುಲಭವಾಗಿ ಪರಿವರ್ತಿಸಿ!</string>
+    <string name="cta_3">ಈಗ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="des_4">ಯಾವುದೇ ಸಮಯದಲ್ಲಿ, ಎಲ್ಲಿಯಾದರೂ ದಾಖಲೆಗಳನ್ನು ಸಂಪಾದಿಸಿ - ಯಾವುದೇ ಲ್ಯಾಪ್‌ಟಾಪ್ ಅಗತ್ಯವಿಲ್ಲ!</string>
+    <string name="cta_4">ಈಗ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="des_5">Office 1 ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಎಲ್ಲಾ ಕಚೇರಿ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ!</string>
+    <string name="cta_5">ಈಗ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="now">ಈಗ</string>
+    <string name="do_not_allow">ಅನುಮತಿಸಬೇಡಿ</string>
+    <string name="to_send_you_notifications">ನಿಮಗೆ ಕಳುಹಿಸಲು \ nnotifications</string>
+    <string name="allow">ಅನುಮತಿಸು</string>
 </resources>

@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Надайте дозвіл на використання функцій програми</string>
     <string name="search_for_file">Пошук файлу</string>
     <string name="file_have_exit_file">Ім\'я файлу Вихід</string>
+    <string name="skip">Пропустити</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">Показати екран блокування PDF зчитувач</string>
+    <string name="des_1">Відкрийте та редагувати PDF, Word, Excel тощо!</string>
+    <string name="cta_1">Спробуйте зараз</string>
+    <string name="des_2">Перетворити зображення в PDF в одному натисканні!</string>
+    <string name="cta_2">Спробуйте зараз</string>
+    <string name="des_3">🔓 Розблокуйте будь -який файл - Переглянути, редагувати, легко конвертувати!</string>
+    <string name="cta_3">Спробуйте зараз</string>
+    <string name="des_4">Редагувати документи в будь -який час і де завгодно - ноутбук не потрібен!</string>
+    <string name="cta_4">Спробуйте зараз</string>
+    <string name="des_5">📂 Читайте та керуйте всіма офісними файлами в 1 додатку!</string>
+    <string name="cta_5">Спробуйте зараз</string>
+    <string name="now">Тепер</string>
+    <string name="do_not_allow">Не допускайте</string>
+    <string name="to_send_you_notifications">щоб надіслати вам \ nnotifications</string>
+    <string name="allow">Дозволяти</string>
 </resources>

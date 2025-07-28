@@ -2,11 +2,14 @@ package com.azg.pdf8.ui.main.document
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
 import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
 import com.azg.pdf8.ads.ads.native.NativePlacement
@@ -51,22 +54,23 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
         }, onMenuClick = { view, doc, pos ->
             popupHerper?.show(view, doc)
         }) {
-            if (it.type == DocumentType.Pdf) {
-                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
-            } else {
-                val docKey = when (it.type) {
-                    DocumentType.Doc -> Constant.Doc
-                    DocumentType.Excel -> Constant.Xls
-                    else -> Constant.Ppt
-                }
-                launchActivity<ReadDocumentActivity>(
-                    hashMapOf(
-                        Constant.DOCUMENT_TYPE to docKey,
-                        Constant.ARG_MEDIA_MODEL to it
+            InterstitialAdManager.showInterAll(this@RecentActivity) {
+                if (it.type == DocumentType.Pdf) {
+                    launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+                } else {
+                    val docKey = when (it.type) {
+                        DocumentType.Doc -> Constant.Doc
+                        DocumentType.Excel -> Constant.Xls
+                        else -> Constant.Ppt
+                    }
+                    launchActivity<ReadDocumentActivity>(
+                        hashMapOf(
+                            Constant.DOCUMENT_TYPE to docKey,
+                            Constant.ARG_MEDIA_MODEL to it
+                        )
                     )
-                )
+                }
             }
-
             documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(this@RecentActivity)
     }
@@ -83,11 +87,9 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
     fun requestAds() {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_recent_file", LayoutSelector.getLayout(
-                    remoteConfig.n110Config2.layout
-                )
+                "native_recent_file",
             ) {
-                (callToActionView as? Button)?.setBackgroundTintCompat(pdfColor)
+                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(pdfColor)
             }
             requestAds()
         }

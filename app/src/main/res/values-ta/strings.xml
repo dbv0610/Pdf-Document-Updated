@@ -163,4 +163,5 @@
     <string name="do_not_allow">அனுமதிக்க வேண்டாம்</string>
     <string name="to_send_you_notifications">உங்களுக்கு அனுப்ப \ nnotifications</string>
     <string name="allow">அனுமதி</string>
+    <string name="are_you_sure_you_want_to_close_the_app">பயன்பாட்டை மூட விரும்புகிறீர்களா?</string>
 </resources>

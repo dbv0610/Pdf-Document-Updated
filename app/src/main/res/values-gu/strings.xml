@@ -163,4 +163,5 @@
     <string name="do_not_allow">મંજૂરી આપશો નહીં</string>
     <string name="to_send_you_notifications">તમને મોકલવા માટે n નોટિફિકેશન</string>
     <string name="allow">મંજૂરી આપવી</string>
+    <string name="are_you_sure_you_want_to_close_the_app">શું તમે ખરેખર એપ્લિકેશનને બંધ કરવા માંગો છો?</string>
 </resources>

@@ -163,4 +163,5 @@
     <string name="do_not_allow">Huwag payagan</string>
     <string name="to_send_you_notifications">Upang magpadala sa iyo ng \ nnotification</string>
     <string name="allow">Payagan</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Sigurado ka bang nais mong isara ang app?</string>
 </resources>

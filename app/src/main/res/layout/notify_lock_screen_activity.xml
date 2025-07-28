@@ -82,6 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_4sdp"
                     android:layout_weight="1"
+                    android:singleLine="true"
                     android:text="@string/now"
                     android:textColor="@color/black" />
 
@@ -91,7 +92,8 @@
                     android:layout_height="@dimen/_30sdp"
                     android:layout_gravity="end"
                     android:padding="@dimen/_6sdp"
-                    android:src="@drawable/ic_rounded_close" />
+                    android:src="@drawable/ic_rounded_close"
+                    app:tint="@color/black" />
             </LinearLayout>
 
             <LinearLayout
@@ -146,10 +148,7 @@
                     android:text="@string/cta_1"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_13sdp"
-                    app:bgGdOrientation="left_right"
-                    app:bgGradientEnd="@color/gdEnd"
-                    app:bgGradientStart="@color/gdStart"
-                    app:bgIsGradient="true"
+                    app:bgColorAll="@color/color_background"
                     app:cornerRadius="@dimen/_20sdp" />
             </LinearLayout>
         </LinearLayout>

@@ -163,4 +163,5 @@
     <string name="do_not_allow">Не дозвољавајте</string>
     <string name="to_send_you_notifications">да вам пошаље \ Нтициоус</string>
     <string name="allow">Дозволити</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Јесте ли сигурни да желите да затворите апликацију?</string>
 </resources>

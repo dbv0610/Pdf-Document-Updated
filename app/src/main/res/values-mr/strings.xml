@@ -163,4 +163,5 @@
     <string name="do_not_allow">परवानगी देऊ नका</string>
     <string name="to_send_you_notifications">आपल्याला पाठविण्यासाठी \ notifications</string>
     <string name="allow">परवानगी द्या</string>
+    <string name="are_you_sure_you_want_to_close_the_app">आपणास खात्री आहे की आपण अ‍ॅप बंद करू इच्छिता?</string>
 </resources>

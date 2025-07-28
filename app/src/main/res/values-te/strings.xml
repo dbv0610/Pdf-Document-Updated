@@ -163,4 +163,5 @@
     <string name="do_not_allow">అనుమతించవద్దు</string>
     <string name="to_send_you_notifications">మీకు \ nnotifications పంపడానికి</string>
     <string name="allow">అనుమతించండి</string>
+    <string name="are_you_sure_you_want_to_close_the_app">మీరు ఖచ్చితంగా అనువర్తనాన్ని మూసివేయాలనుకుంటున్నారా?</string>
 </resources>

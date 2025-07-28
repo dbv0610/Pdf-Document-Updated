@@ -163,4 +163,5 @@
     <string name="do_not_allow">許可しないでください</string>
     <string name="to_send_you_notifications">\ nonotificationsを送信します</string>
     <string name="allow">許可する</string>
+    <string name="are_you_sure_you_want_to_close_the_app">アプリを閉じたいですか？</string>
 </resources>

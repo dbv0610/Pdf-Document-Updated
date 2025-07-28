@@ -163,4 +163,5 @@
     <string name="do_not_allow">İzin vermeyin</string>
     <string name="to_send_you_notifications">Size \ nnotifications göndermek için</string>
     <string name="allow">İzin vermek</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Uygulamayı kapatmak istediğinden emin misiniz?</string>
 </resources>

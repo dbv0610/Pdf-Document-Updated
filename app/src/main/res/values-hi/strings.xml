@@ -163,4 +163,5 @@
     <string name="do_not_allow">इजाजत न दें</string>
     <string name="to_send_you_notifications">आपको \ nnotifications भेजने के लिए</string>
     <string name="allow">अनुमति दें</string>
+    <string name="are_you_sure_you_want_to_close_the_app">क्या आप सुनिश्चित हैं कि आप ऐप बंद करना चाहते हैं?</string>
 </resources>

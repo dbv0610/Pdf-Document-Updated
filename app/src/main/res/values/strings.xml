@@ -173,4 +173,5 @@
     <string name="do_not_allow">Do not allow</string>
     <string name="to_send_you_notifications"> to send you\nnotifications</string>
     <string name="allow">Allow</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Are you sure you want to close the app?</string>
 </resources>

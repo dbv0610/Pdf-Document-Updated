@@ -163,4 +163,5 @@
     <string name="do_not_allow">Nedovolte</string>
     <string name="to_send_you_notifications">poslat vám \ nnotifications</string>
     <string name="allow">Povolit</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Jste si jisti, že chcete aplikaci zavřít?</string>
 </resources>

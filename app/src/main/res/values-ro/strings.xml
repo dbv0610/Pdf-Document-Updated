@@ -163,4 +163,5 @@
     <string name="do_not_allow">Nu permiteți</string>
     <string name="to_send_you_notifications">Pentru a vă trimite \ nnotificări</string>
     <string name="allow">Permite</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Ești sigur că vrei să închizi aplicația?</string>
 </resources>

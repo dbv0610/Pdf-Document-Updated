@@ -163,4 +163,5 @@
     <string name="do_not_allow">Sta niet toe</string>
     <string name="to_send_you_notifications">om u \ nnotificaties te sturen</string>
     <string name="allow">Toestaan</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Weet u zeker dat u de app wilt sluiten?</string>
 </resources>

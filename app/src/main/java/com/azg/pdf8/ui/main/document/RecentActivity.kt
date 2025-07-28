@@ -96,6 +96,10 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
     }
 
     override fun initialize() {
+        popupHerper = PopupDataHelper.with(
+            this@RecentActivity,
+            PopupMenuActionBinding::inflate
+        )
         popupHerper?.onBindData { binding, popup, model ->
             binding.lnShare.click {
                 shareFileWithPath(this@RecentActivity, model?.path ?: "")

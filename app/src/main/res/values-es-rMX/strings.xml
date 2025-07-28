@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Otorgar permiso para usar las funciones de solicitud</string>
     <string name="search_for_file">Buscar archivo</string>
     <string name="file_have_exit_file">El nombre del archivo tiene salida</string>
+    <string name="skip">Saltar</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Mostrar lector de PDF de la pantalla de bloqueo</string>
+    <string name="des_1">¡Abra y edite PDF, Word, Excel y más!</string>
+    <string name="cta_1">Intentarlo ahora</string>
+    <string name="des_2">¡Convierta las imágenes en PDF en un toque!</string>
+    <string name="cta_2">Intentarlo ahora</string>
+    <string name="des_3">🔓 Desbloquee cualquier archivo: ver, editar, convertir fácilmente!</string>
+    <string name="cta_3">Intentarlo ahora</string>
+    <string name="des_4">Edite documentos en cualquier momento, en cualquier lugar, ¡no se necesita una computadora portátil!</string>
+    <string name="cta_4">Intentarlo ahora</string>
+    <string name="des_5">📂 ¡Lea y administre todos los archivos de oficina en 1 aplicación!</string>
+    <string name="cta_5">Intentarlo ahora</string>
+    <string name="now">Ahora</string>
+    <string name="do_not_allow">No permita</string>
+    <string name="to_send_you_notifications">para enviarte \ nnotificaciones</string>
+    <string name="allow">Permitir</string>
 </resources>

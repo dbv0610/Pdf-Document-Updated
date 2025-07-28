@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">アプリケーション関数を使用する許可を付与します</string>
     <string name="search_for_file">ファイルを検索します</string>
     <string name="file_have_exit_file">ファイル名に出口があります</string>
+    <string name="skip">スキップ</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">ロック画面PDFリーダーを表示します</string>
+    <string name="des_1">PDF、Word、Excelなどを開いて編集してください！</string>
+    <string name="cta_1">今すぐ試してみてください</string>
+    <string name="des_2">1つのタップで画像をPDFに変換します！</string>
+    <string name="cta_2">今すぐ試してみてください</string>
+    <string name="des_3">fileファイルのロックを解除する - 表示、編集、簡単に変換！</string>
+    <string name="cta_3">今すぐ試してみてください</string>
+    <string name="des_4">いつでも、いつでもドキュメントを編集します - ラップトップは必要ありません！</string>
+    <string name="cta_4">今すぐ試してみてください</string>
+    <string name="des_5">apps 1つのアプリですべてのオフィスファイルを読み取り、管理してください！</string>
+    <string name="cta_5">今すぐ試してみてください</string>
+    <string name="now">今</string>
+    <string name="do_not_allow">許可しないでください</string>
+    <string name="to_send_you_notifications">\ nonotificationsを送信します</string>
+    <string name="allow">許可する</string>
 </resources>

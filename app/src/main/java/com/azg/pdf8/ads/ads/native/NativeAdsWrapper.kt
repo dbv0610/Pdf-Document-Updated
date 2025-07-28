@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ads.control.ads.AzAdCallback
@@ -92,7 +93,7 @@ class NativeAdsWrapper(
             setShimmerLayoutView(shimmerView.invoke())
             tag?.let { setTagForDebug(it) }
             activityRef.get()?.let { activity ->
-                if (config.displayLayoutId != null) {
+
                     setCustomContentView { nativeAd ->
                         nativeAd.layoutCustomNative =
                             config.displayLayoutId ?: config.preloadLayoutId()
@@ -103,105 +104,29 @@ class NativeAdsWrapper(
                             shimmerView()
                         )
                     }
-                }
+
             }
         }
     }
 
-    fun setupNativeAd(tag: String? = null, layoutId: Int, block: NativeAdView.() -> Unit = {}) {
+    fun setupNativeAd(tag: String? = null, block: NativeAdView.() -> Unit = {}) {
         nativeAdHelper.apply {
             setNativeContentView(adContainer.invoke())
             setShimmerLayoutView(shimmerView.invoke())
             tag?.let { setTagForDebug(it) }
             activityRef.get()?.let { activity ->
                 setCustomContentView { nativeAd ->
-                    nativeAd.layoutCustomNative = layoutId
-                    populateNativeAdView(
+                    nativeAd.layoutCustomNative =
+                        config.displayLayoutId ?: config.preloadLayoutId()
+                    AzAds.getInstance().populateNativeAdView(
                         activity,
                         nativeAd,
                         adContainer(),
-                        shimmerView(), block
+                        shimmerView()
                     )
                 }
-            }
-        }
-    }
-
-    private fun populateUnifiedNativeAdView(
-        nativeAd: com.google.android.gms.ads.nativead.NativeAd,
-        adView: NativeAdView, block: NativeAdView.() -> Unit = {}
-    ) {
-        adView.mediaView = adView.findViewById(R.id.ad_media)
-        adView.headlineView = adView.findViewById(R.id.ad_headline)
-        adView.bodyView = adView.findViewById(R.id.ad_body)
-        adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
-        adView.iconView = adView.findViewById(R.id.ad_app_icon)
-        (adView.headlineView as TextView).text = nativeAd.headline
-        nativeAd.body?.let {
-            (adView.bodyView as TextView).apply {
-                visibility = View.VISIBLE
-                text = it
-            }
-        } ?: run { adView.bodyView?.visibility = View.GONE }
-
-        nativeAd.callToAction?.let {
-            (adView.callToActionView as Button).apply {
-                visibility = View.VISIBLE
-                text = it
-            }
-        } ?: run { adView.callToActionView?.visibility = View.GONE }
-
-        nativeAd.icon?.let {
-            (adView.iconView as ImageView).apply {
-                visibility = View.VISIBLE
-                setImageDrawable(it.drawable)
-            }
-        } ?: run { adView.iconView?.visibility = View.GONE }
-        adView.setNativeAd(nativeAd)
-        adView.block()
-    }
-    @SuppressLint("InflateParams")
-    fun populateNativeAdView(
-        activity: Activity,
-        apNativeAd: ApNativeAd,
-        adPlaceHolder: FrameLayout,
-        containerShimmerLoading: ShimmerFrameLayout, block: NativeAdView.() -> Unit = {}
-    ) {
-        if (apNativeAd.admobNativeAd == null && apNativeAd.nativeView == null) {
-            containerShimmerLoading.visibility = View.GONE
-            Log.e("AzAds", "populateNativeAdView failed : native is not loaded ")
-            return
-        }
-        val mediationProvider = AzAds.getInstance().mediationProvider
-        when (mediationProvider) {
-            AzAdConfig.PROVIDER_ADMOB -> {
-                val adView = LayoutInflater.from(activity)
-                    .inflate(apNativeAd.layoutCustomNative, null) as NativeAdView
-
-                containerShimmerLoading.stopShimmer()
-                containerShimmerLoading.visibility = View.GONE
-                adPlaceHolder.visibility = View.VISIBLE
-                apNativeAd.admobNativeAd?.let { admobAd ->
-                    populateUnifiedNativeAdView(
-                        admobAd,
-                        adView,
-                    ) { block() }
-                }
-                adPlaceHolder.removeAllViews()
-                adPlaceHolder.addView(adView)
-            }
-            AzAdConfig.PROVIDER_MAX -> {
-                containerShimmerLoading.stopShimmer()
-                containerShimmerLoading.visibility = View.GONE
-                adPlaceHolder.visibility = View.VISIBLE
-
-                adPlaceHolder.removeAllViews()
-                apNativeAd.nativeView?.parent
-                    ?.let { (it as? ViewGroup)?.removeAllViews() }
-                apNativeAd.nativeView?.let { adPlaceHolder.addView(it) }
-            }
-            else -> {
-                Log.w("AzAds", "Unknown mediation provider: $mediationProvider")
+                val adView= adContainer().getChildAt(0) as? NativeAdView
+                adView?.block()
             }
         }
     }

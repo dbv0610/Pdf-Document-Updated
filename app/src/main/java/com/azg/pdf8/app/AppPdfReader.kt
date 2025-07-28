@@ -63,7 +63,7 @@ class AppPdfReader : AdsMultiDexApplication() {
             AzAdConfig.ENVIRONMENT_PRODUCTION
         }
         azAdConfig = AzAdConfig(this, AzAdConfig.PROVIDER_ADMOB, environment)
-        azAdConfig.adjustConfig = AdjustConfig("z9lkseui8t8g")
+        azAdConfig.adjustConfig = AdjustConfig("jgw19c5mlc00")
         azAdConfig.appsflyerConfig = AppsflyerConfig(false, "")
         azAdConfig.listDeviceTest = listOf("C01E9C6F78D783B443CEA36BFBCBB212")
         AzAds.getInstance().init(this, azAdConfig, false)

@@ -3,10 +3,12 @@ package com.azg.pdf8.ui.main.document.pdf
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.PorterDuff
+import android.view.View
 import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
 import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.LayoutSelector
@@ -78,11 +80,8 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
     fun requestAds() {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_read_pdf", LayoutSelector.getLayout(
-                    remoteConfig.n110Config2.layout
-                )
-            ) {
-                (callToActionView as? Button)?.setBackgroundTintCompat(pdfColor)
+                "native_read_pdf") {
+                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(pdfColor)
             }
             requestAds()
         }

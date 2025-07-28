@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">اجازه استفاده از توابع برنامه را اعطا کنید</string>
     <string name="search_for_file">پرونده را جستجو کنید</string>
     <string name="file_have_exit_file">نام پرونده خروجی دارد</string>
+    <string name="skip">پرش</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">نمایش قفل صفحه نمایش PDF</string>
+    <string name="des_1">PDF ، Word ، Excel و موارد دیگر را باز و ویرایش کنید!</string>
+    <string name="cta_1">اکنون امتحان کنید</string>
+    <string name="des_2">تبدیل تصاویر به PDF در یک شیر آب!</string>
+    <string name="cta_2">اکنون امتحان کنید</string>
+    <string name="des_3">🔓 باز کردن هر پرونده - مشاهده ، ویرایش ، تبدیل به راحتی!</string>
+    <string name="cta_3">اکنون امتحان کنید</string>
+    <string name="des_4">اسناد را در هر زمان و هر مکان ویرایش کنید - به لپ تاپ نیاز ندارید!</string>
+    <string name="cta_4">اکنون امتحان کنید</string>
+    <string name="des_5">📂 تمام پرونده های اداری را در 1 برنامه بخوانید و مدیریت کنید!</string>
+    <string name="cta_5">اکنون امتحان کنید</string>
+    <string name="now">در حال حاضر</string>
+    <string name="do_not_allow">اجازه ندهید</string>
+    <string name="to_send_you_notifications">برای ارسال \ notifications</string>
+    <string name="allow">اجازه دادن</string>
 </resources>

@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Acordă permisiunea de a utiliza funcțiile aplicației</string>
     <string name="search_for_file">Căutați fișier</string>
     <string name="file_have_exit_file">Numele fișierului are ieșire</string>
+    <string name="skip">Skip</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Afișați ecranul de blocare cititor PDF</string>
+    <string name="des_1">Deschideți și editați PDF, Word, Excel și multe altele!</string>
+    <string name="cta_1">Încercați acum</string>
+    <string name="des_2">Convertiți imaginile în PDF într -un singur atingere!</string>
+    <string name="cta_2">Încercați acum</string>
+    <string name="des_3">🔓 Deblocați orice fișier - Vizualizați, editați, convertiți cu ușurință!</string>
+    <string name="cta_3">Încercați acum</string>
+    <string name="des_4">Editați documente oricând, oriunde - nu este nevoie de laptop!</string>
+    <string name="cta_4">Încercați acum</string>
+    <string name="des_5">📂 Citiți și gestionați toate fișierele Office în 1 aplicație!</string>
+    <string name="cta_5">Încercați acum</string>
+    <string name="now">Acum</string>
+    <string name="do_not_allow">Nu permiteți</string>
+    <string name="to_send_you_notifications">Pentru a vă trimite \ nnotificări</string>
+    <string name="allow">Permite</string>
 </resources>

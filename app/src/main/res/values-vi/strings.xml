@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Cấp quyền sử dụng các chức năng ứng dụng</string>
     <string name="search_for_file">Tìm kiếm tập tin</string>
     <string name="file_have_exit_file">Tên file đã tồn tại</string>
+    <string name="skip">Nhảy</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">Hiển thị khóa màn hình khóa PDF đầu đọc</string>
+    <string name="des_1">Mở &amp; chỉnh sửa PDF, Word, Excel, và nhiều hơn nữa!</string>
+    <string name="cta_1">Thử ngay</string>
+    <string name="des_2">Chuyển đổi hình ảnh thành PDF trong một lần nhấn!</string>
+    <string name="cta_2">Thử ngay</string>
+    <string name="des_3">Mở khóa mọi tập tin - Xem, chỉnh sửa, chuyển đổi dễ dàng!</string>
+    <string name="cta_3">Thử ngay</string>
+    <string name="des_4">Chỉnh sửa tài liệu mọi lúc, mọi nơi - không cần máy tính xách tay!</string>
+    <string name="cta_4">Thử ngay</string>
+    <string name="des_5">Đọc và quản lý tất cả các tệp văn phòng trong 1 ứng dụng!</string>
+    <string name="cta_5">Thử ngay</string>
+    <string name="now">Hiện nay</string>
+    <string name="do_not_allow">Không cho phép</string>
+    <string name="to_send_you_notifications">để gửi cho bạn \ nnotifications</string>
+    <string name="allow">Cho phép</string>
 </resources>

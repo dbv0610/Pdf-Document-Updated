@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">अनुप्रयोग कार्यों का उपयोग करने के लिए अनुदान की अनुमति</string>
     <string name="search_for_file">फ़ाइल के लिए खोजें</string>
     <string name="file_have_exit_file">फ़ाइल का नाम बाहर निकल गया है</string>
+    <string name="skip">छोडना</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">लॉक स्क्रीन पीडीएफ रीडर दिखाएं</string>
+    <string name="des_1">पीडीएफ, वर्ड, एक्सेल, और बहुत कुछ खोलें और संपादित करें!</string>
+    <string name="cta_1">अब कोशिश करो</string>
+    <string name="des_2">एक नल में पीडीएफ में छवियों को परिवर्तित करें!</string>
+    <string name="cta_2">अब कोशिश करो</string>
+    <string name="des_3">🔓 किसी भी फ़ाइल को अनलॉक करें - आसानी से देखो, संपादित करें, कन्वर्ट करें!</string>
+    <string name="cta_3">अब कोशिश करो</string>
+    <string name="des_4">किसी भी समय, कहीं भी दस्तावेज संपादित करें - कोई लैपटॉप की जरूरत नहीं है!</string>
+    <string name="cta_4">अब कोशिश करो</string>
+    <string name="des_5">1 ऐप में सभी कार्यालय फ़ाइलों को पढ़ें और प्रबंधित करें!</string>
+    <string name="cta_5">अब कोशिश करो</string>
+    <string name="now">अब</string>
+    <string name="do_not_allow">इजाजत न दें</string>
+    <string name="to_send_you_notifications">आपको \ nnotifications भेजने के लिए</string>
+    <string name="allow">अनुमति दें</string>
 </resources>

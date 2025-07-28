@@ -36,6 +36,7 @@ import com.azg.pdf8.dialog.PdfNameDialog
 import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.RecentDocument
+import com.azg.pdf8.ui.main.MainActivity
 import com.azg.pdf8.ui.main.document.pdf.PageViewType
 import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.Constant
@@ -84,6 +85,9 @@ class ReadDocumentActivity :
     BaseActivity<ActivityReadFileBinding>(ActivityReadFileBinding::inflate),
     IMainFrame {
     override fun backPressed() {
+        lifecycleScope.launch {
+            MainActivity.isShowRateFirstView.emit(true)
+        }
         finish()
     }
 
@@ -235,7 +239,12 @@ class ReadDocumentActivity :
                                         lastTimeView = System.currentTimeMillis()
                                     })
                                     InterstitialAdManager.showInterAll(this@ReadDocumentActivity) {
-                                        launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                        launchActivity<ReadPdfActivity>(
+                                            hashMapOf(
+                                                Constant.ARG_MEDIA_MODEL to document,
+                                                Constant.RateWhenCreate to true
+                                            )
+                                        )
                                     }
                                     finish()
                                 }

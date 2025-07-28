@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">PDF Reader - Document Reader</string>
-    <string name="fb_app_id" translatable="false">1111111111</string>
-    <string name="fb_client_token" translatable="false">2222222222222222222222</string>
+    <string name="fb_app_id" translatable="false">1076358997878679</string>
+    <string name="fb_client_token" translatable="false">f8c904d199424fb1ddbc349784deea11</string>
     <string name="language">Language</string>
     <string name="changes_applied">Changes applied!</string>
     <string name="applying_language">Applying language…</string>
@@ -158,4 +158,19 @@
     <string name="file_have_exit_file">File name have exit</string>
     <string name="skip">Skip</string>
     <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Show Lock Screen PDF Reader</string>
+    <string name="des_1">Open &amp; edit PDF, Word, Excel, and more!</string>
+    <string name="cta_1">Try now</string>
+    <string name="des_2">Convert images to PDF in one tap!</string>
+    <string name="cta_2">Try now</string>
+    <string name="des_3">🔓 Unlock any file – view, edit, convert easily!</string>
+    <string name="cta_3">Try now</string>
+    <string name="des_4">Edit documents anytime, anywhere – no laptop needed!</string>
+    <string name="cta_4">Try now</string>
+    <string name="des_5">📂 Read &amp; manage all office files in 1 app!</string>
+    <string name="cta_5">Try now</string>
+    <string name="now">Now</string>
+    <string name="do_not_allow">Do not allow</string>
+    <string name="to_send_you_notifications"> to send you\nnotifications</string>
+    <string name="allow">Allow</string>
 </resources>

@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">பயன்பாட்டு செயல்பாடுகளைப் பயன்படுத்த அனுமதி வழங்கவும்</string>
     <string name="search_for_file">கோப்பைத் தேடுங்கள்</string>
     <string name="file_have_exit_file">கோப்பு பெயர் வெளியேறும்</string>
+    <string name="skip">தவிர்க்கவும்</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">பூட்டு திரை PDF ரீடரைக் காட்டு</string>
+    <string name="des_1">PDF, வேர்ட், எக்செல் மற்றும் பலவற்றை திறந்து திருத்தவும்!</string>
+    <string name="cta_1">இப்போது முயற்சிக்கவும்</string>
+    <string name="des_2">படங்களை ஒரே தட்டில் PDF ஆக மாற்றவும்!</string>
+    <string name="cta_2">இப்போது முயற்சிக்கவும்</string>
+    <string name="des_3">File எந்தவொரு கோப்பையும் திறக்கவும் - காண்க, திருத்து, எளிதாக மாற்றவும்!</string>
+    <string name="cta_3">இப்போது முயற்சிக்கவும்</string>
+    <string name="des_4">எந்த நேரத்திலும், எங்கும் ஆவணங்களைத் திருத்தவும் - மடிக்கணினி தேவையில்லை!</string>
+    <string name="cta_4">இப்போது முயற்சிக்கவும்</string>
+    <string name="des_5">App 1 பயன்பாட்டில் உள்ள அனைத்து அலுவலக கோப்புகளையும் படித்து நிர்வகிக்கவும்!</string>
+    <string name="cta_5">இப்போது முயற்சிக்கவும்</string>
+    <string name="now">இப்போது</string>
+    <string name="do_not_allow">அனுமதிக்க வேண்டாம்</string>
+    <string name="to_send_you_notifications">உங்களுக்கு அனுப்ப \ nnotifications</string>
+    <string name="allow">அனுமதி</string>
 </resources>

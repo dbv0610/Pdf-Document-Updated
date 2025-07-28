@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Άδεια χορήγησης για χρήση των λειτουργιών εφαρμογής</string>
     <string name="search_for_file">Αναζήτηση αρχείου</string>
     <string name="file_have_exit_file">Το όνομα του αρχείου έχει έξοδο</string>
+    <string name="skip">Παραλείπω</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">Εμφάνιση οθόνης κλειδώματος ανάγνωση PDF</string>
+    <string name="des_1">Ανοίξτε &amp; Επεξεργασία PDF, Word, Excel και πολλά άλλα!</string>
+    <string name="cta_1">Δοκιμάστε τώρα</string>
+    <string name="des_2">Μετατρέψτε τις εικόνες σε PDF σε μία βρύση!</string>
+    <string name="cta_2">Δοκιμάστε τώρα</string>
+    <string name="des_3">🔓 Ξεκλειδώστε οποιοδήποτε αρχείο - προβολή, επεξεργασία, μετατρέψτε εύκολα!</string>
+    <string name="cta_3">Δοκιμάστε τώρα</string>
+    <string name="des_4">Επεξεργασία Τελειών οποτεδήποτε, οπουδήποτε - δεν χρειάζεται φορητό υπολογιστή!</string>
+    <string name="cta_4">Δοκιμάστε τώρα</string>
+    <string name="des_5">📂 Διαβάστε και διαχειριστείτε όλα τα αρχεία γραφείου σε 1 εφαρμογή!</string>
+    <string name="cta_5">Δοκιμάστε τώρα</string>
+    <string name="now">Τώρα</string>
+    <string name="do_not_allow">Μην το επιτρέπετε</string>
+    <string name="to_send_you_notifications">για να σας στείλει \ nnotifications</string>
+    <string name="allow">Επιτρέπω</string>
 </resources>

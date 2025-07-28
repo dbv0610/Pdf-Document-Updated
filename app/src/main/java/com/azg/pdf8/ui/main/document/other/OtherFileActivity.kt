@@ -2,6 +2,7 @@ package com.azg.pdf8.ui.main.document.other
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.view.View
 import android.widget.Button
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -83,11 +84,8 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
     fun requestAds(color: Int) {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_choose_image", LayoutSelector.getLayout(
-                    remoteConfig.n110Config2.layout
-                )
-            ) {
-                (callToActionView as? Button)?.setBackgroundTintCompat(color)
+                "native_choose_image" ) {
+                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(color)
             }
             requestAds()
         }

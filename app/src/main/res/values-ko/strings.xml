@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">응용 프로그램 기능을 사용할 수있는 권한을 부여합니다</string>
     <string name="search_for_file">파일 검색</string>
     <string name="file_have_exit_file">파일 이름이 종료되었습니다</string>
+    <string name="skip">건너뛰다</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">잠금 화면 PDF 리더 표시</string>
+    <string name="des_1">PDF, Word, Excel 등을 열고 편집하십시오!</string>
+    <string name="cta_1">지금 시도하십시오</string>
+    <string name="des_2">한 탭에서 이미지를 PDF로 변환하십시오!</string>
+    <string name="cta_2">지금 시도하십시오</string>
+    <string name="des_3">file 파일 잠금 해제 -보기, 편집, 쉽게 변환하십시오!</string>
+    <string name="cta_3">지금 시도하십시오</string>
+    <string name="des_4">언제 어디서나 문서 편집 - 노트북이 필요하지 않습니다!</string>
+    <string name="cta_4">지금 시도하십시오</string>
+    <string name="des_5">📂 1 앱에서 모든 사무실 파일을 읽고 관리하십시오!</string>
+    <string name="cta_5">지금 시도하십시오</string>
+    <string name="now">지금</string>
+    <string name="do_not_allow">허용하지 마십시오</string>
+    <string name="to_send_you_notifications">당신에게 \ notifications를 보내기 위해</string>
+    <string name="allow">허용하다</string>
 </resources>

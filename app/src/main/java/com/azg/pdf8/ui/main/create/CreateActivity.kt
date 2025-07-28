@@ -167,7 +167,12 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                     lastTimeView = System.currentTimeMillis()
                                 })
                                 InterstitialAdManager.showInterAll(this@CreateActivity) {
-                                    launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                    launchActivity<ReadPdfActivity>(
+                                        hashMapOf(
+                                            Constant.ARG_MEDIA_MODEL to document,
+                                            Constant.RateWhenCreate to true
+                                        )
+                                    )
                                 }
                                 finish()
                             }

@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Povolení k použití funkcí aplikací</string>
     <string name="search_for_file">Vyhledat soubor</string>
     <string name="file_have_exit_file">Název souboru mají ukončení</string>
+    <string name="skip">Přeskočit</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Zobrazit zámek obrazovky PDF Reader</string>
+    <string name="des_1">Otevřete a upravte PDF, slovo, Excel a další!</string>
+    <string name="cta_1">Zkuste to hned</string>
+    <string name="des_2">Převeďte obrázky na PDF v jednom klepnutí!</string>
+    <string name="cta_2">Zkuste to hned</string>
+    <string name="des_3">🔓 Odemkněte jakýkoli soubor - Zobrazit, upravit, snadno převést!</string>
+    <string name="cta_3">Zkuste to hned</string>
+    <string name="des_4">Upravit dokumenty kdykoli, kdekoli - není potřeba žádný notebook!</string>
+    <string name="cta_4">Zkuste to hned</string>
+    <string name="des_5">📂 Přečtěte si a spravujte všechny kancelářské soubory v 1 aplikaci!</string>
+    <string name="cta_5">Zkuste to hned</string>
+    <string name="now">Teď</string>
+    <string name="do_not_allow">Nedovolte</string>
+    <string name="to_send_you_notifications">poslat vám \ nnotifications</string>
+    <string name="allow">Povolit</string>
 </resources>

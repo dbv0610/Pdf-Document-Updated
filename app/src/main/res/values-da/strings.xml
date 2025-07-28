@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Tilskud tilladelse til at bruge applikationsfunktionerne</string>
     <string name="search_for_file">Søg efter fil</string>
     <string name="file_have_exit_file">Error 500 (Server Error)!!1500.That’s an error.There was an error. Please try again later.That’s all we know.</string>
+    <string name="skip">Springe</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">Vis låseskærm PDF -læser</string>
+    <string name="des_1">Åbn &amp; rediger PDF, Word, Excel og mere!</string>
+    <string name="cta_1">Prøv nu</string>
+    <string name="des_2">Konverter billeder til PDF i et tryk!</string>
+    <string name="cta_2">Prøv nu</string>
+    <string name="des_3">🔓 Lås op for enhver fil - Vis, rediger, konverteres let!</string>
+    <string name="cta_3">Prøv nu</string>
+    <string name="des_4">Rediger dokumenter når som helst og hvor som helst - ingen bærbar computer er nødvendig!</string>
+    <string name="cta_4">Prøv nu</string>
+    <string name="des_5">📂 Læs og administrer alle kontorfiler i 1 app!</string>
+    <string name="cta_5">Prøv nu</string>
+    <string name="now">Nu</string>
+    <string name="do_not_allow">Tillad ikke</string>
+    <string name="to_send_you_notifications">at sende dig \ nnotifications</string>
+    <string name="allow">Tillade</string>
 </resources>

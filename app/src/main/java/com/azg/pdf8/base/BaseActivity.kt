@@ -17,6 +17,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.viewbinding.ViewBinding
 import com.azg.pdf8.R
 import com.azg.pdf8.app.toastShort
+import com.azg.pdf8.dialog.RatingDialog
 import com.dong.baselib.api.isApi33orHigher
 import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.permission.Permission
@@ -29,6 +30,9 @@ abstract class BaseActivity<VB : ViewBinding>(
     private var fullStatus: Boolean = false,
 ) : BaseActivity<VB>(bindingFactory, fullStatus) {
     val permission by inject<Permission>()
+    protected val rattingDialog by lazy {
+        RatingDialog(this)
+    }
     var requestCameraLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->

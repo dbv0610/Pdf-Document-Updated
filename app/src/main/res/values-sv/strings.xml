@@ -146,4 +146,21 @@
     <string name="request_permission_need_to_use_fun">Bidrag tillåtet att använda applikationsfunktionerna</string>
     <string name="search_for_file">Sök efter fil</string>
     <string name="file_have_exit_file">Filnamn har utgång</string>
+    <string name="skip">Hoppa</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Visa låsskärm PDF -läsare</string>
+    <string name="des_1">Öppna &amp; redigera PDF, Word, Excel och mer!</string>
+    <string name="cta_1">Försök nu</string>
+    <string name="des_2">Konvertera bilder till PDF i en kran!</string>
+    <string name="cta_2">Försök nu</string>
+    <string name="des_3">🔓 Lås upp alla filer - Visa, redigera, konvertera enkelt!</string>
+    <string name="cta_3">Försök nu</string>
+    <string name="des_4">Redigera dokument när som helst, var som helst - ingen bärbar dator behövs!</string>
+    <string name="cta_4">Försök nu</string>
+    <string name="des_5">📂 Läs och hantera alla kontorsfiler i 1 app!</string>
+    <string name="cta_5">Försök nu</string>
+    <string name="now">Nu</string>
+    <string name="do_not_allow">Tillåta inte</string>
+    <string name="to_send_you_notifications">för att skicka dig \ nnotifications</string>
+    <string name="allow">Tillåta</string>
 </resources>

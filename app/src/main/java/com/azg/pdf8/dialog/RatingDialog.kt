@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.ads.control.admob.AppOpenManager
 import com.azg.pdf8.R
 import com.azg.pdf8.app.rateApp
 import com.azg.pdf8.app.toastShort
@@ -34,9 +35,12 @@ class RatingDialog(val activity: AppCompatActivity) :
             }
             if (binding.ratingBar.getRating() >= 4) {
                 requestReview()
-            } else {
                 dismiss()
-                //AppOpenManager.getInstance().disableAppResume()
+                SystemUtil.forceRated(activity)
+            } else {
+                SystemUtil.forceRated(activity)
+
+                AppOpenManager.getInstance().disableAdResumeByClickAction()
                 composeEmail()
             }
         }
@@ -99,7 +103,6 @@ class RatingDialog(val activity: AppCompatActivity) :
     private fun rateApp() {
         activity.rateApp {
             activity.toastShort(activity.getString(R.string.thanks_for_your_rating))
-            SystemUtil.forceRated(activity)
             onFinishRate()
             dismiss()
         }
@@ -129,10 +132,9 @@ class RatingDialog(val activity: AppCompatActivity) :
     override fun dismiss() {
         super.dismiss()
         onDismiss.invoke()
-
     }
-    private fun composeEmail() {
 
+    private fun composeEmail() {
         val emailIntent = Intent(Intent.ACTION_SENDTO)
         emailIntent.data = Uri.parse("mailto:")
         emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("support@azuraglobal.app"))

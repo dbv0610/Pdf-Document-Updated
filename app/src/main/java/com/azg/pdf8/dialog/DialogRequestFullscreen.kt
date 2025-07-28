@@ -14,6 +14,8 @@ class DialogRequestFullscreen(activity: Context, var callback: () -> Unit = {}) 
     ) {
     override fun DialogFullScreenPermissionBinding.initView() {
         tvTitle.text = textStyle {
+            normal(context.getString(R.string.allow))
+            normal(" ")
             boldItalic(context.getString(R.string.app_name))
             normal(" "+context.getString(R.string.to_send_you_notifications))
         }

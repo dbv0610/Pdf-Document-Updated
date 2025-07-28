@@ -80,7 +80,8 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
     fun requestAds() {
         with(nativeAdsWrapper) {
             setupNativeAd(
-                "native_read_pdf") {
+                "native_read_pdf"
+            ) {
                 findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(pdfColor)
             }
             requestAds()
@@ -121,7 +122,7 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                 }.show()
             }
         }
-        requestAds()
+
     }
 
     override fun ActivityPdfBinding.setData() {
@@ -132,6 +133,8 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                 if (it.isEmpty()) {
                     rcvListData.gone()
                     lnNoData.visible()
+                    binding.flNativeAd.gone()
+                    nativeAdsWrapper.cancelRequest()
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
@@ -144,6 +147,8 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                             layoutManager.scrollToPositionWithOffset(0, 0)
                         }
                     }
+                    binding.flNativeAd.visible()
+                    requestAds()
                 }
             }
         }

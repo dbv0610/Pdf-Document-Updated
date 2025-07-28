@@ -31,6 +31,9 @@ class DialogPermission(context: Context) :
         with(nativeAdsWrapper) {
             setupNativeAd("native_permission")
             requestAds()
+            registerAdCallbacks(onClicked = {
+                dismiss()
+            })
         }
         return this@DialogPermission
     }

@@ -163,4 +163,5 @@
     <string name="do_not_allow">Tidak mengijinkan</string>
     <string name="to_send_you_notifications">untuk mengirimi Anda notification</string>
     <string name="allow">Mengizinkan</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Apakah Anda yakin ingin menutup aplikasi?</string>
 </resources>

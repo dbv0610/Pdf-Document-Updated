@@ -163,4 +163,5 @@
     <string name="do_not_allow">Не допускайте</string>
     <string name="to_send_you_notifications">щоб надіслати вам \ nnotifications</string>
     <string name="allow">Дозволяти</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Ви впевнені, що хочете закрити додаток?</string>
 </resources>

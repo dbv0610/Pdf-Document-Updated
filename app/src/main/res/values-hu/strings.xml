@@ -163,4 +163,5 @@
     <string name="do_not_allow">Ne engedje meg</string>
     <string name="to_send_you_notifications">hogy elküldje neked \ nnotifikációk</string>
     <string name="allow">Megenged</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Biztosan szeretné bezárni az alkalmazást?</string>
 </resources>

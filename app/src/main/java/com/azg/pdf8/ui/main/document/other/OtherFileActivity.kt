@@ -83,8 +83,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
 
     fun requestAds(color: Int) {
         with(nativeAdsWrapper) {
-            setupNativeAd(
-                "native_choose_image" ) {
+            setupNativeAd("native_document_file" ) {
                 findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(color)
             }
             requestAds()
@@ -144,13 +143,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                 }.show()
             }
         }
-        requestAds(
-            when (documentType) {
-                DocumentType.Doc -> docColor
-                DocumentType.Excel -> xlsColor
-                else -> pptColor
-            }
-        )
+
     }
 
     override fun ActivityOtherBinding.setData() {
@@ -161,6 +154,8 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                 if (it.isEmpty()) {
                     rcvListData.gone()
                     lnNoData.visible()
+                    binding.flNativeAd.gone()
+                    nativeAdsWrapper.cancelRequest()
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
@@ -173,6 +168,14 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                             layoutManager.scrollToPositionWithOffset(0, 0)
                         }
                     }
+                    binding.flNativeAd.visible()
+                    requestAds(
+                        when (documentType) {
+                            DocumentType.Doc -> docColor
+                            DocumentType.Excel -> xlsColor
+                            else -> pptColor
+                        }
+                    )
                 }
             }
         }

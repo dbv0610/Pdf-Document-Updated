@@ -19,8 +19,8 @@ android {
         applicationId = "com.azg.pdf8"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val formattedDate = SimpleDateFormat("MMM.dd.yyyy").format(Date())

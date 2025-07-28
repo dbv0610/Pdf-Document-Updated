@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingHorizontal="@dimen/_8sdp"
-            android:paddingVertical="@dimen/_4sdp"
+            android:paddingVertical="@dimen/_6sdp"
             app:cornerRadius="@dimen/_50sdp"
             app:stColorAll="@color/white"
             app:strokeWidth="1.2dp">
@@ -407,7 +407,7 @@
                     android:paddingVertical="@dimen/_10sdp"
                     android:text="@string/allow_access"
                     android:textColor="@color/white"
-                    app:bgColorAll="@color/mainColor"
+                    app:bgColorAll="#BA0508"
                     app:cornerRadius="@dimen/_8sdp" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,9 +13,9 @@
 
     <ImageView
         android:id="@+id/ivNotify"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_notification_fill"
+        android:layout_width="@dimen/_28sdp"
+        android:layout_height="@dimen/_28sdp"
+        android:src="@drawable/ic_noti_lock"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -61,7 +61,6 @@
         android:text="@string/do_not_allow"
         android:textColor="@color/_8c8c8c"
         android:textSize="@dimen/_13sdp"
-        app:bgColorAll="@color/color_f5f5f5"
         app:cornerRadius="@dimen/_20sdp" />
 </com.dong.baselib.widget.layout.UiLinearLayout>
 

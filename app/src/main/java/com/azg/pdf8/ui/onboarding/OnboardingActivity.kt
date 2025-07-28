@@ -101,11 +101,13 @@ class OnboardingActivity :
             .count { it is OnboardingFragment } - 1
 
         binding.indicatorView.setIndicatorActive(indicatorIndex)
+        binding.tvTitle.text = getString(titles[indicatorIndex])
+        binding.tvContent.text = getString(contents[indicatorIndex])
     }
 
     private fun updateTextNext() {
         val nextText =
-            if (binding.viewPager.currentItem == listFragment.lastIndex) R.string.done else R.string.next
+            if (binding.viewPager.currentItem == listFragment.lastIndex) R.string.continues else R.string.next
         binding.tvNext.text = getString(nextText)
     }
 
@@ -128,9 +130,6 @@ class OnboardingActivity :
                 NativeAdPreloadManager.preloadAd(this, NativePlacement.FEATURE, buffer = 2, false)
             }
         }
-        val idx = position.coerceIn(0, titles.lastIndex)
-        binding.tvTitle.text = getString(titles[idx])
-        binding.tvContent.text = getString(contents[idx])
     }
 
     fun nextPage() {

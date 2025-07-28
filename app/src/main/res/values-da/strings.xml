@@ -163,4 +163,5 @@
     <string name="do_not_allow">Tillad ikke</string>
     <string name="to_send_you_notifications">at sende dig \ nnotifications</string>
     <string name="allow">Tillade</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Er du sikker på, at du vil lukke appen?</string>
 </resources>

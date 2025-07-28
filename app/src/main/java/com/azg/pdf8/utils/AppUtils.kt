@@ -77,6 +77,7 @@ object AppUtils {
         }
         return results
     }
+
     fun <T> scanMedia(
         context: Context,
         fileFilter: (File) -> Boolean,
@@ -85,7 +86,6 @@ object AppUtils {
         val storagePaths = AppUtils.getSdStorageDirectories(context).toMutableList()
         val externalStorage = Environment.getExternalStorageDirectory()
         if (externalStorage.exists()) storagePaths.add(externalStorage.absolutePath)
-
         val directories = ArrayDeque<File>()
         storagePaths
             .map(::File)
@@ -105,7 +105,6 @@ object AppUtils {
     }
         .onEach { delay(1) }
         .flowOn(Dispatchers.IO)
-
 
     fun scanAllDocumentsFlow(
         context: Context,
@@ -131,11 +130,11 @@ object AppUtils {
                     else -> DocumentType.Doc
                 }
                 RecentDocument(
-                    mediaId      = id,
-                    path         = file.absolutePath,
+                    mediaId = id,
+                    path = file.absolutePath,
                     lastModified = file.lastModified(),
-                    size         = file.length(),
-                    type         = type
+                    size = file.length(),
+                    type = type
                 )
             }
         ).onEach { doc ->
@@ -187,17 +186,20 @@ object AppUtils {
                     }
                     val lastModified = it.getLong(dateCol) * 1000L
                     val size = it.getLong(sizeCol)
-                    result.add(
-                        RecentDocument(
-                            mediaId = id,
-                            path = path,
-                            lastModified = lastModified,
-                            size = size,
-                            type = DocumentType.Image
+                    if (size != 0L) {
+                        result.add(
+                            RecentDocument(
+                                mediaId = id,
+                                path = path,
+                                lastModified = lastModified,
+                                size = size,
+                                type = DocumentType.Image
+                            )
                         )
-                    )
-                    processed++
-                    emit(ScanState.Progress(processed = processed, total = total))
+
+                        processed++
+                        emit(ScanState.Progress(processed = processed, total = total))
+                    }
                 }
             }
             emit(ScanState.Success(result))

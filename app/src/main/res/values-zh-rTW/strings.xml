@@ -163,4 +163,5 @@
     <string name="do_not_allow">不允許</string>
     <string name="to_send_you_notifications">向您發送\ nnotifications</string>
     <string name="allow">允許</string>
+    <string name="are_you_sure_you_want_to_close_the_app">您確定要關閉該應用程序嗎？</string>
 </resources>

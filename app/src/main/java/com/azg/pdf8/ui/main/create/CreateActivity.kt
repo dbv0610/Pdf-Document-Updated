@@ -30,6 +30,7 @@ import com.azg.pdf8.viewmodel.CreateViewModel
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.viewmodel.OnCreateFile
 import com.dong.baselib.widget.click
+import com.dong.baselib.widget.delay
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
 import kotlinx.coroutines.CoroutineScope
@@ -173,8 +174,8 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                             Constant.RateWhenCreate to true
                                         )
                                     )
+                                    finish()
                                 }
-                                finish()
                             }
                         }
 
@@ -205,6 +206,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                     )
                     viewModel.addData(model)
                     binding.progressBar.gone()
+                } ?: run {
+                    toastShort(getString(R.string.can_create_pdf))
+                    delay(1500) {
+                        finish()
+                    }
                 }
             } else {
                 getData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_NEW)?.let { data ->
@@ -213,6 +219,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                         binding.progressBar.gone()
                     } else {
                         binding.progressBar.visible()
+                    }
+                } ?: run {
+                    toastShort(getString(R.string.can_create_pdf))
+                    delay(1500) {
+                        finish()
                     }
                 }
             }
@@ -223,6 +234,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                     binding.progressBar.gone()
                 } else {
                     binding.progressBar.visible()
+                }
+            } ?: run {
+                toastShort(getString(R.string.can_create_pdf))
+                delay(1500) {
+                    finish()
                 }
             }
         }

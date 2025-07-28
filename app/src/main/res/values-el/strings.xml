@@ -163,4 +163,5 @@
     <string name="do_not_allow">Μην το επιτρέπετε</string>
     <string name="to_send_you_notifications">για να σας στείλει \ nnotifications</string>
     <string name="allow">Επιτρέπω</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Είστε βέβαιοι ότι θέλετε να κλείσετε την εφαρμογή;</string>
 </resources>

@@ -163,4 +163,5 @@
     <string name="do_not_allow">אל תאפשר</string>
     <string name="to_send_you_notifications">כדי לשלוח לך \ nnotifications</string>
     <string name="allow">לְהַתִיר</string>
+    <string name="are_you_sure_you_want_to_close_the_app">האם אתה בטוח שאתה רוצה לסגור את האפליקציה?</string>
 </resources>

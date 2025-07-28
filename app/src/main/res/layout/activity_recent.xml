@@ -83,7 +83,6 @@
                 <ImageView
                     android:id="@+id/icSearch"
                     android:padding="@dimen/_3sdp"
-                    android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_width="@dimen/_24sdp"
                     android:src="@drawable/ic_app_search"
                     android:layout_height="@dimen/_24sdp"/>
@@ -91,7 +90,7 @@
             </com.dong.baselib.widget.layout.UiLinearLayout>
 
             <com.dong.baselib.widget.view.RoundImageView
-                android:layout_width="@dimen/_34sdp"
+                android:layout_width="0dp"
                 android:id="@+id/lnSortData"
                 android:layout_marginStart="@dimen/_8sdp"
                 app:bgColorAll="@color/color_f5f5f5"

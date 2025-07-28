@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
@@ -33,6 +34,7 @@ import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.ads.model.type.LayoutNativeType
 import com.azg.pdf8.app.remoteConfig
+import com.azg.pdf8.utils.showToast
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.gms.ads.nativead.NativeAdView
 import kotlinx.coroutines.flow.Flow
@@ -93,18 +95,16 @@ class NativeAdsWrapper(
             setShimmerLayoutView(shimmerView.invoke())
             tag?.let { setTagForDebug(it) }
             activityRef.get()?.let { activity ->
-
-                    setCustomContentView { nativeAd ->
-                        nativeAd.layoutCustomNative =
-                            config.displayLayoutId ?: config.preloadLayoutId()
-                        AzAds.getInstance().populateNativeAdView(
-                            activity,
-                            nativeAd,
-                            adContainer(),
-                            shimmerView()
-                        )
-                    }
-
+                setCustomContentView { nativeAd ->
+                    nativeAd.layoutCustomNative =
+                        config.displayLayoutId ?: config.preloadLayoutId()
+                    AzAds.getInstance().populateNativeAdView(
+                        activity,
+                        nativeAd,
+                        adContainer(),
+                        shimmerView()
+                    )
+                }
             }
         }
     }
@@ -124,9 +124,9 @@ class NativeAdsWrapper(
                         adContainer(),
                         shimmerView()
                     )
+                    val adView = adContainer().getChildAt(0) as? NativeAdView
+                    adView?.block()
                 }
-                val adView= adContainer().getChildAt(0) as? NativeAdView
-                adView?.block()
             }
         }
     }

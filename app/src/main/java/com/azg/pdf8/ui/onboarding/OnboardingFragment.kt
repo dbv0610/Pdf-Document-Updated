@@ -3,7 +3,9 @@ package com.azg.pdf8.ui.onboarding
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import com.ads.control.admob.AppOpenManager
 import com.azg.pdf8.R
+import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseFragment
 import com.azg.pdf8.databinding.FragmentOnboardingBinding
 import com.bumptech.glide.Glide
@@ -69,5 +71,14 @@ class OnboardingFragment :
     }
 
     override fun FragmentOnboardingBinding.onClick() {
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (remoteConfig.a001Config.enable) AppOpenManager.getInstance().enableAppResume()
+        viewModel.trackScreenView(
+            isFullScreen = false,
+            position = position
+        )
     }
 }

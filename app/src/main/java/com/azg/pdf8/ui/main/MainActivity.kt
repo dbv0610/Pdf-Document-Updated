@@ -21,6 +21,7 @@ import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.firstOpenApp
+import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.database.RecentDao
@@ -28,6 +29,7 @@ import com.azg.pdf8.databinding.ActivityMainBinding
 import com.azg.pdf8.dialog.DialogPermission
 import com.azg.pdf8.dialog.DialogRequestFullscreen
 import com.azg.pdf8.dialog.QuitAppDialog
+import com.azg.pdf8.firebase.Analytics
 import com.azg.pdf8.notilock.ReminderUtils
 import com.azg.pdf8.ui.main.document.DocumentFragment
 import com.azg.pdf8.ui.main.favorite.FavoriteFragment
@@ -203,9 +205,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 replaceFragment(SettingFragment(), mainContainer.id, false)
             }
         })
+        if(isUfo()){
+            Analytics.track("ufo_home")
+        }
     }
     @SuppressLint("UseKtx")
     fun requestStoragePermission() {
+        AppOpenManager.getInstance().disableAdResumeByClickAction()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)

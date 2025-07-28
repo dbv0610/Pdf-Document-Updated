@@ -179,9 +179,15 @@ class DocumentFragment :
             }
         }
         lnPdf.click {
+            if(isStorageAccess()){
             InterstitialAdManager.showInterAll(appActivity) {
                 launchActivity<PdfActivity>()
             }
+        } else {
+            DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                fragmentAttach?.fragmentAction("requestPermission")
+            }.show()
+        }
         }
         tvShowAll.click {
             if (isStorageAccess()) {
@@ -196,18 +202,36 @@ class DocumentFragment :
             fragmentAttach?.fragmentAction("requestPermission")
         }
         lnDocx.click {
-            InterstitialAdManager.showInterAll(appActivity) {
-                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))
+            if (isStorageAccess()) {
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))
+                }
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
             }
         }
         lnXls.click {
-            InterstitialAdManager.showInterAll(appActivity) {
-                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Xls))
+            if (isStorageAccess()) {
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Xls))
+                }
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
             }
         }
         lnPpt.click {
-            InterstitialAdManager.showInterAll(appActivity) {
-                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
+            if (isStorageAccess()) {
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
+                }
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
             }
         }
     }

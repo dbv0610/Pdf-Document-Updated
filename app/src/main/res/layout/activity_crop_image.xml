@@ -88,7 +88,7 @@
         android:layout_height="wrap_content"
         android:background="#000000"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/bannerAdView">
 
         <LinearLayout
             android:id="@+id/wrapper_states"
@@ -107,7 +107,6 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_rounded_close"
                 android:text="@string/txt_azcrop_frame" />
-
 
             <TextView
                 android:id="@+id/az_state_aspect_ratio"
@@ -130,11 +129,17 @@
                 android:layout_weight="0.5"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_view_done"
-                android:tint="@color/white"
-                android:text="@string/txt_azcrop_frame" />
-
+                android:text="@string/txt_azcrop_frame"
+                android:tint="@color/white" />
         </LinearLayout>
     </RelativeLayout>
+
+    <com.azg.pdf8.widget.BannerAdView
+        android:id="@+id/bannerAdView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/color_f5f5f5"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 
     <FrameLayout

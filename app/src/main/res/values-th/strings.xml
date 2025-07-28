@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">อนุญาตให้ใช้ฟังก์ชั่นแอปพลิเคชัน</string>
     <string name="search_for_file">ค้นหาไฟล์</string>
     <string name="file_have_exit_file">ชื่อไฟล์มีทางออก</string>
+    <string name="skip">ข้าม</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">แสดงตัวอ่านหน้าจอล็อค PDF</string>
+    <string name="des_1">เปิด &amp; แก้ไข PDF, Word, Excel และอีกมากมาย!</string>
+    <string name="cta_1">ลองเลย</string>
+    <string name="des_2">แปลงภาพเป็น PDF ในการแตะครั้งเดียว!</string>
+    <string name="cta_2">ลองเลย</string>
+    <string name="des_3">🔓ปลดล็อกไฟล์ใด ๆ - ดูแก้ไขแปลงได้อย่างง่ายดาย!</string>
+    <string name="cta_3">ลองเลย</string>
+    <string name="des_4">แก้ไขเอกสารทุกที่ทุกเวลา - ไม่จำเป็นต้องใช้แล็ปท็อป!</string>
+    <string name="cta_4">ลองเลย</string>
+    <string name="des_5">📂อ่านและจัดการไฟล์สำนักงานทั้งหมดใน 1 แอพ!</string>
+    <string name="cta_5">ลองเลย</string>
+    <string name="now">ตอนนี้</string>
+    <string name="do_not_allow">ไม่อนุญาต</string>
+    <string name="to_send_you_notifications">เพื่อส่งคุณ \ nnotifications</string>
+    <string name="allow">อนุญาต</string>
+    <string name="are_you_sure_you_want_to_close_the_app">แน่ใจหรือว่าต้องการปิดแอป?</string>
 </resources>

@@ -25,18 +25,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadPdfBinding
 import com.azg.pdf8.databinding.PopupMoreActionBinding
 import com.azg.pdf8.dialog.DialogProcess
 import com.azg.pdf8.model.RecentDocument
+import com.azg.pdf8.ui.main.MainActivity
+import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.utils.Constant.ARG_MEDIA_MODEL
 import com.azg.pdf8.utils.Constant.ARG_SEARCH_WITH_PAGE
 import com.azg.pdf8.viewmodel.DataResponse
 import com.azg.pdf8.widget.PdfHighlightView
 import com.dong.baselib.api.parcelable
 import com.dong.baselib.base.PopupHelper
+import com.dong.baselib.base.SystemUtil
 import com.dong.baselib.string.fileName
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.dimenSdp
@@ -91,6 +96,14 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
                 adapter = this@ReadPdfActivity.adapter
             }
         }
+
+        getData<Boolean?>(Constant.RateWhenCreate)?.let {
+            if(!SystemUtil.isRatting(this@ReadPdfActivity)){
+                rattingDialog.show()
+            }
+        }
+
+
         popupHerper.onBind { binding, popup ->
             val currentOrientation = resources.configuration.orientation
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -122,6 +135,25 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         }
         viewModel.pagesState.observe(this) { pages ->
             adapter.submitList(pages)
+        }
+        binding.bannerAdView
+            .setBannerPlacement(this@ReadPdfActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+                if (!isInternetAvailable()) {
+                    binding.bannerAdView.gone()
+                }
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                binding.bannerAdView.gone()
+            }
+            else -> Unit
         }
     }
 
@@ -285,6 +317,9 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             binding.lnHeaderDef.visible()
             binding.edtSearchData.setText("")
             return
+        }
+        lifecycleScope.launch {
+            MainActivity.isShowRateFirstView.emit(true)
         }
         finish()
     }

@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Дозвола за грант за употребу функција апликација</string>
     <string name="search_for_file">Потражите датотеку</string>
     <string name="file_have_exit_file">Име датотеке има излаз</string>
+    <string name="skip">Прескочити</string>
+    <string name="default_notification_channel_id">пдф_реадер_цханнел_ид</string>
+    <string name="show_lock_screen">Прикажи закључавање Сцреен ПДФ Реадер</string>
+    <string name="des_1">Отворите и уредите ПДФ, Ворд, Екцел и још много тога!</string>
+    <string name="cta_1">Пробај сада</string>
+    <string name="des_2">Претворите слике у ПДФ у једном додир!</string>
+    <string name="cta_2">Пробај сада</string>
+    <string name="des_3">🔓 Откључајте ниједну датотеку - приказ, уређивање, лако претворите!</string>
+    <string name="cta_3">Пробај сада</string>
+    <string name="des_4">Уредите документе било када, било где - није потребан лаптоп!</string>
+    <string name="cta_4">Пробај сада</string>
+    <string name="des_5">📂 Прочитајте и управљајте свим канцеларијским датотекама у 1 апликацији!</string>
+    <string name="cta_5">Пробај сада</string>
+    <string name="now">Сада</string>
+    <string name="do_not_allow">Не дозвољавајте</string>
+    <string name="to_send_you_notifications">да вам пошаље \ Нтициоус</string>
+    <string name="allow">Дозволити</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Јесте ли сигурни да желите да затворите апликацију?</string>
 </resources>

@@ -4,8 +4,12 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.CreatePdfAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
+import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityCreateBinding
@@ -26,6 +30,7 @@ import com.azg.pdf8.viewmodel.CreateViewModel
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.viewmodel.OnCreateFile
 import com.dong.baselib.widget.click
+import com.dong.baselib.widget.delay
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
 import kotlinx.coroutines.CoroutineScope
@@ -51,41 +56,51 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
     private val createDialog by lazy {
         DialogCreatePdf(this@CreateActivity, object : CreateEventHandle {
             override fun createImage() {
-                launcherForResult<ChooseImageActivity>(
-                    hashMapOf(
-                        Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
-                    )
-                ) { acResult ->
-                    acResult.getResultData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_LIST)
-                        ?.let { data ->
-                            if (data.isNotEmpty()) {
-                                viewModel.addDataToList(data)
-                                binding.progressBar.gone()
-                            } else {
-                                binding.progressBar.visible()
+                NativeAdPreloadManager.preloadAd(
+                    this@CreateActivity,
+                    NativePlacement.PERMISSION,
+                    2,
+                    false
+                )
+                InterstitialAdManager.showInterAll(this@CreateActivity) {
+                    launcherForResult<ChooseImageActivity>(
+                        hashMapOf(
+                            Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
+                        )
+                    ) { acResult ->
+                        acResult.getResultData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_LIST)
+                            ?.let { data ->
+                                if (data.isNotEmpty()) {
+                                    viewModel.addDataToList(data)
+                                    binding.progressBar.gone()
+                                } else {
+                                    binding.progressBar.visible()
+                                }
                             }
-                        }
+                    }
                 }
             }
 
             override fun scanDocument() {
                 if (permission.checkGrantedCamera) {
-                    launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
-                        it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
-                            val randomId = Random.nextInt()
-                            val bitmap = BitmapFactory.decodeFile(path)
-                            val model = CreatePdf(
-                                randomId, bitmap, randomId
-                            )
-                            viewModel.addData(model)
-                            binding.progressBar.gone()
+                    InterstitialAdManager.showInterAll(this@CreateActivity) {
+                        launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
+                            it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
+                                val randomId = Random.nextInt()
+                                val bitmap = BitmapFactory.decodeFile(path)
+                                val model = CreatePdf(
+                                    randomId, bitmap, randomId
+                                )
+                                viewModel.addData(model)
+                                binding.progressBar.gone()
+                            }
                         }
                     }
                 } else {
                     requestCameraLauncher.launch(permission.cameraRequest)
                 }
             }
-        })
+        }).attachActivity(this@CreateActivity)
     }
     private val adapter: CreatePdfAdapter by lazy {
         CreatePdfAdapter(
@@ -152,8 +167,15 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                 docViewModel.addToRecent(document.apply {
                                     lastTimeView = System.currentTimeMillis()
                                 })
-                                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
-                                finish()
+                                InterstitialAdManager.showInterAll(this@CreateActivity) {
+                                    launchActivity<ReadPdfActivity>(
+                                        hashMapOf(
+                                            Constant.ARG_MEDIA_MODEL to document,
+                                            Constant.RateWhenCreate to true
+                                        )
+                                    )
+                                    finish()
+                                }
                             }
                         }
 
@@ -184,6 +206,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                     )
                     viewModel.addData(model)
                     binding.progressBar.gone()
+                } ?: run {
+                    toastShort(getString(R.string.can_create_pdf))
+                    delay(1500) {
+                        finish()
+                    }
                 }
             } else {
                 getData<MutableList<RecentDocument>>(Constant.IMAGE_ADD_NEW)?.let { data ->
@@ -192,6 +219,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                         binding.progressBar.gone()
                     } else {
                         binding.progressBar.visible()
+                    }
+                } ?: run {
+                    toastShort(getString(R.string.can_create_pdf))
+                    delay(1500) {
+                        finish()
                     }
                 }
             }
@@ -203,6 +235,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                 } else {
                     binding.progressBar.visible()
                 }
+            } ?: run {
+                toastShort(getString(R.string.can_create_pdf))
+                delay(1500) {
+                    finish()
+                }
             }
         }
         val touchHelper = ItemTouchHelper(callback)
@@ -210,6 +247,9 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
         adapter.dragStartListener = { viewHolder ->
             touchHelper.startDrag(viewHolder)
         }
+        binding.bannerAdView
+            .setBannerPlacement(this@CreateActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
     }
 
     override fun ActivityCreateBinding.setData() {

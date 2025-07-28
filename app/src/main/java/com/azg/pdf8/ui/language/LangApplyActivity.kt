@@ -1,10 +1,13 @@
 package com.azg.pdf8.ui.language
 
 import com.azg.pdf8.R
-import com.azg.pdf8.app.avgWalkingSpeed
+import com.azg.pdf8.app.remoteConfig
 import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.base.SystemUtil
 import com.azg.pdf8.databinding.ActivityLangApplyBinding
+import com.azg.pdf8.ui.feature.FeatureActivity
+import com.azg.pdf8.ui.feature.FeatureScreenType
+import com.azg.pdf8.ui.main.MainActivity
 import com.azg.pdf8.ui.onboarding.OnboardingActivity
 
 import com.dong.baselib.widget.click
@@ -70,7 +73,15 @@ class LangApplyActivity :
                     this@LangApplyActivity,
                     LanguageOpenActivity.currentLang.value?.code ?: "en"
                 )
-                launchActivity<OnboardingActivity>()
+                if(remoteConfig.onboardingEnable){
+                    launchActivity<OnboardingActivity>()
+                } else {
+                    if(remoteConfig.wellComeEnable){
+                        FeatureActivity.start(this@LangApplyActivity, FeatureScreenType.Feature1)
+                    } else {
+                        launchActivity<MainActivity>()
+                    }
+                }
                 finish()
             }
         }

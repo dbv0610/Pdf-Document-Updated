@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Предоставление разрешения на использование прикладных функций</string>
     <string name="search_for_file">Поиск файла</string>
     <string name="file_have_exit_file">Имя файла имеет выход</string>
+    <string name="skip">Пропускать</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Показать экран блокировки PDF Reader</string>
+    <string name="des_1">Откройте и редактируйте PDF, Word, Excel и многое другое!</string>
+    <string name="cta_1">Попробуй сейчас</string>
+    <string name="des_2">Конвертируйте изображения в PDF в одном Tap!</string>
+    <string name="cta_2">Попробуй сейчас</string>
+    <string name="des_3">🔓 Разблокируйте любой файл - просмотреть, редактировать, конвертировать легко!</string>
+    <string name="cta_3">Попробуй сейчас</string>
+    <string name="des_4">Редактировать документы в любое время, где угодно - ноутбук не требуется!</string>
+    <string name="cta_4">Попробуй сейчас</string>
+    <string name="des_5">📂 Читать и управлять всеми офисными файлами в 1 приложении!</string>
+    <string name="cta_5">Попробуй сейчас</string>
+    <string name="now">Сейчас</string>
+    <string name="do_not_allow">Не допускайте</string>
+    <string name="to_send_you_notifications">Чтобы отправить вам \ nnotifications</string>
+    <string name="allow">Позволять</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Вы уверены, что хотите закрыть приложение?</string>
 </resources>

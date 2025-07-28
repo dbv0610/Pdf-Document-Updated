@@ -8,7 +8,7 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dong.baselib.base.BaseActivity
+import com.azg.pdf8.base.BaseActivity
 import com.dong.baselib.base.SystemUtil
 import com.azg.pdf8.databinding.ActivityLanguageOpenBinding
 import com.azg.pdf8.widget.color_D9D9D9

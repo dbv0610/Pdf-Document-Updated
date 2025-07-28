@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Предоставяне на разрешение за използване на функциите за кандидатстване</string>
     <string name="search_for_file">Търсене на файл</string>
     <string name="file_have_exit_file">Името на файла има изход</string>
+    <string name="skip">Пропуснете</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">Показване на заключен екран PDF четец</string>
+    <string name="des_1">Отворете и редактирайте PDF, дума, Excel и други!</string>
+    <string name="cta_1">Опитайте сега</string>
+    <string name="des_2">Преобразувайте изображения в PDF с едно докосване!</string>
+    <string name="cta_2">Опитайте сега</string>
+    <string name="des_3">🔓 Отключете всеки файл - Преглед, редактиране, преобразуване лесно!</string>
+    <string name="cta_3">Опитайте сега</string>
+    <string name="des_4">Редактирайте документи по всяко време, навсякъде - не е необходим лаптоп!</string>
+    <string name="cta_4">Опитайте сега</string>
+    <string name="des_5">📂 Прочетете и управлявайте всички офис файлове в 1 приложение!</string>
+    <string name="cta_5">Опитайте сега</string>
+    <string name="now">Сега</string>
+    <string name="do_not_allow">Не позволявайте</string>
+    <string name="to_send_you_notifications">За да ви изпратя \ nnotifications</string>
+    <string name="allow">Позволете</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Сигурни ли сте, че искате да затворите приложението?</string>
 </resources>

@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">הענק הרשאה לשימוש בפונקציות הבקשה</string>
     <string name="search_for_file">חפש קובץ</string>
     <string name="file_have_exit_file">שם הקובץ יש יציאה</string>
+    <string name="skip">לְדַלֵג</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">הצג את קורא ה- PDF של מסך הנעילה</string>
+    <string name="des_1">פתח וערוך PDF, Word, Excel ועוד!</string>
+    <string name="cta_1">נסה עכשיו</string>
+    <string name="des_2">המיר תמונות ל- PDF בברז אחד!</string>
+    <string name="cta_2">נסה עכשיו</string>
+    <string name="des_3">🔓 ביטול נעילה של כל קובץ - צפה, ערוך, המרה בקלות!</string>
+    <string name="cta_3">נסה עכשיו</string>
+    <string name="des_4">ערוך מסמכים בכל עת ובכל מקום - אין צורך במחשב נייד!</string>
+    <string name="cta_4">נסה עכשיו</string>
+    <string name="des_5">📂 קרא ונהל את כל קבצי המשרד באפליקציה אחת!</string>
+    <string name="cta_5">נסה עכשיו</string>
+    <string name="now">עַכשָׁיו</string>
+    <string name="do_not_allow">אל תאפשר</string>
+    <string name="to_send_you_notifications">כדי לשלוח לך \ nnotifications</string>
+    <string name="allow">לְהַתִיר</string>
+    <string name="are_you_sure_you_want_to_close_the_app">האם אתה בטוח שאתה רוצה לסגור את האפליקציה?</string>
 </resources>

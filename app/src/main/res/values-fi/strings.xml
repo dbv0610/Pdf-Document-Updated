@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Myöntäkää lupa käyttää sovellustoimintoja</string>
     <string name="search_for_file">Etsi tiedosto</string>
     <string name="file_have_exit_file">Tiedostonimi on poistunut</string>
+    <string name="skip">Hypätä</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Näytä Lock Screen PDF -lukija</string>
+    <string name="des_1">Avaa ja muokkaa pdf, sana, excel ja paljon muuta!</string>
+    <string name="cta_1">Yrittää nyt</string>
+    <string name="des_2">Muunna kuvat PDF: ksi yhdellä napautuksella!</string>
+    <string name="cta_2">Yrittää nyt</string>
+    <string name="des_3">🔓 Avaa tiedosto - Näytä, muokkaa, muunna helposti!</string>
+    <string name="cta_3">Yrittää nyt</string>
+    <string name="des_4">Muokkaa asiakirjoja milloin tahansa, missä tahansa - kannettavaa tietokonetta ei tarvita!</string>
+    <string name="cta_4">Yrittää nyt</string>
+    <string name="des_5">📂 Lue ja hallitse kaikkia toimistotiedostoja yhdessä sovelluksessa!</string>
+    <string name="cta_5">Yrittää nyt</string>
+    <string name="now">Nyt</string>
+    <string name="do_not_allow">Älä salli</string>
+    <string name="to_send_you_notifications">Lähettää sinulle \ nnotifications</string>
+    <string name="allow">Sallia</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Haluatko varmasti sulkea sovelluksen?</string>
 </resources>

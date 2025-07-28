@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">درخواست کے افعال کو استعمال کرنے کی اجازت دیں</string>
     <string name="search_for_file">فائل کے لئے تلاش کریں</string>
     <string name="file_have_exit_file">فائل کے نام سے باہر نکلیں</string>
+    <string name="skip">چھوڑ دیں</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">لاک اسکرین پی ڈی ایف ریڈر دکھائیں</string>
+    <string name="des_1">پی ڈی ایف ، ورڈ ، ایکسل ، اور بہت کچھ کھولیں اور ترمیم کریں!</string>
+    <string name="cta_1">ابھی کوشش کریں</string>
+    <string name="des_2">ایک نل میں تصاویر کو پی ڈی ایف میں تبدیل کریں!</string>
+    <string name="cta_2">ابھی کوشش کریں</string>
+    <string name="des_3">any کسی بھی فائل کو انلاک کریں - دیکھیں ، ترمیم کریں ، آسانی سے تبدیل کریں!</string>
+    <string name="cta_3">ابھی کوشش کریں</string>
+    <string name="des_4">کسی بھی وقت ، کہیں بھی دستاویزات میں ترمیم کریں - کسی لیپ ٹاپ کی ضرورت نہیں!</string>
+    <string name="cta_4">ابھی کوشش کریں</string>
+    <string name="des_5">1 1 ایپ میں آفس تمام فائلوں کو پڑھیں اور ان کا نظم کریں!</string>
+    <string name="cta_5">ابھی کوشش کریں</string>
+    <string name="now">اب</string>
+    <string name="do_not_allow">اجازت نہ دیں</string>
+    <string name="to_send_you_notifications">آپ کو بھیجنے کے لئے</string>
+    <string name="allow">اجازت دیں</string>
+    <string name="are_you_sure_you_want_to_close_the_app">کیا آپ واقعی ایپ کو بند کرنا چاہتے ہیں؟</string>
 </resources>

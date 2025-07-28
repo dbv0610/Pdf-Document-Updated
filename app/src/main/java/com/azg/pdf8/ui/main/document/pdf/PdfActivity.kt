@@ -1,7 +1,21 @@
 package com.azg.pdf8.ui.main.document.pdf
 
+import android.content.res.ColorStateList
+import android.content.res.Configuration
+import android.graphics.PorterDuff
+import android.view.View
+import android.widget.Button
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
+import com.azg.pdf8.ads.ads.native.LayoutSelector
+import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
+import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.app.isInternetAvailable
+import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityPdfBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
@@ -16,6 +30,8 @@ import com.azg.pdf8.ui.main.camera.CameraActivity
 import com.azg.pdf8.ui.main.create.ChooseImageActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
+import com.azg.pdf8.widget.pdfColor
+import com.azg.pdf8.widget.setBackgroundTintCompat
 import com.dong.baselib.base.PopupDataHelper
 import com.dong.baselib.file.shareFileWithPath
 import com.dong.baselib.lifecycle.lifecycleLaunch
@@ -36,19 +52,42 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
     private var currentPos = 0
     private lateinit var layoutManager: LinearLayoutManager
     private var lastScrollPosition = 0
-    private var  isClickInFavorite = false
+    private var isClickInFavorite = false
     private val recentAdapter by lazy {
         RecentAdapter(onFavoriteClick = { doc, index ->
-            isClickInFavorite= true
+            isClickInFavorite = true
             viewModel.toggleFavoriteRecent(doc)
         }, onMenuClick = { view, doc, pos ->
             currentPos = pos
             popupHerper?.show(view, doc)
         }) {
-            launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
             viewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
+            InterstitialAdManager.showInterAll(this@PdfActivity) {
+                launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to it))
+            }
         }.attachLifecycle(this@PdfActivity)
     }
+    val nativeAdsWrapper by lazy {
+        NativeAdsWrapper(
+            activity = this@PdfActivity,
+            config = NativePlacement.NATIVE_DOC,
+            lifecycleOwner = this,
+            adContainer = { binding.flNativeAd },
+            shimmerView = { binding.shimmerNativeAd.shimmerContainerNative }
+        )
+    }
+
+    fun requestAds() {
+        with(nativeAdsWrapper) {
+            setupNativeAd(
+                "native_read_pdf"
+            ) {
+                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(pdfColor)
+            }
+            requestAds()
+        }
+    }
+
     var popupHerper: PopupDataHelper<PopupMenuActionBinding, RecentDocument>? = null
     override fun initialize() {
         viewModel.setSearchCriteria("", DocumentType.Pdf)
@@ -83,6 +122,7 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                 }.show()
             }
         }
+
     }
 
     override fun ActivityPdfBinding.setData() {
@@ -93,19 +133,22 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
                 if (it.isEmpty()) {
                     rcvListData.gone()
                     lnNoData.visible()
+                    binding.flNativeAd.gone()
+                    nativeAdsWrapper.cancelRequest()
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
                     lastScrollPosition = layoutManager.findFirstVisibleItemPosition()
                     recentAdapter.submitList(it) {
-                        if(isClickInFavorite){
+                        if (isClickInFavorite) {
                             layoutManager.scrollToPositionWithOffset(lastScrollPosition, 0)
-                            isClickInFavorite= false
+                            isClickInFavorite = false
                         } else {
                             layoutManager.scrollToPositionWithOffset(0, 0)
                         }
-
                     }
+                    binding.flNativeAd.visible()
+                    requestAds()
                 }
             }
         }
@@ -126,17 +169,27 @@ class PdfActivity : BaseActivity<ActivityPdfBinding>(ActivityPdfBinding::inflate
         btnCreate.click {
             DialogCreatePdf(this@PdfActivity, object : CreateEventHandle {
                 override fun createImage() {
-                    launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                    NativeAdPreloadManager.preloadAd(
+                        this@PdfActivity,
+                        NativePlacement.PERMISSION,
+                        2,
+                        false
+                    )
+                    InterstitialAdManager.showInterAll(this@PdfActivity) {
+                        launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                    }
                 }
 
                 override fun scanDocument() {
-                    if(permission.checkGrantedCamera) {
-                        launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                    if (permission.checkGrantedCamera) {
+                        InterstitialAdManager.showInterAll(this@PdfActivity) {
+                            launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                        }
                     } else {
                         requestCameraLauncher.launch(permission.cameraRequest)
                     }
                 }
-            }).show()
+            }).attachActivity(this@PdfActivity).show()
         }
         icSortData.click {
             SortDataByDialog(this@PdfActivity)

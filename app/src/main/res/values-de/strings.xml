@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Ergeben Sie die Erlaubnis zur Verwendung der Antragsfunktionen</string>
     <string name="search_for_file">Suche nach Datei</string>
     <string name="file_have_exit_file">Dateiname beenden</string>
+    <string name="skip">Überspringen</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">PDF -Leser des Sperrbildschirms anzeigen</string>
+    <string name="des_1">Öffnen und bearbeiten Sie PDF, Wort, Excel und mehr!</string>
+    <string name="cta_1">Versuchen Sie es jetzt</string>
+    <string name="des_2">Konvertieren Sie Bilder in PDF in einem Hahn!</string>
+    <string name="cta_2">Versuchen Sie es jetzt</string>
+    <string name="des_3">🔓 Entsperren Sie jede Datei - anzeigen, bearbeiten, leicht konvertieren!</string>
+    <string name="cta_3">Versuchen Sie es jetzt</string>
+    <string name="des_4">Bearbeiten Sie Dokumente jederzeit und überall - kein Laptop benötigt!</string>
+    <string name="cta_4">Versuchen Sie es jetzt</string>
+    <string name="des_5">📂 Lesen und verwalten Sie alle Office -Dateien in 1 App!</string>
+    <string name="cta_5">Versuchen Sie es jetzt</string>
+    <string name="now">Jetzt</string>
+    <string name="do_not_allow">Nicht erlauben</string>
+    <string name="to_send_you_notifications">um Ihnen \ nnotifications zu senden</string>
+    <string name="allow">Erlauben</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Sind Sie sicher, dass Sie die App schließen möchten?</string>
 </resources>

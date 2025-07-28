@@ -24,6 +24,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
+import com.azg.pdf8.ads.ads.banner.BannerPlacement
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
+import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadFileBinding
@@ -33,6 +36,7 @@ import com.azg.pdf8.dialog.PdfNameDialog
 import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.model.DocumentType
 import com.azg.pdf8.model.RecentDocument
+import com.azg.pdf8.ui.main.MainActivity
 import com.azg.pdf8.ui.main.document.pdf.PageViewType
 import com.azg.pdf8.ui.main.document.pdf.ReadPdfActivity
 import com.azg.pdf8.utils.Constant
@@ -81,6 +85,9 @@ class ReadDocumentActivity :
     BaseActivity<ActivityReadFileBinding>(ActivityReadFileBinding::inflate),
     IMainFrame {
     override fun backPressed() {
+        lifecycleScope.launch {
+            MainActivity.isShowRateFirstView.emit(true)
+        }
         finish()
     }
 
@@ -130,6 +137,9 @@ class ReadDocumentActivity :
             }
         )
         listDataSlideShow.value = mutableListOf()
+        binding.bannerAdView
+            .setBannerPlacement(this@ReadDocumentActivity, BannerPlacement.BANNER_ALL)
+            .requestBanner()
     }
 
     fun EditText.onActionSearch(actionSuccess: (query: String) -> Unit, actionFail: () -> Unit) {
@@ -228,7 +238,14 @@ class ReadDocumentActivity :
                                     viewModel.addToRecent(document.apply {
                                         lastTimeView = System.currentTimeMillis()
                                     })
-                                    launchActivity<ReadPdfActivity>(hashMapOf(Constant.ARG_MEDIA_MODEL to document))
+                                    InterstitialAdManager.showInterAll(this@ReadDocumentActivity) {
+                                        launchActivity<ReadPdfActivity>(
+                                            hashMapOf(
+                                                Constant.ARG_MEDIA_MODEL to document,
+                                                Constant.RateWhenCreate to true
+                                            )
+                                        )
+                                    }
                                     finish()
                                 }
 
@@ -269,6 +286,21 @@ class ReadDocumentActivity :
                 else
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+                if (!isInternetAvailable()) {
+                    binding.bannerAdView.gone()
+                }
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                binding.bannerAdView.gone()
+            }
+            else -> Unit
         }
     }
 

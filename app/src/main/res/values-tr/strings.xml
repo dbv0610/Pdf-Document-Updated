@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Uygulama işlevlerini kullanmak için izni verin</string>
     <string name="search_for_file">Dosya Ara</string>
     <string name="file_have_exit_file">Dosya adı çıkış var</string>
+    <string name="skip">Atlamak</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Kilit ekranını göster PDF okuyucusu</string>
+    <string name="des_1">PDF, Word, Excel ve daha fazlasını açık ve düzenleyin!</string>
+    <string name="cta_1">Şimdi dene</string>
+    <string name="des_2">Bir muslukta görüntüleri PDF\'ye dönüştürün!</string>
+    <string name="cta_2">Şimdi dene</string>
+    <string name="des_3">🔓 Herhangi bir dosyanın kilidini açın - görüntüle, düzenleme, kolayca dönüştürün!</string>
+    <string name="cta_3">Şimdi dene</string>
+    <string name="des_4">Belgeleri her zaman, her yerde düzenleyin - dizüstü bilgisayar gerekmez!</string>
+    <string name="cta_4">Şimdi dene</string>
+    <string name="des_5">📂 1 uygulamadaki tüm ofis dosyalarını okuyun ve yönetin!</string>
+    <string name="cta_5">Şimdi dene</string>
+    <string name="now">Şimdi</string>
+    <string name="do_not_allow">İzin vermeyin</string>
+    <string name="to_send_you_notifications">Size \ nnotifications göndermek için</string>
+    <string name="allow">İzin vermek</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Uygulamayı kapatmak istediğinden emin misiniz?</string>
 </resources>

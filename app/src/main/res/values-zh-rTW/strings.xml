@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">授予使用應用程序功能的權限</string>
     <string name="search_for_file">搜索文件</string>
     <string name="file_have_exit_file">文件名有退出</string>
+    <string name="skip">跳過</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">顯示鎖定屏幕PDF閱讀器</string>
+    <string name="des_1">打開和編輯PDF，Word，Excel等！</string>
+    <string name="cta_1">現在嘗試</string>
+    <string name="des_2">一口氣將圖像轉換為PDF！</string>
+    <string name="cta_2">現在嘗試</string>
+    <string name="des_3">🔓解鎖任何文件 - 查看，編輯，輕鬆轉換！</string>
+    <string name="cta_3">現在嘗試</string>
+    <string name="des_4">隨時隨地編輯文檔 - 無需筆記本電腦！</string>
+    <string name="cta_4">現在嘗試</string>
+    <string name="des_5">📂在1個應用程序中讀取和管理所有辦公文件！</string>
+    <string name="cta_5">現在嘗試</string>
+    <string name="now">現在</string>
+    <string name="do_not_allow">不允許</string>
+    <string name="to_send_you_notifications">向您發送\ nnotifications</string>
+    <string name="allow">允許</string>
+    <string name="are_you_sure_you_want_to_close_the_app">您確定要關閉該應用程序嗎？</string>
 </resources>

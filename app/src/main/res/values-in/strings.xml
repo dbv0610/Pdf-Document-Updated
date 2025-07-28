@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Hibah izin untuk menggunakan fungsi aplikasi</string>
     <string name="search_for_file">Cari file</string>
     <string name="file_have_exit_file">Nama file telah keluar</string>
+    <string name="skip">Melewati</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Tampilkan Layar Kunci Pembaca PDF</string>
+    <string name="des_1">Buka &amp; Edit PDF, Word, Excel, dan banyak lagi!</string>
+    <string name="cta_1">Coba sekarang</string>
+    <string name="des_2">Konversi gambar ke PDF dalam satu ketukan!</string>
+    <string name="cta_2">Coba sekarang</string>
+    <string name="des_3">🔓 Buka kunci file apa pun - lihat, edit, konversi dengan mudah!</string>
+    <string name="cta_3">Coba sekarang</string>
+    <string name="des_4">Edit dokumen kapan saja, di mana saja - tidak diperlukan laptop!</string>
+    <string name="cta_4">Coba sekarang</string>
+    <string name="des_5">📂 Baca &amp; kelola semua file kantor di 1 aplikasi!</string>
+    <string name="cta_5">Coba sekarang</string>
+    <string name="now">Sekarang</string>
+    <string name="do_not_allow">Tidak mengijinkan</string>
+    <string name="to_send_you_notifications">untuk mengirimi Anda notification</string>
+    <string name="allow">Mengizinkan</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Apakah Anda yakin ingin menutup aplikasi?</string>
 </resources>

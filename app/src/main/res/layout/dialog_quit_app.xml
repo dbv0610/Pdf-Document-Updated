@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@color/color_background"
+        android:background="#BA0508"
         android:orientation="vertical"
         android:padding="@dimen/_16sdp">
 
@@ -34,7 +34,7 @@
         android:layout_marginTop="@dimen/_12sdp"
         android:fontFamily="@font/rb_400"
         android:includeFontPadding="false"
-        android:text="@string/are_you_sure_want_to_quit_app"
+        android:text="@string/are_you_sure_you_want_to_close_the_app"
         android:textAlignment="textStart"
         android:textColor="@color/black"
         android:textSize="@dimen/_13sdp" />
@@ -78,7 +78,7 @@
             android:text="@string/exit"
             android:textColor="@color/white"
             android:textSize="@dimen/_13sdp"
-            app:bgColorAll="@color/mainColor"
+            app:bgColorAll="#BA0508"
             app:cornerRadius="@dimen/_8sdp" />
     </LinearLayout>
 </com.dong.baselib.widget.layout.UiLinearLayout>

@@ -110,8 +110,8 @@
 
             <ImageView
                 android:id="@+id/ivImgLoad"
-                android:layout_width="@dimen/_54sdp"
-                android:layout_height="@dimen/_54sdp"
+                android:layout_width="@dimen/_58sdp"
+                android:layout_height="@dimen/_58sdp"
                 android:padding="@dimen/_5sdp"
                 android:src="@drawable/ic_loading_view" />
 

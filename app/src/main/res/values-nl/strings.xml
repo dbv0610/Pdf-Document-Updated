@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Verleen toestemming om de toepassingsfuncties te gebruiken</string>
     <string name="search_for_file">Zoek naar bestand</string>
     <string name="file_have_exit_file">Bestandsnaam hebben exit</string>
+    <string name="skip">Overslaan</string>
+    <string name="default_notification_channel_id">PDF_READER_CHANNEL_ID</string>
+    <string name="show_lock_screen">Toon vergrendelscherm PDF -lezer</string>
+    <string name="des_1">Open en bewerk PDF, Word, Excel en meer!</string>
+    <string name="cta_1">Probeer het nu</string>
+    <string name="des_2">Converteer afbeeldingen naar PDF in één tik!</string>
+    <string name="cta_2">Probeer het nu</string>
+    <string name="des_3">🔓 Ontgrendel elk bestand - Bekijk, bewerk, converteer eenvoudig!</string>
+    <string name="cta_3">Probeer het nu</string>
+    <string name="des_4">Bewerk documenten altijd, overal - geen laptop nodig!</string>
+    <string name="cta_4">Probeer het nu</string>
+    <string name="des_5">📂 Lees en beheer alle kantoorbestanden in 1 app!</string>
+    <string name="cta_5">Probeer het nu</string>
+    <string name="now">Nu</string>
+    <string name="do_not_allow">Sta niet toe</string>
+    <string name="to_send_you_notifications">om u \ nnotificaties te sturen</string>
+    <string name="allow">Toestaan</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Weet u zeker dat u de app wilt sluiten?</string>
 </resources>

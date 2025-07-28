@@ -58,7 +58,7 @@
         android:padding="@dimen/_8sdp"
         android:text="@string/continues"
         android:fontFamily="@font/rb_500"
-        android:layout_marginBottom="@dimen/_18sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
         android:textColor="#C9CDD4"
         android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toTopOf="@id/flNativeAd"
@@ -69,10 +69,17 @@
     <FrameLayout
         android:id="@+id/flNativeAd"
         android:layout_width="match_parent"
-        android:visibility="gone"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent">
 
-    </FrameLayout>
+        <include
+            android:id="@+id/shimmerAdSmall"
+            layout="@layout/layout_native_shimmer_small"
+            android:visibility="invisible" />
 
+        <include
+            android:id="@+id/shimmerAdMedium"
+            layout="@layout/layout_native_shimmer_medium"
+            android:visibility="visible" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

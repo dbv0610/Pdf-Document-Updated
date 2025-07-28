@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">منح إذن لاستخدام وظائف التطبيق</string>
     <string name="search_for_file">ابحث عن ملف</string>
     <string name="file_have_exit_file">اسم الملف الخروج</string>
+    <string name="skip">يتخطى</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">إظهار شاشة قفل PDF قارئ</string>
+    <string name="des_1">افتح وتحرير PDF ، Word ، Excel ، وأكثر!</string>
+    <string name="cta_1">حاول الآن</string>
+    <string name="des_2">تحويل الصور إلى PDF في واحد نقرة!</string>
+    <string name="cta_2">حاول الآن</string>
+    <string name="des_3">🔓 فتح أي ملف - عرض ، تحرير ، تحويل بسهولة!</string>
+    <string name="cta_3">حاول الآن</string>
+    <string name="des_4">تحرير المستندات في أي وقت ، في أي مكان - لا حاجة كمبيوتر محمول!</string>
+    <string name="cta_4">حاول الآن</string>
+    <string name="des_5">📂 اقرأ وإدارة جميع ملفات Office في تطبيق واحد!</string>
+    <string name="cta_5">حاول الآن</string>
+    <string name="now">الآن</string>
+    <string name="do_not_allow">لا تسمح</string>
+    <string name="to_send_you_notifications">لإرسالك \ nnotifications</string>
+    <string name="allow">يسمح</string>
+    <string name="are_you_sure_you_want_to_close_the_app">هل أنت متأكد أنك تريد إغلاق التطبيق؟</string>
 </resources>

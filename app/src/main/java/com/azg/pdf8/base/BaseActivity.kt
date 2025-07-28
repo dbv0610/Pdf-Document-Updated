@@ -6,7 +6,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -14,50 +14,24 @@ import android.view.View
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.NestedScrollView
-import androidx.lifecycle.MutableLiveData
 import androidx.viewbinding.ViewBinding
 import com.azg.pdf8.R
-import com.azg.pdf8.app.countGrantedCamera
-import com.azg.pdf8.app.countGrantedRecognize
-import com.azg.pdf8.app.countGrantedLocation
-import com.azg.pdf8.app.countGrantedNotification
 import com.azg.pdf8.app.toastShort
+import com.azg.pdf8.dialog.RatingDialog
 import com.dong.baselib.api.isApi33orHigher
 import com.dong.baselib.base.BaseActivity
 import com.dong.baselib.permission.Permission
 import com.dong.baselib.widget.delay
 import org.koin.android.ext.android.inject
 import kotlin.math.abs
-import kotlin.reflect.KMutableProperty0
 
 abstract class BaseActivity<VB : ViewBinding>(
     override val bindingFactory: (LayoutInflater) -> VB,
     private var fullStatus: Boolean = false,
 ) : BaseActivity<VB>(bindingFactory, fullStatus) {
     val permission by inject<Permission>()
-    private var yDown = 0f
-    private var isMove = false
-    var requestLocationLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (!isGranted) {
-            handlePermissionDenied(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                ::countGrantedLocation,
-            )
-        }
-    }
-    var requestRecognizeLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (!isGranted) {
-            if (Build.VERSION.SDK_INT > 29) {
-                handlePermissionDenied(
-                    Manifest.permission.ACTIVITY_RECOGNITION,
-                    ::countGrantedRecognize,
-                )
-            }
-        }
+    protected val rattingDialog by lazy {
+        RatingDialog(this)
     }
     var requestCameraLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -66,7 +40,6 @@ abstract class BaseActivity<VB : ViewBinding>(
             if (Build.VERSION.SDK_INT > 29) {
                 handlePermissionDenied(
                     Manifest.permission.CAMERA,
-                    ::countGrantedCamera,
                 )
             }
         }
@@ -78,7 +51,6 @@ abstract class BaseActivity<VB : ViewBinding>(
             if (isApi33orHigher) {
                 handlePermissionDenied(
                     Manifest.permission.POST_NOTIFICATIONS,
-                    ::countGrantedNotification,
                 )
             }
         }
@@ -86,15 +58,11 @@ abstract class BaseActivity<VB : ViewBinding>(
 
     fun handlePermissionDenied(
         permission: String,
-        counter: KMutableProperty0<Int>,
     ) {
         if (!shouldShowRequestPermissionRationale(permission)) {
-            counter.set(counter.get() + 1)
-            if (counter.get() > 1) {
-                toastShort(getString(R.string.request_permission_need_to_use_fun))
-                delay(1500){
-                    goToSetting()
-                }
+            toastShort(getString(R.string.request_permission_need_to_use_fun))
+            delay(1500) {
+                goToSetting()
             }
         }
     }
@@ -106,29 +74,15 @@ abstract class BaseActivity<VB : ViewBinding>(
         intent.setData(uri)
         startActivity(intent)
     }
-    @SuppressLint("ClickableViewAccessibility")
-    fun hideKeyboardScrollView(scrollView: NestedScrollView, action: (() -> Unit)? = {}) {
-        scrollView.setOnTouchListener { _, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    yDown = motionEvent.y
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (!isMove) {
-                        hideKeyboard()
-                        action?.invoke()
-                    }
-                    isMove = false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val yMove = motionEvent.y
-                    val distY: Float = yMove - yDown
-                    if (abs(distY) >= 10) {
-                        isMove = true
-                    }
-                }
-            }
-            false
+
+    fun isStorageAccess(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            permission.arePermissionsGranted(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
         }
     }
 
@@ -143,47 +97,10 @@ abstract class BaseActivity<VB : ViewBinding>(
         }
         return super.dispatchTouchEvent(ev)
     }
-    @SuppressLint("ClickableViewAccessibility")
-    fun hideKeyboardByView(scrollView: View, action: (() -> Unit)? = {}) {
-        scrollView.setOnTouchListener { _, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    yDown = motionEvent.y
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (!isMove) {
-                        hideKeyboard()
-                        action?.invoke()
-                    }
-                    isMove = false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val yMove = motionEvent.y
-                    val distY: Float = yMove - yDown
-                    if (abs(distY) >= 10) {
-                        isMove = true
-                    }
-                }
-            }
-            false
-        }
-    }
 
-    fun scrollKeyboardShow() {
-        binding.root.post {
-            binding.root.viewTreeObserver.addOnGlobalLayoutListener {
-                val rect = Rect()
-                binding.root.getWindowVisibleDisplayFrame(rect)
-                val screenHeight = binding.root.rootView.height
-                val keypadHeight = screenHeight - rect.bottom
-                val isKeyboardVisible = keypadHeight > screenHeight * 0.15
-                binding.root.setPadding(
-                    binding.root.paddingLeft,
-                    binding.root.paddingTop,
-                    binding.root.paddingRight,
-                    if (isKeyboardVisible) keypadHeight else 12
-                )
-            }
-        }
+   protected fun isGrantedPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            isStorageAccess()
+        } else permission.checkGrantedStorage_24_33
     }
 }

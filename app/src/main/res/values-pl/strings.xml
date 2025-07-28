@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Zezwolenie na korzystanie z funkcji aplikacji</string>
     <string name="search_for_file">Wyszukaj plik</string>
     <string name="file_have_exit_file">Nazwa pliku ma wyjście</string>
+    <string name="skip">Pominąć</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Pokaż ekran blokady czytnik pdf</string>
+    <string name="des_1">Otwórz i edytuj pdf, Word, Excel i więcej!</string>
+    <string name="cta_1">Spróbuj teraz</string>
+    <string name="des_2">Konwertuj obrazy na pdf w jednym kran!</string>
+    <string name="cta_2">Spróbuj teraz</string>
+    <string name="des_3">🔓 Odblokuj dowolny plik - Zobacz, edytuj, łatwo przekonwertuj!</string>
+    <string name="cta_3">Spróbuj teraz</string>
+    <string name="des_4">Edytuj dokumenty w dowolnym miejscu, w dowolnym miejscu - nie potrzebny laptop!</string>
+    <string name="cta_4">Spróbuj teraz</string>
+    <string name="des_5">📂 Przeczytaj i zarządzaj wszystkimi plikami biurowymi w 1 aplikacji!</string>
+    <string name="cta_5">Spróbuj teraz</string>
+    <string name="now">Teraz</string>
+    <string name="do_not_allow">Nie dopuszczaj</string>
+    <string name="to_send_you_notifications">Aby wysłać Ci \ nnotifications</string>
+    <string name="allow">Umożliwić</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Czy na pewno chcesz zamknąć aplikację?</string>
 </resources>

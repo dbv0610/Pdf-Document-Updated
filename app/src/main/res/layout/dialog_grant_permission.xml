@@ -94,19 +94,39 @@
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
     <com.dong.baselib.widget.view.UiTextView
-        android:layout_width="match_parent"
-        android:includeFontPadding="false"
         android:id="@+id/btnGranted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_16sdp"
         android:fontFamily="@font/rb_500"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:padding="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
         android:text="@string/allow_access"
         android:textColor="@color/white"
-        app:bgColorAll="@color/color_ba0508"
-        android:gravity="center"
         android:textSize="@dimen/_12sdp"
+        app:bgColorAll="@color/color_ba0508"
         app:cornerRadius="@dimen/_8sdp"
-        android:padding="@dimen/_10sdp"
-        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/flNativeAd"
         app:layout_constraintTop_toBottomOf="@+id/textView"
         tools:layout_editor_absoluteX="16dp" />
+
+    <FrameLayout
+        android:id="@+id/flNativeAd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="16dp">
+
+        <include
+            android:id="@+id/shimmerAdSmall"
+            layout="@layout/layout_native_shimmer_small"
+            android:visibility="visible" />
+
+        <include
+            android:id="@+id/shimmerAdMedium"
+            layout="@layout/layout_native_shimmer_medium"
+            android:visibility="gone" />
+    </FrameLayout>
 </com.dong.baselib.widget.layout.UiConstraintLayout>

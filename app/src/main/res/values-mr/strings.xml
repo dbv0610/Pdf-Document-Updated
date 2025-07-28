@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">अनुप्रयोग कार्ये वापरण्यासाठी अनुदान परवानगी</string>
     <string name="search_for_file">फाईल शोधा</string>
     <string name="file_have_exit_file">फाईलचे नाव बाहेर पडा आहे</string>
+    <string name="skip">वगळा</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">लॉक स्क्रीन पीडीएफ वाचक दर्शवा</string>
+    <string name="des_1">पीडीएफ, शब्द, एक्सेल आणि बरेच काही उघडा आणि संपादित करा!</string>
+    <string name="cta_1">आता प्रयत्न करा</string>
+    <string name="des_2">एका टॅपमध्ये प्रतिमा पीडीएफमध्ये रूपांतरित करा!</string>
+    <string name="cta_2">आता प्रयत्न करा</string>
+    <string name="des_3">File कोणतीही फाईल अनलॉक करा - पहा, संपादित करा, सहजपणे रूपांतरित करा!</string>
+    <string name="cta_3">आता प्रयत्न करा</string>
+    <string name="des_4">कागदपत्रे कधीही, कोठेही संपादित करा - लॅपटॉपची आवश्यकता नाही!</string>
+    <string name="cta_4">आता प्रयत्न करा</string>
+    <string name="des_5">Office 1 अॅपमध्ये सर्व ऑफिस फायली वाचा आणि व्यवस्थापित करा!</string>
+    <string name="cta_5">आता प्रयत्न करा</string>
+    <string name="now">आता</string>
+    <string name="do_not_allow">परवानगी देऊ नका</string>
+    <string name="to_send_you_notifications">आपल्याला पाठविण्यासाठी \ notifications</string>
+    <string name="allow">परवानगी द्या</string>
+    <string name="are_you_sure_you_want_to_close_the_app">आपणास खात्री आहे की आपण अ‍ॅप बंद करू इच्छिता?</string>
 </resources>

@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Accorder l\'autorisation d\'utiliser les fonctions d\'application</string>
     <string name="search_for_file">Rechercher un fichier</string>
     <string name="file_have_exit_file">Le nom du fichier est sorti</string>
+    <string name="skip">Sauter</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Afficher le lecteur PDF de l\'écran de verrouillage</string>
+    <string name="des_1">Ouvrez et modifiez PDF, Word, Excel et plus encore!</string>
+    <string name="cta_1">Essayer maintenant</string>
+    <string name="des_2">Convertir des images en PDF en un seul Tap!</string>
+    <string name="cta_2">Essayer maintenant</string>
+    <string name="des_3">🔓 Déverrouiller n\'importe quel fichier - afficher, modifier, convertir facilement!</string>
+    <string name="cta_3">Essayer maintenant</string>
+    <string name="des_4">Modifiez les documents à tout moment, n\'importe où - aucun ordinateur portable nécessaire!</string>
+    <string name="cta_4">Essayer maintenant</string>
+    <string name="des_5">📂 Lire et gérer tous les fichiers de bureau dans 1 application!</string>
+    <string name="cta_5">Essayer maintenant</string>
+    <string name="now">Maintenant</string>
+    <string name="do_not_allow">Ne permettez pas</string>
+    <string name="to_send_you_notifications">Pour vous envoyer \ nnotifications</string>
+    <string name="allow">Permettre</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Êtes-vous sûr de vouloir fermer l\'application?</string>
 </resources>

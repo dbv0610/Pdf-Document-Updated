@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Concedi l\'autorizzazione per utilizzare le funzioni di domanda</string>
     <string name="search_for_file">Cerca file</string>
     <string name="file_have_exit_file">Il nome del file ha l\'uscita</string>
+    <string name="skip">Saltare</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Mostrare il lettore PDF della schermata di blocco</string>
+    <string name="des_1">Apri e modifica PDF, Word, Excel e altro ancora!</string>
+    <string name="cta_1">Prova ora</string>
+    <string name="des_2">Converti le immagini in PDF in un tocco!</string>
+    <string name="cta_2">Prova ora</string>
+    <string name="des_3">🔓 Sblocca qualsiasi file: visualizza, modifica, converti facilmente!</string>
+    <string name="cta_3">Prova ora</string>
+    <string name="des_4">Modifica documenti in qualsiasi momento, ovunque - nessun laptop necessario!</string>
+    <string name="cta_4">Prova ora</string>
+    <string name="des_5">📂 Leggi e gestisci tutti i file Office in 1 app!</string>
+    <string name="cta_5">Prova ora</string>
+    <string name="now">Ora</string>
+    <string name="do_not_allow">Non permettere</string>
+    <string name="to_send_you_notifications">per inviarti \ nnotifications</string>
+    <string name="allow">Permettere</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Sei sicuro di voler chiudere l\'app?</string>
 </resources>

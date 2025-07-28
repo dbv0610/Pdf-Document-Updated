@@ -146,4 +146,22 @@
     <string name="request_permission_need_to_use_fun">Magbigay ng pahintulot upang magamit ang mga pag -andar ng application</string>
     <string name="search_for_file">Maghanap para sa file</string>
     <string name="file_have_exit_file">Ang pangalan ng file ay may exit</string>
+    <string name="skip">Laktawan</string>
+    <string name="default_notification_channel_id">pdf_reader_channel_id</string>
+    <string name="show_lock_screen">Ipakita ang lock screen PDF Reader</string>
+    <string name="des_1">Buksan at i -edit ang PDF, Word, Excel, at marami pa!</string>
+    <string name="cta_1">Subukan ngayon</string>
+    <string name="des_2">I -convert ang mga imahe sa PDF sa isang gripo!</string>
+    <string name="cta_2">Subukan ngayon</string>
+    <string name="des_3">🔓 I -unlock ang anumang file - tingnan, i -edit, madaling i -convert!</string>
+    <string name="cta_3">Subukan ngayon</string>
+    <string name="des_4">I -edit ang mga dokumento anumang oras, kahit saan - hindi kailangan ng laptop!</string>
+    <string name="cta_4">Subukan ngayon</string>
+    <string name="des_5">📂 Basahin at pamahalaan ang lahat ng mga file ng opisina sa 1 app!</string>
+    <string name="cta_5">Subukan ngayon</string>
+    <string name="now">Ngayon</string>
+    <string name="do_not_allow">Huwag payagan</string>
+    <string name="to_send_you_notifications">Upang magpadala sa iyo ng \ nnotification</string>
+    <string name="allow">Payagan</string>
+    <string name="are_you_sure_you_want_to_close_the_app">Sigurado ka bang nais mong isara ang app?</string>
 </resources>

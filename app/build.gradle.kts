@@ -19,8 +19,8 @@ android {
         applicationId = "com.azg.pdf8"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val formattedDate = SimpleDateFormat("MMM.dd.yyyy").format(Date())
@@ -77,13 +77,12 @@ android {
         create("dev") {
             applicationId = "com.azg.pdf8"
             manifestPlaceholders["ad_app_id"] = "ca-app-pub-3940256099942544~3347511713"
-
             buildConfigField("boolean", "build_debug", "true")
         }
 
         create("product") {
             applicationId = "com.documentreader.manage.pdfreader.viewpdf.open"
-            manifestPlaceholders["ad_app_id"] = ""
+            manifestPlaceholders["ad_app_id"] = "ca-app-pub-5417263955398589~7174217706"
 
             buildConfigField("boolean", "build_debug", "false")
         }
@@ -100,6 +99,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.config)
+    implementation(platform(libs.firebase.bom))
+
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.crashlytics)
     implementation(libs.androidx.navigation.fragment.ktx)
@@ -139,6 +140,14 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    implementation(libs.mediation.facebook)
+    implementation(libs.mediation.mintegral)
+    implementation(libs.mediation.pangle)
+    implementation(libs.play.app.update)
+    implementation(libs.play.services.ads)
+    implementation(libs.androidx.multidex)
+    implementation(libs.azmoduleads)
 
 
     implementation(libs.android.pdf.viewer)

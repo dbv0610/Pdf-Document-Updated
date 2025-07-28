@@ -6,8 +6,12 @@ import android.os.Build
 import android.os.Environment
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
+import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
+import com.azg.pdf8.ads.ads.native.NativePlacement
+import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.base.BaseFragment
 import com.azg.pdf8.databinding.FragmentDocumentBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
@@ -44,22 +48,25 @@ import org.koin.androidx.viewmodel.ext.android.activityViewModel
 class DocumentFragment :
     BaseFragment<FragmentDocumentBinding>(FragmentDocumentBinding::inflate, true) {
     val documentViewModel: DocumentViewModel by activityViewModel()
-    val permission: Permission by inject()
     private val createDialog by lazy {
         DialogCreatePdf(this@DocumentFragment.appActivity, object : CreateEventHandle {
             override fun createImage() {
-                launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                NativeAdPreloadManager.preloadAd(appActivity, NativePlacement.PERMISSION, 2, false)
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<ChooseImageActivity>(hashMapOf(Constant.KEY_ACTION to "createNew"))
+                }
             }
 
             override fun scanDocument() {
-                if(permission.checkGrantedCamera){
-                    launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                if (permission.checkGrantedCamera) {
+                    InterstitialAdManager.showInterAll(appActivity) {
+                        launchActivity<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to "mainSc"))
+                    }
                 } else {
                     fragmentAttach?.fragmentAction("requestCameraPer")
                 }
-
             }
-        })
+        }).attachActivity(appActivity)
     }
 
     override fun backPress() {
@@ -91,7 +98,6 @@ class DocumentFragment :
                     )
                 )
             }
-
             documentViewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
         }.attachLifecycle(viewLifecycleOwner)
     }
@@ -162,32 +168,32 @@ class DocumentFragment :
         binding.lnNoPer.isVisible = !isGrantPermission
     }
 
-    fun isStorageAccess(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            permission.checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-    }
-
     override fun FragmentDocumentBinding.onClick() {
         btnCreate.click {
-            if (MainActivity.isGrantPermission) {
+            if (isStorageAccess()) {
                 createDialog.show()
             } else {
-                DialogPermission(appActivity).onAllowAccess {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
                     fragmentAttach?.fragmentAction("requestPermission")
                 }.show()
             }
         }
         lnPdf.click {
-            launchActivity<PdfActivity>()
+            if(isStorageAccess()){
+            InterstitialAdManager.showInterAll(appActivity) {
+                launchActivity<PdfActivity>()
+            }
+        } else {
+            DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                fragmentAttach?.fragmentAction("requestPermission")
+            }.show()
+        }
         }
         tvShowAll.click {
-            if (MainActivity.isGrantPermission) {
+            if (isStorageAccess()) {
                 launchActivity<RecentActivity>()
             } else {
-                DialogPermission(appActivity).onAllowAccess {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
                     fragmentAttach?.fragmentAction("requestPermission")
                 }.show()
             }
@@ -196,13 +202,37 @@ class DocumentFragment :
             fragmentAttach?.fragmentAction("requestPermission")
         }
         lnDocx.click {
-            launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))
+            if (isStorageAccess()) {
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Doc))
+                }
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
+            }
         }
         lnXls.click {
-            launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Xls))
+            if (isStorageAccess()) {
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Xls))
+                }
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
+            }
         }
         lnPpt.click {
-            launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
+            if (isStorageAccess()) {
+                InterstitialAdManager.showInterAll(appActivity) {
+                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
+                }
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
+            }
         }
     }
 }

@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    app:bgIsGradient="true"
+    android:layout_height="match_parent"
     app:bgGradientEnd="#830000"
     app:bgGradientStart="#FF0000"
-    android:layout_height="match_parent"
+    app:bgIsGradient="true"
     tools:context=".ui.splash.SplashActivity">
 
     <com.dong.baselib.widget.view.RoundImageView
@@ -31,10 +31,9 @@
         android:layout_marginHorizontal="@dimen/_16sdp"
         android:layout_marginTop="@dimen/_16sdp"
         android:adjustViewBounds="true"
-
+        android:fontFamily="@font/rb_700"
         android:includeFontPadding="false"
         android:text="@string/app_name"
-        android:fontFamily="@font/rb_700"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="@dimen/_18sdp"
@@ -62,11 +61,28 @@
         android:indeterminate="true"
         android:progressBackgroundTint="#FFFFFF"
         app:indicatorColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/flNativeAd"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintWidth_percent="0.65"
         app:layout_marginBaseline="@dimen/_2sdp"
         app:trackCornerRadius="@dimen/_12sdp"
         app:trackThickness="@dimen/_4sdp" />
+
+    <FrameLayout
+        android:id="@+id/flNativeAd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <include
+            android:id="@+id/shimmerAdSmall"
+            layout="@layout/layout_native_shimmer_small"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/shimmerAdMedium"
+            layout="@layout/layout_native_shimmer_medium"
+            android:visibility="gone" />
+    </FrameLayout>
 </com.dong.baselib.widget.layout.UiConstraintLayout>

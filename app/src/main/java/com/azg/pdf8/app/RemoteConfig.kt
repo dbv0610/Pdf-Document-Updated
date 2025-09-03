@@ -178,12 +178,6 @@ class RemoteConfig(
         ) {
             enable = enable && isAdEnable
         }
-        a001Config = getAndApply(
-            remoteConfig.getString("A101_config"),
-            AppOpenConfig.defaultAll
-        ) {
-            enable = enable && isAdEnable
-        }
 
         b100Config = getAndApply(
             remoteConfig.getString("B100_config"),
@@ -282,6 +276,11 @@ class RemoteConfig(
         ) {
             enable = enable && isAdEnable
         }
+
+        newFlowApp = getAndApply(
+            remoteConfig.getString("new_flow_app"),
+            false
+        )
         wellComeEnable = remoteConfig.getBoolean("onboarding_enable")
         onboardingEnable = remoteConfig.getBoolean("onboarding_enable")
         timeOutSplash =

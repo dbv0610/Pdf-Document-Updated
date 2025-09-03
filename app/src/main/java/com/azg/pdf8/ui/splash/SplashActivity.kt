@@ -98,6 +98,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
                 }
             }
         InterstitialAdManager.isCloseInterSplash.postValue(false)
+        Log.e("fsadfsdasfdsadsafdsad", "initAds: ${remoteConfig.newFlowApp}")
         if (isEnableAds()) {
             setupAdManager()
             nativeSplashManager?.loadNative()

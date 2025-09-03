@@ -46,6 +46,9 @@ class RemoteConfig(
         private set
     var metaCtrLow by sharedPreference.boolean("meta_ctr_low", false)
         private set
+
+    var newFlowApp by sharedPreference.boolean("new_flow_app", false)
+        private set
     var timeNotiLockReminder by sharedPreference.list(
         "timeNotiLockReminder",
         listOf(3, 8, 13, 18, 23)

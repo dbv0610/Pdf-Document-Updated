@@ -3,6 +3,7 @@ package com.azg.pdf8.ui.splash
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.ads.control.admob.AdsConsentManager2
 import com.ads.control.admob.AppOpenManager

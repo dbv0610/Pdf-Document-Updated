@@ -12,6 +12,7 @@ import com.az.inappupdate.AppUpdateManager
 import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.ads.ads.splash.AdSplashCompleteListener
+import com.azg.pdf8.ads.ads.splash.AdSplashHelper
 import com.azg.pdf8.ads.ads.splash.AdSplashManager
 import com.azg.pdf8.ads.ads.splash.AdState
 import com.azg.pdf8.ads.ads.splash.NativeSplashManager
@@ -71,7 +72,9 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
             else binding.shimmerAdMedium.shimmerContainerNative,
             this@SplashActivity
         )
-        adSplashManager = AdSplashManager(this@SplashActivity, this)
+        adSplashManager = AdSplashManager(this@SplashActivity)
+        adSplashManager?.bind(this)
+        AdSplashHelper.adManager = adSplashManager
     }
 
     private suspend fun requestUmp() {
@@ -98,7 +101,6 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
                 }
             }
         InterstitialAdManager.isCloseInterSplash.postValue(false)
-        Log.e("fsadfsdasfdsadsafdsad", "initAds: ${remoteConfig.newFlowApp}")
         if (isEnableAds()) {
             setupAdManager()
             nativeSplashManager?.loadNative()
@@ -157,11 +159,16 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
     override fun onAdComplete(adName: String) {
         when (adName) {
             AdSplashManager.TAG -> {
+                AdSplashHelper.isLoadAdsFullDone = true
                 isFinishAdSplash = true
-                if (isFinishAdNative) {
-                    adSplashManager?.showCurrentAd()
-                } else {
-                    handleWaitingAdSplash()
+                if (remoteConfig.newFlowApp){
+                    navigateToNextScreen()
+                }else{
+                    if (isFinishAdNative) {
+                        adSplashManager?.showCurrentAd()
+                    } else {
+                        handleWaitingAdSplash()
+                    }
                 }
             }
             NativeSplashManager.TAG -> {

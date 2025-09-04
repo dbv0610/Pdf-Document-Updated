@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.azura.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.gmsGoogleServices)
     alias(libs.plugins.firebaseCrashlytics)
@@ -19,8 +19,8 @@ android {
         applicationId = "com.azg.pdf8"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val formattedDate = SimpleDateFormat("MMM.dd.yyyy").format(Date())
@@ -111,9 +111,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.lottie)
-    implementation(libs.inappupdate)
     implementation(libs.app.update.ktx)
-    implementation(libs.billing.ktx)
     implementation(libs.glide)
     implementation(libs.gson)
     implementation(libs.sdp.android)
@@ -144,10 +142,7 @@ dependencies {
     implementation(libs.mediation.facebook)
     implementation(libs.mediation.mintegral)
     implementation(libs.mediation.pangle)
-    implementation(libs.play.app.update)
     implementation(libs.play.services.ads)
-    implementation(libs.androidx.multidex)
-    implementation(libs.azmoduleads)
 
 
     implementation(libs.android.pdf.viewer)

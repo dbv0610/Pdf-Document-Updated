@@ -46,6 +46,9 @@ class RemoteConfig(
         private set
     var metaCtrLow by sharedPreference.boolean("meta_ctr_low", false)
         private set
+
+    var newFlowApp by sharedPreference.boolean("new_flow_app", false)
+        private set
     var timeNotiLockReminder by sharedPreference.list(
         "timeNotiLockReminder",
         listOf(3, 8, 13, 18, 23)
@@ -175,12 +178,6 @@ class RemoteConfig(
         ) {
             enable = enable && isAdEnable
         }
-        a001Config = getAndApply(
-            remoteConfig.getString("A101_config"),
-            AppOpenConfig.defaultAll
-        ) {
-            enable = enable && isAdEnable
-        }
 
         b100Config = getAndApply(
             remoteConfig.getString("B100_config"),
@@ -279,6 +276,11 @@ class RemoteConfig(
         ) {
             enable = enable && isAdEnable
         }
+
+        newFlowApp = getAndApply(
+            remoteConfig.getString("new_flow_app"),
+            false
+        )
         wellComeEnable = remoteConfig.getBoolean("onboarding_enable")
         onboardingEnable = remoteConfig.getBoolean("onboarding_enable")
         timeOutSplash =

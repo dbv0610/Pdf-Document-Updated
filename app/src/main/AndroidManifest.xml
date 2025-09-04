@@ -34,6 +34,13 @@
         android:theme="@style/Theme.VideoRecorder"
         tools:replace="android:fullBackupContent,android:allowBackup,android:dataExtractionRules"
         tools:targetApi="31">
+
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AdActivityTheme"
+            tools:replace="android:theme" />
+
         <activity
             android:name=".ui.main.document.other.SlideShowActivity"
             android:exported="false"

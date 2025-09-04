@@ -26,4 +26,9 @@ object Constant {
     const val Xls= "Xls"
     const val Ppt= "Ppt"
     const val RateWhenCreate = "RateWhenCreate"
+
+    const val SCREEN = "SCREEN"
+    const val SPLASH = "SPLASH"
+    const val LANGUAGE = "LANGUAGE"
+    const val ONBOARDING = "ONBOARDING"
 }

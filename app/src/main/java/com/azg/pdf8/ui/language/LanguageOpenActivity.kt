@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -163,12 +164,19 @@ abstract class LanguageOpenActivity :
         startActivity(intent)
         finish()
     }
+
+    val launcherResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                navigateToHome()
+            }
+        }
+
     private fun navigateToNativeFullScreen() {
         val intent = Intent(this, NativeSplashActivity::class.java).apply {
             putExtra(Constant.SCREEN, Constant.LANGUAGE)
         }
-        startActivity(intent)
-        finish()
+        launcherResult.launch(intent)
     }
 
     private fun navigateToHome() {

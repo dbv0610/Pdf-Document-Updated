@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.ads.control.admob.AdsConsentManager2
 import com.ads.control.admob.AppOpenManager
@@ -146,9 +147,16 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding
         finish()
     }
 
+    val launcherResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                navigateToNextScreen()
+            }
+        }
+
     private fun navigateToNativeFullScreen() {
-        startActivity(Intent(this, NativeSplashActivity::class.java))
-        finish()
+        val intent = Intent(this, NativeSplashActivity::class.java)
+        launcherResult.launch(intent)
     }
 
     override fun onDestroy() {

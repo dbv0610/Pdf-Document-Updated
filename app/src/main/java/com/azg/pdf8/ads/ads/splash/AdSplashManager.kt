@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 sealed class AdState {
     data object Idle : AdState()
@@ -38,7 +39,6 @@ sealed class AdState {
 }
 
 class AdSplashManager(
-    private val activity: AppCompatActivity,
     private val listener: AdSplashCompleteListener,
 ) : DefaultLifecycleObserver {
     companion object {
@@ -66,9 +66,17 @@ class AdSplashManager(
     private var isAppOpenBackground = false
     private var isPause = false
 
-    init {
+    private var activityRef: WeakReference<AppCompatActivity>? = null
+
+    fun bind(activity: AppCompatActivity) {
+        activityRef = WeakReference(activity)
         activity.lifecycle.addObserver(this)
     }
+
+    private fun getActivity(): AppCompatActivity? {
+        return activityRef?.get()
+    }
+
 
     /**
      * Callback for interstitial ads
@@ -129,7 +137,7 @@ class AdSplashManager(
     fun loadAds() {
         if (remoteConfig.i101Config.enable
             && remoteConfig.isAdEnable
-            && activity.isInternetAvailable()
+            && getActivity()?.isInternetAvailable() == true
             && !AppPurchase.getInstance().isPurchased
         ) {
             isTimeOut = false
@@ -168,7 +176,7 @@ class AdSplashManager(
     private fun loadInterSplash(splashConfig: SplashConfig, isDelay: Boolean) {
         if (splashConfig.enableAd) {
             AzAds.getInstance().loadSplashInterstitialAds(
-                activity,
+                getActivity(),
                 splashConfig.adUnit,
                 splashConfig.timeout,
                 if (isDelay) TIME_DELAY else 0,
@@ -198,7 +206,7 @@ class AdSplashManager(
         if (splashConfig.enableAd) {
             AppOpenManager.getInstance().setSplashAdId(splashConfig.adUnit)
             AppOpenManager.getInstance().loadOpenAppAdSplash(
-                activity,
+                getActivity(),
                 if (isDelay) TIME_DELAY else 0,
                 splashConfig.timeout,
                 object : AdCallback() {
@@ -233,29 +241,33 @@ class AdSplashManager(
             }
             NativeSplashActivity.nativeAdSplash = splashConfig
             isLoadedNativeFullScreen = false
-            NativeAdPreload.getInstance().preload(
-                activity,
-                splashConfig.adUnit,
-                R.layout.layout_native_full_screen,
-            )
-            NativeAdPreload.getInstance().getAdPreloadState(
-                splashConfig.adUnit,
-                R.layout.layout_native_full_screen
-            ).onEach {
-                when (it) {
-                    is NativePreloadState.Consume -> {
-                        isLoadedNativeFullScreen = true
-                    }
+            getActivity()?.let {
+                NativeAdPreload.getInstance().preload(
+                    it,
+                    splashConfig.adUnit,
+                    R.layout.layout_native_full_screen,
+                )
+            }
+            getActivity()?.lifecycleScope?.let {
+                NativeAdPreload.getInstance().getAdPreloadState(
+                    splashConfig.adUnit,
+                    R.layout.layout_native_full_screen
+                ).onEach {
+                    when (it) {
+                        is NativePreloadState.Consume -> {
+                            isLoadedNativeFullScreen = true
+                        }
 
-                    is NativePreloadState.Complete -> {
-                        if (isTimeOut || isTimeoutNative) return@onEach
-                        timeoutNativeJob?.cancel()
-                        if (isTimeDelayNative) onAdNativeComplete()
-                    }
+                        is NativePreloadState.Complete -> {
+                            if (isTimeOut || isTimeoutNative) return@onEach
+                            timeoutNativeJob?.cancel()
+                            if (isTimeDelayNative) onAdNativeComplete()
+                        }
 
-                    else -> Unit
-                }
-            }.launchIn(activity.lifecycleScope)
+                        else -> Unit
+                    }
+                }.launchIn(it)
+            }
         } else {
             loadNextAdSplash()
         }
@@ -274,7 +286,7 @@ class AdSplashManager(
 
     private fun countTimeDelayNative() {
         timeDelayNativeJob?.cancel()
-        timeDelayNativeJob = activity.lifecycleScope.launch {
+        timeDelayNativeJob = getActivity()?.lifecycleScope?.launch {
             delay(TIME_DELAY)
             if (isActive) handleTimeDelayNative()
         }
@@ -287,7 +299,7 @@ class AdSplashManager(
 
     private fun countTimeoutNative(timeout: Long) {
         timeoutNativeJob?.cancel()
-        timeoutNativeJob = activity.lifecycleScope.launch {
+        timeoutNativeJob = getActivity()?.lifecycleScope?.launch {
             delay(timeout)
             if (isActive) handleTimeOutNative()
         }
@@ -307,13 +319,13 @@ class AdSplashManager(
     }
 
     private fun showInterSplash() {
-        if (activity.isFinishing || activity.isDestroyed) return
-        AzAds.getInstance().onShowSplash(activity, interAdCallback)
+        if (getActivity()?.isFinishing == true || getActivity()?.isDestroyed == true) return
+        AzAds.getInstance().onShowSplash(getActivity(), interAdCallback)
     }
 
     private fun showOpenSplash() {
-        if (activity.isFinishing || activity.isDestroyed) return
-        AppOpenManager.getInstance().showAppOpenSplash(activity, openAdCallback)
+        if (getActivity()?.isFinishing == true || getActivity()?.isDestroyed == true) return
+        AppOpenManager.getInstance().showAppOpenSplash(getActivity(), openAdCallback)
     }
 
     private fun showNativeFullScrSplash() {
@@ -324,7 +336,7 @@ class AdSplashManager(
 
     private fun startLoadAdsTimeout() {
         timeoutJob?.cancel()
-        timeoutJob = activity.lifecycleScope.launch {
+        timeoutJob = getActivity()?.lifecycleScope?.launch {
             delay(remoteConfig.i101Config.totalTimeout)
             if (isActive) handleTimeOut()
         }
@@ -346,7 +358,7 @@ class AdSplashManager(
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        activity.lifecycle.removeObserver(this)
+        getActivity()?.lifecycle?.removeObserver(this)
         super.onDestroy(owner)
     }
 
@@ -357,16 +369,16 @@ class AdSplashManager(
     fun onCheckShowAdsWhenFail() {
         when (splashType) {
             SplashType.Inter -> {
-                AzAds.getInstance().onCheckShowSplashWhenFail(activity, interAdCallback, 1000)
+                AzAds.getInstance().onCheckShowSplashWhenFail(getActivity(), interAdCallback, 1000)
             }
 
             SplashType.AppOpen -> {
                 AppOpenManager.getInstance()
-                    .onCheckShowAppOpenSplashWhenFail(activity, openAdCallback, 1000)
+                    .onCheckShowAppOpenSplashWhenFail(getActivity(), openAdCallback, 1000)
             }
 
             SplashType.Native -> {
-                activity.lifecycleScope.launch {
+                getActivity()?.lifecycleScope?.launch {
                     delay(1000)
                     InterstitialAdManager.isCloseInterSplash.postValue(true)
                     if (isLoadedNativeFullScreen) {
@@ -378,7 +390,7 @@ class AdSplashManager(
             }
 
             else -> {
-                activity.lifecycleScope.launch {
+                getActivity()?.lifecycleScope?.launch {
                     delay(1000)
                     InterstitialAdManager.isCloseInterSplash.postValue(true)
                     updateState(AdState.NavigateNext)

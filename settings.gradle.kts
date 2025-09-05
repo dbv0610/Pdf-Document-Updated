@@ -1,5 +1,13 @@
 pluginManagement {
+    val mavenUser: String by settings
+    val mavenPassword: String by settings
     repositories {
+        maven(url = "https://maven.pkg.github.com/azuraglobal/plugin") {
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
         google {
             content {
                 includeGroupByRegex("com\\.android.*")

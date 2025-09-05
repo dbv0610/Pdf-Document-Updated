@@ -2,8 +2,10 @@ package com.azg.pdf8.app
 
 import android.app.Activity
 import android.app.Application
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowInsets
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -17,6 +19,7 @@ import com.ads.control.config.AzAdConfig
 import com.azg.pdf8.BuildConfig
 import com.azg.pdf8.ui.splash.NativeSplashActivity
 import com.azg.pdf8.ui.splash.SplashActivity
+import com.google.android.gms.ads.AdActivity
 import com.google.firebase.FirebaseApp
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import org.koin.android.ext.koin.androidContext
@@ -54,6 +57,29 @@ class AppPdfReader : AdsMultiDexApplication() {
         registerLifecycleCallback()
         FirebaseApp.initializeApp(this)
         initAds()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
+        }
+    }
+
+    private val activityLifecycleCallbacks = object : ActivityLifecycleCallbacks {
+
+        override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                if (activity::class.java == AdActivity::class.java) {
+                    val rootView = activity.window.decorView
+                    rootView.windowInsetsController?.hide(WindowInsets.Type.navigationBars())
+                }
+            }
+        }
+
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+        override fun onActivityStarted(activity: Activity) {}
+        override fun onActivityResumed(activity: Activity) {}
+        override fun onActivityPaused(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {}
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+        override fun onActivityDestroyed(activity: Activity) {}
     }
 
     private fun initAds() {

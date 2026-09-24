@@ -8,7 +8,6 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.ads.control.event.AzLogEventManager
 import com.azg.pdf8.R
 import com.azg.pdf8.ui.splash.SplashActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -23,7 +22,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d(TAG, "Refreshed token: $token")
-        AzLogEventManager.onTrackTokenFcm(token, applicationContext)
+
     }
 
     override fun onCreate() {
@@ -31,7 +30,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful && task.result != null) {
-                    AzLogEventManager.onTrackTokenFcm(task.result, applicationContext)
                 }
             }
     }

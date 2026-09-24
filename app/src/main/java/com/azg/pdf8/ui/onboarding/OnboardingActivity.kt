@@ -4,13 +4,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import com.ads.control.billing.AppPurchase
-import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
-import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
-import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.isFinishFirstFlow
-import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.databinding.ActivityOnboardingBinding
 import com.azg.pdf8.ui.feature.FeatureActivity
@@ -24,26 +19,14 @@ import org.koin.android.ext.android.inject
 class OnboardingActivity :
     BaseActivity<ActivityOnboardingBinding>(ActivityOnboardingBinding::inflate, true) {
     private val viewModel: OnboardingViewModel by inject()
-    private val isSmallNative get() = remoteConfig.n104Config1.layout.contains("small")
-    private val nativeAdsWrapper by lazy {
-        NativeAdsWrapper(
-            activity = this,
-            config = NativePlacement.ONBOARDING,
-            lifecycleOwner = this,
-            adContainer = { binding.flNativeAd },
-            shimmerView = { if (isSmallNative) binding.shimmerAdSmall.shimmerContainerNative else binding.shimmerAdMedium.shimmerContainerNative }
-        )
-    }
+
     private val listFragment by lazy {
         mutableListOf<Fragment>(
             OnboardingFragment.newInstance(0),
             OnboardingFragment.newInstance(1),
             OnboardingFragment.newInstance(2),
             OnboardingFragment.newInstance(3)
-        ).apply {
-            if (isShowNativeFullScreen2()) add(3, OnboardingFullFragment.newInstance(1))
-            if (isShowNativeFullScreen1()) add(2, OnboardingFullFragment.newInstance(0))
-        }
+        )
     }
     private val titles = arrayOf(
         R.string.title_onboarding_1,
@@ -58,15 +41,14 @@ class OnboardingActivity :
         R.string.content_onboarding_4
     )
     private val showAdConfig: Map<Int, () -> Boolean> = mapOf(
-        0 to { remoteConfig.onboardingConfig.isEnableScreen1 },
-        1 to { remoteConfig.onboardingConfig.isEnableScreen2 },
-        2 to { !isShowNativeFullScreen1() && remoteConfig.onboardingConfig.isEnableScreen3 },
+        0 to {false },
+        1 to { false},
+        2 to { false},
         3 to {
-            if (isShowNativeFullScreen1()) remoteConfig.onboardingConfig.isEnableScreen3
-            else !isShowNativeFullScreen2() && remoteConfig.onboardingConfig.isEnableScreen4
+            false
         },
-        4 to { !isShowNativeFullScreen1() && !isShowNativeFullScreen2() && remoteConfig.onboardingConfig.isEnableScreen4 },
-        5 to { remoteConfig.onboardingConfig.isEnableScreen4 }
+        4 to { false},
+        5 to {false }
     )
     private val adapter by lazy { OnboardingViewPagerAdapter(this, listFragment) }
 
@@ -74,7 +56,6 @@ class OnboardingActivity :
     override fun ActivityOnboardingBinding.onClick() = Unit
 
     override fun ActivityOnboardingBinding.setData() {
-        nativeAdsWrapper.setupNativeAd("native_onboarding")
         tvNext.setOnClickListener { nextPage() }
         viewPager.adapter = adapter
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -114,21 +95,9 @@ class OnboardingActivity :
     fun changeData(position: Int) {
         if (position == 0 && !viewModel.isPreloadNativeFull) {
             viewModel.isPreloadNativeFull = true
-            NativeAdPreloadManager.preloadAd(
-                this,
-                NativePlacement.ONBOARDING_FULL_1,
-                isForce = true
-            )
-            NativeAdPreloadManager.preloadAd(
-                this,
-                NativePlacement.ONBOARDING_FULL_2,
-                isForce = true
-            )
+
         } else if (position == listFragment.lastIndex && !viewModel.isPreloadNativeFeature) {
-            if (remoteConfig.wellComeEnable) {
-                viewModel.isPreloadNativeFeature = true
-                NativeAdPreloadManager.preloadAd(this, NativePlacement.FEATURE, buffer = 2, false)
-            }
+
         }
     }
 
@@ -151,28 +120,8 @@ class OnboardingActivity :
         val idx = binding.viewPager.currentItem
         val show = showAdConfig[idx]?.invoke() == true
         binding.llTabLayout.isVisible = show
-        if (show) requestAds() else cancelAds()
+
     }
-
-    private fun requestAds() {
-        nativeAdsWrapper.requestAds()
-        val missing = 2 - nativeAdsWrapper.getAvailableAdCount()
-        if (missing > 0) nativeAdsWrapper.preloadAd(missing, isForce = true)
-    }
-
-    private fun cancelAds() {
-        nativeAdsWrapper.cancelRequest()
-    }
-
-    private fun isShowNativeFullScreen1() = remoteConfig.N107Config1.enable
-            && remoteConfig.isAdEnable
-            && isInternetAvailable()
-            && !AppPurchase.getInstance().isPurchased
-
-    private fun isShowNativeFullScreen2() = remoteConfig.n108Config1.enable
-            && remoteConfig.isAdEnable
-            && isInternetAvailable()
-            && !AppPurchase.getInstance().isPurchased
 
     override fun fragmentOnBack() {
         previousPage()

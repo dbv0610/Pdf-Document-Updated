@@ -24,6 +24,8 @@ import java.io.InputStream
 class SheetReader private constructor() {
     companion object {
         private val reader = SheetReader()
+        private const val INITIAL_ROW_BATCH = 240
+        private const val CONTINUATION_ROW_BATCH = 480
         @JvmStatic fun instance(): SheetReader = reader
     }
 
@@ -34,7 +36,34 @@ class SheetReader private constructor() {
         // The old DOM4J path built an XML Element for every worksheet node.
         // Large worksheets therefore exhausted the Android heap before the
         // model was complete. Parse the worksheet as a forward-only stream.
-        parseWorksheetStreaming(sheetPart.inputStream, sheet)
+        streamInput = sheetPart.inputStream
+        streamParser = Xml.newPullParser().also { it.setInput(streamInput, null) }
+        streamTarget = sheet
+        val complete = parseWorksheetStreaming(sheet, INITIAL_ROW_BATCH)
+        if (!complete) {
+            sheet.setState(Sheet.State_Reading)
+            return
+        }
+        finishSheet(control, zipPackage, sheet, sheetPart)
+    }
+
+    @Throws(Exception::class)
+    fun continueSheet(control: IControl, zipPackage: ZipPackage, sheet: Sheet, sheetPart: PackagePart, iReader: IReader): Boolean {
+        this.sheet = sheet
+        this.iReader = iReader
+        if (streamTarget !== sheet) {
+            streamInput = sheetPart.inputStream
+            streamParser = Xml.newPullParser().also { it.setInput(streamInput, null) }
+            streamTarget = sheet
+        }
+        val complete = parseWorksheetStreaming(sheet, CONTINUATION_ROW_BATCH)
+        if (complete) finishSheet(control, zipPackage, sheet, sheetPart)
+        return complete
+    }
+
+    fun isStreaming(sheet: Sheet): Boolean = streamTarget === sheet && streamParser != null
+
+    private fun finishSheet(control: IControl, zipPackage: ZipPackage, sheet: Sheet, sheetPart: PackagePart) {
         val tableRelations = sheetPart.getRelationshipsByType(PackageRelationshipTypes.TABLE_PART)
         for (relation in tableRelations) TableReader.instance().read(control, zipPackage.getPart(relation.targetURI), sheet)
         val drawingRelations = sheetPart.getRelationshipsByType(PackageRelationshipTypes.DRAWING_PART)
@@ -48,8 +77,9 @@ class SheetReader private constructor() {
         dispose()
     }
 
-    private fun parseWorksheetStreaming(input: InputStream, target: Sheet) {
-        val parser = Xml.newPullParser()
+    private fun parseWorksheetStreaming(target: Sheet, maxRows: Int): Boolean {
+        val parser = streamParser ?: return true
+        val input = streamInput ?: return true
         parser.setInput(input, null)
         var row: Row? = null
         var cellRef: String? = null
@@ -58,12 +88,13 @@ class SheetReader private constructor() {
         var cellText: StringBuilder? = null
         var captureValue = false
         var rowHasMetadata = false
+        var rowsRead = 0
 
         try {
             while (true) {
                 if (iReader?.isAborted() == true) throw AbortReaderError("abort Reader")
                 when (parser.next()) {
-                    XmlPullParser.END_DOCUMENT -> break
+                    XmlPullParser.END_DOCUMENT -> return true
                     XmlPullParser.START_TAG -> when (parser.name) {
                         "sheetFormatPr" -> {
                             parser.attr("defaultRowHeight")?.let {
@@ -153,13 +184,16 @@ class SheetReader private constructor() {
                             }
                             row = null
                             rowHasMetadata = false
+                            rowsRead++
+                            if (rowsRead >= maxRows) return false
                         }
                     }
                 }
             }
         } finally {
-            input.close()
+            if (streamParser == null) input.close()
         }
+        return true
     }
 
     private fun cellTypeToModelType(type: String?): Short = when (type) {
@@ -396,6 +430,10 @@ class SheetReader private constructor() {
     }
 
     private fun dispose() {
+        try { streamInput?.close() } catch (_: Exception) {}
+        streamInput = null
+        streamParser = null
+        streamTarget = null
         sheet = null
         iReader = null
         key = null
@@ -407,4 +445,8 @@ class SheetReader private constructor() {
     private var defaultColWidth = 0
     private var key: String? = null
     private var searched = false
+    private var streamInput: InputStream? = null
+    private var streamParser: XmlPullParser? = null
+    private var streamTarget: Sheet? = null
+
 }

@@ -16,4 +16,6 @@ package com.wxiwei.office.ss.model.interfacePart
  */
 interface IReaderListener {
     fun OnReadingFinished()
+
+    fun OnReadingProgress() {}
 }

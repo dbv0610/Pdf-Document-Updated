@@ -7,13 +7,10 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.azg.pdf8.R;
+import com.azg.pdf8.R
 import com.azg.pdf8.adapter.FolderGalleryAdapter
 import com.azg.pdf8.adapter.PhotoGalleryAdapter
 import com.azg.pdf8.adapter.ViewActionHandle
-import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
-import com.azg.pdf8.ads.ads.native.NativePlacement
-import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.databinding.ActivityChooseImageBinding
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.utils.Constant
@@ -47,16 +44,7 @@ class ChooseImageActivity :
             binding.folderName.text = it.folderName
         }
     }
-    val isSmallNative = remoteConfig.n110Config1.layout.contains("small")
-    val nativeAdsWrapper by lazy {
-        NativeAdsWrapper(
-            activity = this@ChooseImageActivity,
-            config = NativePlacement.PERMISSION,
-            lifecycleOwner = this,
-            adContainer = { binding.flNativeAd },
-            shimmerView = { if (isSmallNative) binding.shimmerAdSmall.shimmerContainerNative else binding.shimmerAdMedium.shimmerContainerNative }
-        )
-    }
+
 
     override fun initialize() {
         screenAction = getData<String>(Constant.KEY_ACTION).toString()
@@ -80,10 +68,7 @@ class ChooseImageActivity :
     }
 
     fun requestAds() {
-        with(nativeAdsWrapper) {
-            setupNativeAd("native_choose_image")
-            requestAds()
-        }
+
     }
 
     override fun ActivityChooseImageBinding.setData() {

@@ -112,11 +112,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.splash.NativeSplashActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+
         <activity
             android:name=".ui.language.LanguageOpenActivity"
             android:exported="false"

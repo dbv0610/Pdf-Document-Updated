@@ -1,5 +1,5 @@
 pluginManagement {
-    val mavenUser: String by settings
+ val mavenUser: String by settings
     val mavenPassword: String by settings
     repositories {
         maven(url = "https://maven.pkg.github.com/azuraglobal/plugin") {

@@ -104,10 +104,19 @@ class WorkbookReader private constructor() {
             }
         }
         delay(50)
-        synchronized(workbook) {
-            if (currentSheet >= 0 && workbook.getSheet(currentSheet) != null && !workbook.getSheet(currentSheet)!!.isAccomplished()) readSheet(control, currentSheet)
-            for (i in currentSheet - WINDOWWIDTH..currentSheet + WINDOWWIDTH) {
-                if (i >= 0 && workbook.getSheet(i) != null && !workbook.getSheet(i)!!.isAccomplished()) readSheet(control, i)
+        if (currentSheet >= 0 && workbook.getSheet(currentSheet) != null) {
+            val active = workbook.getSheet(currentSheet)!!
+            while (!active.isAccomplished()) {
+                readSheet(control, currentSheet)
+                if (!active.isAccomplished()) {
+                    active.notifyReadingProgress()
+                    delay(16)
+                }
+            }
+        }
+        for (i in currentSheet - WINDOWWIDTH..currentSheet + WINDOWWIDTH) {
+            if (i >= 0 && i != currentSheet && workbook.getSheet(i) != null && !workbook.getSheet(i)!!.isAccomplished()) {
+                while (!workbook.getSheet(i)!!.isAccomplished()) readSheet(control, i)
             }
         }
     }
@@ -124,7 +133,12 @@ class WorkbookReader private constructor() {
         if (rel == null) return
         val part = zipPackage!!.getPart(rel.targetURI) ?: return
         book!!.getSheet(index)!!.setSheetType(type)
-        SheetReader.instance().getSheet(control, zipPackage!!, book!!.getSheet(index)!!, part, iReader!!)
+        val sheet = book!!.getSheet(index)!!
+        if (SheetReader.instance().isStreaming(sheet)) {
+            SheetReader.instance().continueSheet(control, zipPackage!!, sheet, part, iReader!!)
+        } else {
+            SheetReader.instance().getSheet(control, zipPackage!!, sheet, part, iReader!!)
+        }
     }
 
     @Throws(Exception::class)

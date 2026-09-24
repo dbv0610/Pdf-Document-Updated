@@ -7,8 +7,6 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.azg.pdf8.ads.ads.banner.BannerAdWrapper
-import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.databinding.LayoutBannerAdBinding
 import com.dong.baselib.widget.gone
@@ -25,22 +23,7 @@ class BannerAdView @JvmOverloads constructor(
         true
     )
     private var attachActivity: AppCompatActivity? = null
-    private var bannerAdsWrapper: BannerAdWrapper? = null
 
-    fun setBannerPlacement(
-        lifecycleOwner: AppCompatActivity,
-        placement: BannerPlacement
-    ): BannerAdView {
-        attachActivity = lifecycleOwner
-        lifecycleOwner.lifecycle.addObserver(this)
-        bannerAdsWrapper = BannerAdWrapper(
-            activity = lifecycleOwner,
-            config = placement,
-            lifecycleOwner = lifecycleOwner,
-            adContainer = { binding.flBanner }
-        )
-        return this
-    }
 
     override fun onResume(owner: LifecycleOwner) {
         attachActivity?.let { activity ->
@@ -50,13 +33,7 @@ class BannerAdView @JvmOverloads constructor(
             }
         }
     }
-
-    fun requestBanner() {
-        bannerAdsWrapper?.setupBannerAd()
-        bannerAdsWrapper?.requestAds()
-    }
-
-    fun cancelRequest() = bannerAdsWrapper?.cancelRequest()
+    fun cancelRequest() = Unit
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()

@@ -3,11 +3,7 @@ package com.azg.pdf8.ui.language
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
-import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
-import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
-import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.isUfo
-import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityLanguageWaitingBinding
 import com.azg.pdf8.firebase.Analytics
@@ -56,27 +52,12 @@ class LanguageWaitingActivity :
         }
     }
 
-    val isSmallNative = remoteConfig.n103Config1.layout.contains("small")
-    private val nativeAdsWrapper by lazy {
-        NativeAdsWrapper(
-            activity = this,
-            config = NativePlacement.LANGUAGE_1,
-            lifecycleOwner = this,
-            adContainer = { binding.flNativeAd },
-            shimmerView = { if (isSmallNative) binding.shimmerAdSmall.shimmerContainerNative else binding.shimmerAdMedium.shimmerContainerNative }
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isUfo()) {
             Analytics.track("ufo_language_loading")
         }
-        with(nativeAdsWrapper) {
-            setupNativeAd("native_language_loading")
-            requestAds()
-        }
-        NativeAdPreloadManager.preloadAd(this, NativePlacement.LANGUAGE_2, isForce = true)
     }
 
     private fun setupListLanguage() {

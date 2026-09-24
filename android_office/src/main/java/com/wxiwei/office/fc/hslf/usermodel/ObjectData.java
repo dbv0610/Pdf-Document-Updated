@@ -17,11 +17,10 @@
 
 package com.wxiwei.office.fc.hslf.usermodel;
 
-import java.io.InputStream;
-
 import com.wxiwei.office.fc.hslf.record.ExOleObjStg;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 
 /**

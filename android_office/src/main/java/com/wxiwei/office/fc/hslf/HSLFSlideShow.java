@@ -374,7 +374,7 @@ public final class HSLFSlideShow/* extends POIDocument*/
                 try
                 {
                     PictureData pict = PictureData.create(type - 0xF018);
-                    pict.setOffset(offset);
+                    pict.offset = offset;
                     
                     // Copy the data, ready to pass to PictureData
                     //byte[] imgdata = new byte[imgsize];
@@ -395,7 +395,7 @@ public final class HSLFSlideShow/* extends POIDocument*/
                             FileOutputStream out = new FileOutputStream(file);
                             if(pict.getType() == Picture.WMF || pict.getType() == Picture.EMF)
                             {
-                                byte[] rawdata = property.getRecordData(pict.getOffset());
+                                byte[] rawdata = property.getRecordData(pict.offset);
                                 
                                 pict.setRawData(rawdata);
 //                                out.write(pict.getData());
@@ -433,7 +433,7 @@ public final class HSLFSlideShow/* extends POIDocument*/
                         {
                             control.getSysKit().getErrorKit().writerLog(e);
                         }
-                        pict.setTempFilePath(file.getAbsolutePath());
+                        pict.tempFilePath = file.getAbsolutePath();
                     
                     }
                     _pictures.add(pict);
@@ -638,9 +638,9 @@ public final class HSLFSlideShow/* extends POIDocument*/
         if (_pictures.size() > 0)
         {
             PictureData prev = _pictures.get(_pictures.size() - 1);
-            offset = prev.getOffset() + prev.getRawData().length + 8;
+            offset = prev.offset + prev.getRawData().length + 8;
         }
-        img.setOffset(offset);
+        img.offset = offset;
         _pictures.add(img);
         return offset;
     }

@@ -7,7 +7,7 @@ import com.azg.pdf8.R
 import com.azg.pdf8.databinding.ItemContentSearchBinding
 import com.azg.pdf8.model.ContentWithPage
 
-class SearchAdapter() :
+class SearchAdapter(private val onItemClick: (ContentWithPage) -> Unit = {}) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val listContentSearch = ArrayList<ContentWithPage>()
@@ -49,6 +49,7 @@ class SearchAdapter() :
             val page = "${binding.root.context.getString(R.string.page)} \n ${searchModel.page}"
             binding.txtPage.text = page
             binding.txtContent.text = searchModel.content
+            binding.root.setOnClickListener { onItemClick(searchModel) }
 
             binding.btnExpand.setOnClickListener {
                 searchModel.expand = !searchModel.expand

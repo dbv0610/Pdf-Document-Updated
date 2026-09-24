@@ -6,9 +6,6 @@
  */
 package com.wxiwei.office.fc.hslf.record;
 
-import com.wxiwei.office.fc.hslf.record.PositionDependentRecordContainer;
-import com.wxiwei.office.fc.hslf.record.Record;
-
 /**
  * TODO: a scale-animation behavior that changes the size of an object
  * <p>

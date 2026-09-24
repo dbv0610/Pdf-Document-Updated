@@ -30,22 +30,23 @@ class TXTKit {
             if (signature == HeaderBlock._signature || signature == 0x0006001404034b50L) {
                 input.close()
                 OpenTrace.e("text reader rejected office container path=$filePath")
-                control.getSysKit().getErrorKit().writerLog(Exception("Format error"), true)
+                handler.obtainMessage(com.wxiwei.office.constant.MainConstant.HANDLER_MESSAGE_ERROR, com.wxiwei.office.system.BadFileFormatException("Office container opened as text")).sendToTarget()
                 return
             }
             signature = signature and 0x00FFFFFFFFFFFFFFL
             if (signature == 0x002e312d46445025L) {
                 input.close()
                 OpenTrace.e("text reader rejected PDF container path=$filePath")
-                control.getSysKit().getErrorKit().writerLog(Exception("Format error"), true)
+                handler.obtainMessage(com.wxiwei.office.constant.MainConstant.HANDLER_MESSAGE_ERROR, com.wxiwei.office.system.BadFileFormatException("PDF opened as text")).sendToTarget()
                 return
             }
             input.close()
 
             // TODO(coroutine): Starts the file reader worker; use an IO dispatcher in a unified refactor.
             FileReaderThread(control, handler, filePath, "UTF-8").start()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             OpenTrace.e("text reader preflight failed path=$filePath", e)
+            handler.obtainMessage(com.wxiwei.office.constant.MainConstant.HANDLER_MESSAGE_ERROR, e).sendToTarget()
         }
     }
 

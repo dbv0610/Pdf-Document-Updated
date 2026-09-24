@@ -3,6 +3,7 @@ package com.azg.pdf8.viewmodel
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.pdf.PdfDocument
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.graphics.scale
 import androidx.lifecycle.ViewModel
@@ -14,12 +15,18 @@ import com.azg.pdf8.utils.AppUtils
 import com.dong.baselib.string.fileName
 import com.dong.baselib.widget.pink
 import com.wxiwei.office.pg.control.Presentation
-import com.wxiwei.office.ss.control.ExcelView
-import com.wxiwei.office.ss.model.baseModel.Row
-import com.wxiwei.office.ss.model.baseModel.Sheet
+import com.wxiwei.office.constant.SSConstant
 import com.wxiwei.office.ss.view.SheetView
 import com.wxiwei.office.wp.control.Word
+import com.wxiwei.office.system.OpenFileErrors
+import com.wxiwei.office.system.OpenFileException
+import com.wxiwei.office.system.OpenTrace
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -39,7 +46,6 @@ enum class StateLoadData {
 class ConvertViewModel : ViewModel() {
     private val TAG = "ConvertViewModel"
     private val _listSlide = MutableStateFlow<List<DocumentPage>>(listOf())
-    var excelBitmap = MutableStateFlow<Bitmap?>(null)
     val listSlide = _listSlide.asStateFlow()
 
     private val _uiState = MutableStateFlow(StateLoadData.Loading)
@@ -232,138 +238,160 @@ class ConvertViewModel : ViewModel() {
         }
     }
 
-    fun initXlsPages(view: ExcelView, callback: (Bitmap?) -> Unit = {}) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val thumbBmp = try {
-                val sheetView = view.getSheetView() ?: return@launch
-                val sheet = sheetView.getCurrentSheet() ?: return@launch
-                val activeRow = sheet.getPhysicalNumberOfRows()
-                var activeColumn: Int? = 0
-
-                for (i in 0 .. activeRow-1){
-                    if( sheet.getRow(i)?.getLastCol() !=null){
-                        activeColumn= sheet.getRow(i)?.getLastCol()
-                        break
-                    }
-                }
-
-                var currentSheetWidth = 0f
-                var currentSheetHeight = 0f
-                for (i in 0..(activeColumn?:0) + 1) {
-                    currentSheetWidth += sheet.getColumnPixelWidth(i)
-                }
-                for (i in 0..activeRow + 1) {
-                    val row: Row = sheet.getRow(i) ?: continue
-                    val rowHeight: Float = row.getRowPixelHeight()
-                    Log.d(
-                        TAG,
-                        "Row info: ${row.toString()} --${row.getRowPixelHeight()}"
-                    )
-                    currentSheetHeight += rowHeight
-                }
-                Log.d(
-                    TAG,
-                    "Data is active: $activeRow-$activeColumn"
-                )
-                val fullBitmap = sheetView.getThumbnail(sheet, currentSheetWidth.toInt(), currentSheetHeight.toInt(), 1f)
-                fullBitmap
-            } catch (t: Throwable) {
-                Log.e(TAG, "initXlsPage failed: ", t)
-                null
-            }
-            withContext(Dispatchers.Main) {
-                callback(thumbBmp)
-            }
-        }
-    }
-
     fun convertToPdf(
         newName : String,
         model: RecentDocument,
         onNameExit:()-> Unit,
         onStart: () -> Unit,
         onFinish: (File) -> Unit,
-        onError: () -> Unit
+        onError: (OpenFileException) -> Unit,
+        excelSheetView: SheetView? = null
     ) {
         Log.d(TAG, "convertToPdf: start for ${model.path}")
+        // Capture the selected sheet before starting the background conversion.
+        val excelSheet = excelSheetView?.getCurrentSheet()
         viewModelScope.launch(Dispatchers.IO) {
-            // notify UI
-            withContext(Dispatchers.Main) {
-                Log.d(TAG, "convertToPdf: onStart()")
-                onStart()
-            }
-            // prepare file
-            var outputFile = File(
-                AppUtils.documentPath,
-                "$newName.pdf"
-            ).apply {
-                if (!exists()) createNewFile()
-            }
-
-
-            when (model.type) {
-                DocumentType.Doc, DocumentType.Ppt -> {
-                    Log.d(TAG, "convertToPdf: DOC/PPT branch, slides=${listSlide.value?.size}")
-                    val bitmaps = listSlide.value?.map { it.bitmap } ?: emptyList()
-                    if (bitmaps.isEmpty()) {
-                        Log.e(TAG, "convertToPdf: no bitmaps to write")
-                        withContext(Dispatchers.Main) { onError() }
-                    } else {
-                        val success = createPdfFromBitmaps(bitmaps, outputFile)
-                        withContext(Dispatchers.Main) {
-                            if (success) {
-                                Log.d(TAG, "convertToPdf: finished DOC/PPT PDF")
-                                onFinish(outputFile)
-                            } else {
-                                Log.e(TAG, "convertToPdf: error in DOC/PPT PDF")
-                                onError()
-                            }
+            try {
+                withContext(Dispatchers.Main) { onStart() }
+                val outputFile = File(AppUtils.documentPath, "$newName.pdf").apply {
+                    if (model.type != DocumentType.Excel && !exists()) createNewFile()
+                }
+                when (model.type) {
+                    DocumentType.Doc, DocumentType.Ppt -> {
+                        val bitmaps = listSlide.value.map { it.bitmap }
+                        check(bitmaps.any { it != null }) { "No rendered pages to convert" }
+                        createPdfFromBitmaps(bitmaps, outputFile)
+                    }
+                    DocumentType.Excel -> {
+                        try {
+                            checkNotNull(excelSheetView) { "No Excel view" }
+                            checkNotNull(excelSheet) { "No selected sheet" }
+                            check(withTimeoutOrNull(30_000L) {
+                                while (!excelSheet.isAccomplished()) delay(100)
+                                true
+                            } == true) { "Timed out waiting for Excel sheet" }
+                            createPdfFromExcel(excelSheetView, excelSheet, outputFile)
+                        } catch (error: Throwable) {
+                            deleteExcelPdfFile(outputFile)
+                            throw error
                         }
                     }
+                    else -> Unit
                 }
-                DocumentType.Excel -> {
-                    val bmp = excelBitmap.value
-                    Log.d(TAG, "convertToPdf: EXCEL branch, bitmap=${bmp?.width}×${bmp?.height}")
-                    if (bmp == null) {
-                        withContext(Dispatchers.Main) { onError() }
-                    } else {
-                        // A4 @72dpi: 595×842 pts, margin 20pts → content height = 842–40 = 802px
-                        val pageHeightPts = (842 * 1.55f).roundToInt()
-                        val marginPts = 20
-                        val contentHeightPx = pageHeightPts - marginPts * 2
-                        val pages = splitBitmapVertically(bmp, contentHeightPx)
-                        Log.d(TAG, "convertToPdf: split into ${pages.size} pages")
-                        val success = createPdfFromBitmaps(pages, outputFile)
-                        withContext(Dispatchers.Main) {
-                            if (success) {
-                                Log.d(TAG, "convertToPdf: finished EXCEL PDF")
-                                onFinish(outputFile)
-                            } else {
-                                Log.e(TAG, "convertToPdf: error in EXCEL PDF")
-                                onError()
-                            }
-                        }
-                    }
-                }
-                else -> {
-                    Log.d(TAG, "convertToPdf: OTHER branch → immediately onFinish()")
-                    withContext(Dispatchers.Main) { onFinish(outputFile) }
-                }
+                withContext(Dispatchers.Main) { onFinish(outputFile) }
+            } catch (error: Throwable) {
+                if (OpenFileErrors.isCancellation(error)) throw error
+                val failure = OpenFileErrors.wrap(error, model.path)
+                OpenTrace.e("PDF conversion failed reason=${failure.reason} path=${failure.filePath}", failure)
+                withContext(Dispatchers.Main) { onError(failure) }
             }
         }
     }
 
-    private fun splitBitmapVertically(src: Bitmap, maxHeightPx: Int): List<Bitmap> {
-        val pages = mutableListOf<Bitmap>()
-        var yOffset = 0
-        while (yOffset < src.height) {
-            val chunkHeight = minOf(maxHeightPx, src.height - yOffset)
-            Log.d(TAG, "splitBitmap: chunk at y=$yOffset height=$chunkHeight")
-            val chunk = Bitmap.createBitmap(src, 0, yOffset, src.width, chunkHeight)
-            pages += chunk
-            yOffset += chunkHeight
+    private fun deleteExcelPdfFile(file: File) {
+        if (file.exists() && !file.delete()) {
+            Log.e(TAG, "Could not delete incomplete Excel PDF: $file")
         }
-        return pages
+    }
+
+    private suspend fun createPdfFromExcel(
+        sheetView: SheetView,
+        sheet: com.wxiwei.office.ss.model.baseModel.Sheet,
+        outputFile: File
+    ) {
+        val startedAt = SystemClock.elapsedRealtime()
+        var lastColumn = 0
+        var totalHeight = 0.0
+        for (index in 0..sheet.getLastRowNum()) {
+            currentCoroutineContext().ensureActive()
+            val row = sheet.getRow(index) ?: continue
+            lastColumn = maxOf(lastColumn, row.getLastCol())
+            totalHeight += row.getRowPixelHeight()
+        }
+        var totalWidth = 0.0
+        // Preserve the old thumbnail's trailing column allowance.
+        for (column in 0..lastColumn + 1) {
+            totalWidth += sheet.getColumnPixelWidth(column)
+        }
+        require(totalWidth > 0 && totalWidth < Int.MAX_VALUE &&
+            totalHeight > 0 && totalHeight < Int.MAX_VALUE) { "Invalid sheet bounds" }
+        val width = totalWidth.toInt().coerceAtLeast(1)
+        val height = totalHeight.toInt().coerceAtLeast(1)
+        val contentHeightPx = (842 * 1.55f).roundToInt() - 20 * 2
+        val headerHeight = SSConstant.DEFAULT_COLUMN_HEADER_HEIGHT
+        val bodyHeightPx = contentHeightPx - headerHeight
+        val tempFile = File.createTempFile("xlsx-pdf-", ".tmp", outputFile.absoluteFile.parentFile)
+        var pageCount = 0
+        try {
+            val pdf = PdfDocument()
+            try {
+                var top = 0
+                var pageNumber = 1
+                while (top < height) {
+                    currentCoroutineContext().ensureActive()
+                    val bodyHeight = minOf(bodyHeightPx, height - top)
+                    val regionHeight = bodyHeight + headerHeight
+                    val scale = minOf(555f / width, 802f / regionHeight)
+                    val page = pdf.startPage(PdfDocument.PageInfo.Builder(595, 842, pageNumber).create())
+                    try {
+                        val canvas = page.canvas
+                        val saved = canvas.save()
+                        try {
+                            canvas.translate(
+                                20f + (555f - width * scale) / 2f,
+                                20f + (802f - regionHeight * scale) / 2f
+                            )
+                            canvas.scale(scale, scale)
+                            // getClipBounds() is local to the current matrix: headers and
+                            // rows see sheet pixels, not the 595 x 842 PDF page bounds.
+                            canvas.clipRect(0, 0, width, regionHeight)
+                            sheetView.drawRegion(sheet, 0, top, 1f, canvas)
+                        } finally {
+                            canvas.restoreToCount(saved)
+                        }
+                        currentCoroutineContext().ensureActive()
+                    } finally {
+                        pdf.finishPage(page)
+                    }
+                    pageCount++
+                    top += bodyHeight
+                    pageNumber++
+                    // No SheetView monitor is held while yielding or writing the PDF.
+                    yield()
+                }
+                currentCoroutineContext().ensureActive()
+                FileOutputStream(tempFile).use { pdf.writeTo(it) }
+            } finally {
+                pdf.close()
+            }
+            currentCoroutineContext().ensureActive()
+            check(tempFile.renameTo(outputFile)) { "Could not publish Excel PDF" }
+            Log.d(TAG, "Excel PDF complete: pages=$pageCount, elapsedMs=${SystemClock.elapsedRealtime() - startedAt}")
+        } finally {
+            deleteExcelPdfFile(tempFile)
+        }
+    }
+
+    private fun appendPdfPage(
+        pdf: PdfDocument, bitmap: Bitmap, pageNumber: Int,
+        pageWidthPts: Int, pageHeightPts: Int, marginPts: Int
+    ) {
+        val contentW = pageWidthPts - marginPts * 2
+        val contentH = pageHeightPts - marginPts * 2
+        val scale = minOf(contentW.toFloat() / bitmap.width, contentH.toFloat() / bitmap.height)
+        val page = pdf.startPage(PdfDocument.PageInfo.Builder(pageWidthPts, pageHeightPts, pageNumber).create())
+        try {
+            val matrix = Matrix().apply {
+                postScale(scale, scale)
+                postTranslate(
+                    marginPts + (contentW - bitmap.width * scale) / 2f,
+                    marginPts + (contentH - bitmap.height * scale) / 2f
+                )
+            }
+            page.canvas.drawBitmap(bitmap, matrix, null)
+        } finally {
+            pdf.finishPage(page)
+        }
     }
 
     private fun createPdfFromBitmaps(
@@ -372,32 +400,13 @@ class ConvertViewModel : ViewModel() {
         pageWidthPts: Int = 595,
         pageHeightPts: Int = 842,
         marginPts: Int = 20
-    ): Boolean {
+    ) {
         Log.d(TAG, "createPdfFromBitmaps: start, pages=${bitmaps.size}, file=$outputFile")
         val pdf = PdfDocument()
-        return try {
+        try {
             bitmaps.forEachIndexed { index, bitmap ->
                 bitmap?.let {
-                    val contentW = pageWidthPts - marginPts * 2
-                    val contentH = pageHeightPts - marginPts * 2
-                    val scale = minOf(
-                        contentW.toFloat() / it.width,
-                        contentH.toFloat() / it.height
-                    )
-                    Log.d(TAG, " page#${index + 1}: size=${it.width}×${it.height} scale=$scale")
-                    val pageInfo = PdfDocument.PageInfo.Builder(
-                        pageWidthPts, pageHeightPts, index + 1
-                    ).create()
-                    val page = pdf.startPage(pageInfo)
-                    val dx = marginPts + (contentW - it.width * scale) / 2f
-                    val dy = marginPts + (contentH - it.height * scale) / 2f
-                    val matrix = Matrix().apply {
-                        postScale(scale, scale)
-                        postTranslate(dx, dy)
-                    }
-
-                    page.canvas.drawBitmap(it, matrix, null)
-                    pdf.finishPage(page)
+                    appendPdfPage(pdf, it, index + 1, pageWidthPts, pageHeightPts, marginPts)
                     Log.d(TAG, " page#${index + 1} done")
                 }
             }
@@ -407,10 +416,9 @@ class ConvertViewModel : ViewModel() {
                 pdf.writeTo(out)
             }
             Log.d(TAG, "createPdf: write complete")
-            true
         } catch (e: IOException) {
             Log.e(TAG, "createPdf: ERROR", e)
-            false
+            throw e
         } finally {
             pdf.close()
             Log.d(TAG, "createPdf: PDF closed")

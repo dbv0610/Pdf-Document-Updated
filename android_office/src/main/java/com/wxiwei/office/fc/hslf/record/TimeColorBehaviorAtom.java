@@ -8,8 +8,6 @@ package com.wxiwei.office.fc.hslf.record;
 
 import java.util.Hashtable;
 
-import com.wxiwei.office.fc.hslf.record.PositionDependentRecordAtom;
-
 /**
  * TODO: An atom record that specifies the information for an animation that changes the color of an object
  * <p>

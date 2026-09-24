@@ -2,12 +2,10 @@ package com.wxiwei.office.pg.control
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.widget.ProgressBar
 import com.wxiwei.office.pg.model.PGModel
 import com.wxiwei.office.pg.view.SlideDrawKit
 import com.wxiwei.office.system.IControl
-import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.beans.pagelist.APageListItem
 import com.wxiwei.office.system.beans.pagelist.APageListView
 import kotlinx.coroutines.CoroutineScope
@@ -33,12 +31,6 @@ class PGPageListItem(
     private var pgModel: PGModel? = listView.getModel() as PGModel?
     private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var waitForSlideJob: Job? = null
-    private var renderJob: Job? = null
-    private var renderedBitmap: Bitmap? = null
-    private var renderedPageIndex = -1
-    private var renderedZoom = 0f
-    private var loggedDrawKey: String? = null
-    private var loggedDrawEnd = false
 
     init {
         this.control = requireNotNull(control) { "PGPageListItem requires a control" }
@@ -50,56 +42,7 @@ class PGPageListItem(
     override fun onDraw(canvas: Canvas) {
         val model = pgModel ?: return
         val slide = model.getSlide(pageIndex) ?: return
-        val zoom = listView.getZoom()
-        val drawKey = "$pageIndex:$zoom:${width}x$height"
-        if (loggedDrawKey != drawKey) {
-            loggedDrawKey = drawKey
-            loggedDrawEnd = false
-            OpenTrace.mark("ppt.page.onDraw.begin key=$drawKey")
-        }
-        val bitmap = renderedBitmap
-        if (bitmap != null && renderedPageIndex == pageIndex && renderedZoom == zoom && !bitmap.isRecycled) {
-            canvas.drawBitmap(bitmap, 0f, 0f, null)
-        } else {
-            canvas.drawColor(Color.WHITE)
-            renderSlideInBackground(model, slide, zoom)
-        }
-        if (loggedDrawKey == drawKey && !loggedDrawEnd) {
-            loggedDrawEnd = true
-            OpenTrace.mark("ppt.page.onDraw.end key=$drawKey")
-        }
-    }
-
-    private fun renderSlideInBackground(model: PGModel, slide: com.wxiwei.office.pg.model.PGSlide, zoom: Float) {
-        if (renderJob?.isActive == true && renderedPageIndex == pageIndex && renderedZoom == zoom) return
-        renderJob?.cancel()
-        val targetPage = pageIndex
-        val targetZoom = zoom
-        renderedPageIndex = targetPage
-        renderedZoom = targetZoom
-        renderJob = loadScope.launch {
-            val start = android.os.SystemClock.uptimeMillis()
-            OpenTrace.mark("ppt.page.render.begin page=$targetPage zoom=$targetZoom size=${pageWidth}x$pageHeight")
-            val width = (pageWidth * targetZoom).toInt().coerceAtLeast(1)
-            val height = (pageHeight * targetZoom).toInt().coerceAtLeast(1)
-            val bitmap = try {
-                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also {
-                    SlideDrawKit.instance().drawSlide(Canvas(it), model, editor, slide, targetZoom)
-                }
-            } catch (_: Throwable) {
-                null
-            }
-            withContext(Dispatchers.Main.immediate) {
-                if (targetPage != pageIndex || targetZoom != listView.getZoom()) {
-                    bitmap?.recycle()
-                    return@withContext
-                }
-                renderedBitmap?.takeIf { !it.isRecycled }?.recycle()
-                renderedBitmap = bitmap
-                postInvalidate()
-                OpenTrace.mark("ppt.page.render.end page=$targetPage bitmap=${bitmap != null}", start)
-            }
-        }
+        SlideDrawKit.instance().drawSlide(canvas, model, editor, slide, listView.getZoom())
     }
 
     override fun setPageItemRawData(pIndex: Int, pageWidth: Int, pageHeight: Int) {
@@ -159,9 +102,6 @@ class PGPageListItem(
 
     override fun dispose() {
         waitForSlideJob?.cancel()
-        renderJob?.cancel()
-        renderedBitmap?.takeIf { !it.isRecycled }?.recycle()
-        renderedBitmap = null
         loadScope.coroutineContext[Job]?.cancel()
         super.dispose(); pgModel = null; editor = null
     }

@@ -18,7 +18,6 @@ import com.wxiwei.office.fc.ppt.attribute.ParaAttr
 import com.wxiwei.office.fc.ppt.attribute.RunAttr
 import com.wxiwei.office.fc.ppt.attribute.SectionAttr
 import com.wxiwei.office.fc.ppt.reader.ReaderKit
-import com.wxiwei.office.java.awt.Rectangle
 import com.wxiwei.office.simpletext.model.AttrManage
 import com.wxiwei.office.simpletext.model.IAttributeSet
 import com.wxiwei.office.simpletext.model.LeafElement

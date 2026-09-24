@@ -12,7 +12,6 @@ import com.wxiwei.office.constant.MainConstant;
 import com.wxiwei.office.fc.doc.DOCReader;
 import com.wxiwei.office.fc.doc.DOCXReader;
 import com.wxiwei.office.fc.doc.TXTReader;
-import com.wxiwei.office.fc.pdf.PDFReader;
 import com.wxiwei.office.fc.ppt.PPTReader;
 import com.wxiwei.office.fc.ppt.PPTXReader;
 import com.wxiwei.office.fc.xls.XLSReader;
@@ -243,11 +242,6 @@ public class Search
             {
                 reader = new PPTXReader(control, file.getAbsolutePath());
             }  
-            // PDF document
-            else if (fileName.endsWith(MainConstant.FILE_TYPE_PDF))
-            {
-                reader = new PDFReader(control, file.getAbsolutePath());;
-            }
             reader.dispose();
             reader = null;
         }

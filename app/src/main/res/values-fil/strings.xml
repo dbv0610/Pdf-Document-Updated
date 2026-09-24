@@ -164,4 +164,13 @@
     <string name="to_send_you_notifications">Upang magpadala sa iyo ng \ nnotification</string>
     <string name="allow">Payagan</string>
     <string name="are_you_sure_you_want_to_close_the_app">Sigurado ka bang nais mong isara ang app?</string>
+    <string name="error_file_damaged">This file is damaged or is not a valid document.</string>
+    <string name="error_file_rtf">This file is an RTF document. Please open it with an app that supports RTF.</string>
+    <string name="error_file_old_format">This document uses an old format that is not supported.</string>
+    <string name="error_file_password">This document is password protected. A password is required to open it.</string>
+    <string name="error_file_password_incorrect">The password for this document is incorrect.</string>
+    <string name="error_file_not_found">This file cannot be found or read. Check that it is still available.</string>
+    <string name="error_file_too_large_memory">There is not enough memory to open this document.</string>
+    <string name="error_file_storage">The document could not be processed because of a storage error. Check free space and access permissions.</string>
+    <string name="error_file_open_generic">This document could not be opened or processed. Please try another file.</string>
 </resources>

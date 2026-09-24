@@ -9,6 +9,8 @@ package com.wxiwei.office.ss.other
 import com.wxiwei.office.ss.model.baseModel.Row
 import com.wxiwei.office.ss.model.baseModel.Sheet
 import com.wxiwei.office.ss.model.baseModel.Workbook
+import com.wxiwei.office.system.OpenTrace
+import kotlin.math.abs
 
 /**
  * min row and column information of current sheet after scrolling
@@ -38,6 +40,14 @@ class SheetScroller {
     //current min visible row height and visible column width(zoom = 1)
     private var visibleRowHeight = 0.0
     private var visibleColumnWidth = 0.0
+    // hidden part of the first row/column; visibleRowHeight/visibleColumnWidth hold the visible part
+    private var rowOffset = 0.0
+    private var columnOffset = 0.0
+    private var lastScrollX = Int.MIN_VALUE
+    private var lastScrollY = Int.MIN_VALUE
+    private var updateCount = 0
+    private var rowsVisited = 0
+    private var columnsVisited = 0
 
     fun reset() {
         setMinRowIndex(0)
@@ -53,13 +63,32 @@ class SheetScroller {
         setColumnAllVisible(true)
     }
 
+    fun resetPositionCache() {
+        lastScrollX = Int.MIN_VALUE
+        lastScrollY = Int.MIN_VALUE
+    }
+
     fun update(sheet: Sheet, scrollX: Int, scrollY: Int) {
+        val started = android.os.SystemClock.uptimeMillis()
+        updateCount++
+        rowsVisited = 0
+        columnsVisited = 0
+        val paneInfo = sheet.getPaneInformation()
+        if (paneInfo == null && lastScrollX != Int.MIN_VALUE &&
+            abs(scrollX - lastScrollX) <= sheet.getDefaultColWidth().coerceAtLeast(72) * 200 &&
+            abs(scrollY - lastScrollY) <= sheet.getDefaultRowHeight().coerceAtLeast(18) * 200) {
+            updateRowsIncremental(sheet, scrollY - lastScrollY)
+            updateColumnsIncremental(sheet, scrollX - lastScrollX)
+            lastScrollX = scrollX
+            lastScrollY = scrollY
+            traceUpdate(sheet, scrollX, scrollY, "incremental", started)
+            return
+        }
         reset()
 
         setVisibleRowHeight(scrollY.toDouble())
         setVisibleColumnWidth(scrollX.toDouble())
 
-        val paneInfo = sheet.getPaneInformation()
         if (paneInfo != null) {
             setMinRowIndex(paneInfo.getHorizontalSplitTopRow().toInt())
             setMinColumnIndex(paneInfo.getVerticalSplitLeftColumn().toInt())
@@ -83,6 +112,7 @@ class SheetScroller {
                     if (skippedRows > 0) {
                         minRowIndex += skippedRows
                         visibleRowHeight -= skippedRows * defaultRowHeight
+                        rowsVisited += skippedRows
                     }
                     if (visibleRowHeight < 1) break
                 }
@@ -97,6 +127,7 @@ class SheetScroller {
                     visibleRowHeight = visibleRowHeight - rowHeight
                 }
                 minRowIndex++
+                rowsVisited++
             }
 
             if (minRowIndex != maxSheetRows) {
@@ -128,6 +159,7 @@ class SheetScroller {
                     visibleColumnWidth -= columnWidth.toDouble()
                 }
                 minColumnIndex++
+                columnsVisited++
             }
 
             if (minColumnIndex != maxSheetColumns) {
@@ -147,6 +179,87 @@ class SheetScroller {
                 setVisibleColumnWidth(0.0)
             }
         }
+        rowOffset = if (isRowAllVisible) 0.0 else rowHeightAt(sheet, minRowIndex) - visibleRowHeight
+        columnOffset = if (isColumnAllVisible) 0.0 else sheet.getColumnPixelWidth(minColumnIndex) - visibleColumnWidth
+        lastScrollX = scrollX
+        lastScrollY = scrollY
+        traceUpdate(sheet, scrollX, scrollY, "full", started)
+    }
+
+    private fun traceUpdate(sheet: Sheet, scrollX: Int, scrollY: Int, mode: String, started: Long) {
+        val elapsed = android.os.SystemClock.uptimeMillis() - started
+        if (elapsed >= 8 || updateCount % 20 == 0) {
+            OpenTrace.d(
+                "excel.scroll.scroller mode=$mode elapsed=${elapsed}ms " +
+                    "scroll=$scrollX,$scrollY visitedRows=$rowsVisited visitedCols=$columnsVisited " +
+                    "min=${minRowIndex},${minColumnIndex} sheet=${sheet.getSheetName()}"
+            )
+        }
+    }
+
+    private fun rowHeightAt(sheet: Sheet, index: Int): Float {
+        val row = sheet.getRow(index)
+        if (row != null && row.isZeroHeight()) return 0f
+        return if (row == null) sheet.getDefaultRowHeight().toFloat() else row.getRowPixelHeight()
+    }
+
+    private fun updateRowsIncremental(sheet: Sheet, delta: Int) {
+        var offset = rowOffset + delta
+        if (delta >= 0) {
+            while (offset >= 1) {
+                val height = rowHeightAt(sheet, minRowIndex)
+                if (height < 1) {
+                    minRowIndex++
+                    rowsVisited++
+                    continue
+                }
+                if (offset < height) break
+                offset -= height
+                minRowIndex++
+                rowsVisited++
+            }
+        } else {
+            while (offset < 0 && minRowIndex > 0) {
+                minRowIndex--
+                rowsVisited++
+                offset += rowHeightAt(sheet, minRowIndex)
+            }
+            if (offset < 0) offset = 0.0
+        }
+        // same convention as the full update: visibleRowHeight is the visible part of the row
+        rowOffset = if (offset < 1) 0.0 else offset
+        isRowAllVisible = offset < 1
+        visibleRowHeight = if (isRowAllVisible) 0.0 else rowHeightAt(sheet, minRowIndex) - offset
+    }
+
+    private fun updateColumnsIncremental(sheet: Sheet, delta: Int) {
+        var offset = columnOffset + delta
+        if (delta >= 0) {
+            while (offset >= 1) {
+                if (sheet.isColumnHidden(minColumnIndex)) {
+                    minColumnIndex++
+                    columnsVisited++
+                    continue
+                }
+                val width = sheet.getColumnPixelWidth(minColumnIndex)
+                if (offset < width) break
+                offset -= width
+                minColumnIndex++
+                columnsVisited++
+            }
+        } else {
+            while (offset < 0 && minColumnIndex > 0) {
+                minColumnIndex--
+                columnsVisited++
+                if (!sheet.isColumnHidden(minColumnIndex)) {
+                    offset += sheet.getColumnPixelWidth(minColumnIndex)
+                }
+            }
+            if (offset < 0) offset = 0.0
+        }
+        columnOffset = if (offset < 1) 0.0 else offset
+        isColumnAllVisible = offset < 1
+        visibleColumnWidth = if (isColumnAllVisible) 0.0 else sheet.getColumnPixelWidth(minColumnIndex) - offset
     }
 
     /**

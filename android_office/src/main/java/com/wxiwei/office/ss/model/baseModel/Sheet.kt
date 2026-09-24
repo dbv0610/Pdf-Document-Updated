@@ -15,6 +15,7 @@ import com.wxiwei.office.ss.model.interfacePart.IReaderListener
 import com.wxiwei.office.ss.model.sheetProperty.ColumnInfo
 import com.wxiwei.office.ss.model.sheetProperty.PaneInformation
 import com.wxiwei.office.ss.model.table.SSTable
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Sheet 表
@@ -103,7 +104,7 @@ open class Sheet {
      */
     init {
         activeCellType = ACTIVECELL_SINGLE
-        rows = HashMap()
+        rows = ConcurrentHashMap()
         merges = ArrayList()
         maxScrollX = Int.MAX_VALUE.toFloat()
         maxScrollY = Int.MAX_VALUE.toFloat()
@@ -708,6 +709,10 @@ open class Sheet {
             maxScrollX += ((Workbook.MAXCOLUMN_03 - columnsCnt) * defaultColWidth).toFloat()
             maxScrollY += ((Workbook.MAXROW_03 - rowCnt) * defaultRowHeight).toFloat()
         }
+    }
+
+    fun notifyReadingProgress() {
+        if (state != State_Accomplished) iReaderListener?.OnReadingProgress()
     }
 
     /**

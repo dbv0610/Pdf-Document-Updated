@@ -33,11 +33,20 @@ class PGMaster {
     fun getSectionAttr(type: String?, idx: Int): IAttributeSet? = style(type, idx)?.getSectionAttr()
     fun getTextStyle(type: String?, idx: Int, lvl: Int): Int {
         val checked = PGPlaceholderUtil.instance().checkTypeName(type)
-        val s = style(checked, idx); val id = s?.getStyle(lvl) ?: -1
-        if (id >= 0) return id
-        return if (!PGPlaceholderUtil.instance().isBody(checked)) {
-            if (PGPlaceholderUtil.TITLE == checked) titleStyle?.getStyle(lvl) ?: otherStyle?.getStyle(lvl) ?: -1 else otherStyle?.getStyle(lvl) ?: -1
-        } else bodyStyle?.getStyle(lvl) ?: -1
+        if (!PGPlaceholderUtil.instance().isBody(checked)) {
+            val styleID = styleByType?.get(checked)?.getStyle(lvl) ?: -1
+            if (styleID >= 0) return styleID
+            if (PGPlaceholderUtil.TITLE == checked) {
+                titleStyle?.let { return it.getStyle(lvl) }
+            } else {
+                otherStyle?.let { return it.getStyle(lvl) }
+            }
+        } else if (idx > 0) {
+            val styleID = (styleByIdx?.get(idx) ?: styleByIdx?.values?.firstOrNull())?.getStyle(lvl) ?: -1
+            if (styleID >= 0) return styleID
+            bodyStyle?.let { return it.getStyle(lvl) }
+        }
+        return -1
     }
     fun getSchemeColor(): MutableMap<String, Int>? = schemeColor
     fun getSlideMasterIndex(): Int = index

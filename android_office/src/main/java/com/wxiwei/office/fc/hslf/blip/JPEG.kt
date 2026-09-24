@@ -7,6 +7,14 @@ class JPEG : Bitmap() {
         return Picture.JPEG
     }
 
+    override fun getData(): ByteArray? {
+        return super.getData()
+    }
+
+    override fun setData(data: ByteArray?) {
+        super.setData(data)
+    }
+
     override fun getSignature(): Int {
         return 0x46A0
     }

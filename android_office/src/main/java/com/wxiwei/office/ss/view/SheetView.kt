@@ -82,6 +82,23 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
     private var scrollY = 0f
     private var lastScrollerX = Int.MIN_VALUE
     private var lastScrollerY = Int.MIN_VALUE
+    private var drawCount = 0
+    private val tileCache = SheetTileCache(this)
+    private var lastDrawZoom = 0f
+    private var tileScrollerDirty = false
+
+    // scroll limit: the data area plus a couple of empty rows/columns, not the whole 16384 x 1M grid
+    private var extentSheet: Sheet? = null
+    private var extentSignature = Long.MIN_VALUE
+    private var extentWidth = 0f
+    private var extentHeight = 0f
+    // empty columns/rows allowed past the data; grows while the user keeps pushing at the edge
+    private var extraColumns = EXTRA_EMPTY
+    private var extraRows = EXTRA_EMPTY
+    private var lastColumnGrow = 0L
+    private var lastRowGrow = 0L
+    private var gestureAtRightEdge = false
+    private var gestureAtBottomEdge = false
 
     //
     private var shapeView: ShapeView? = null
@@ -251,50 +268,57 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
      * @return
      */
     fun getThumbnail(sheet: Sheet, width: Int, height: Int, zoomValue: Float): Bitmap? {
+        val bitmap = Bitmap.createBitmap((width * zoomValue).toInt(), (height * zoomValue).toInt(), Config.ARGB_8888)
+        try {
+            val canvas = Canvas(bitmap)
+            canvas.drawColor(Color.WHITE)
+            drawRegion(sheet, 0, 0, zoomValue, canvas)
+            return bitmap
+        } catch (t: Throwable) {
+            bitmap.recycle()
+            throw t
+        }
+    }
+
+    /** Render one viewport. Offsets are sheet pixels at zoom 1, excluding headers.
+     * The caller supplies a canvas clipped in local sheet pixels (including headers).
+     * The monitor is released after this single region; no page bitmap is allocated.
+     */
+    fun drawRegion(sheet: Sheet, left: Int, top: Int, zoomValue: Float, canvas: Canvas) {
         synchronized(this) {
-            val bitmap = Bitmap.createBitmap((width * zoomValue).toInt(), (height * zoomValue).toInt(), Config.ARGB_8888)
-            if (bitmap == null) {
-                return null
-            }
-
             val b = PictureKit.instance().isDrawPictrue()
-            PictureKit.instance().setDrawPictrue(true)
-
-            val picCanvas = Canvas(bitmap)
-            picCanvas.drawColor(Color.WHITE)
-
-            //save sheet(not current sheet) info
             val oldScrollX = sheet.getScrollX()
             val oldScrollY = sheet.getScrollY()
             val oldZoom = sheet.getZoom()
-
             val oldSheet = this.sheet!!
-
-            //set specific sheet thumbnail info
-            this.sheet = sheet
-            scrollX = 0f
-            scrollY = 0f
-            sheet.setScroll(0, 0)
-            setZoom(zoomValue, true)
-
-            updateScroller(sheet, Math.round(scrollX), Math.round(scrollY), true)
-
-            drawThumbnail(picCanvas)
-
-            //restore specific sheet info
-            sheet.setScroll(oldScrollX, oldScrollY)
-            sheet.setZoom(oldZoom)
-
-            //restore to current sheet
-            this.sheet = oldSheet
-            scrollX = oldSheet.getScrollX().toFloat()
-            scrollY = oldSheet.getScrollY().toFloat()
-            setZoom(oldSheet.getZoom(), true)
-
-            updateScroller(sheet, Math.round(scrollX), Math.round(scrollY))
-
-            PictureKit.instance().setDrawPictrue(b)
-            return bitmap
+            val oldClipRect = clipRect
+            val canvasSave = canvas.save()
+            try {
+                PictureKit.instance().setDrawPictrue(true)
+                this.sheet = sheet
+                scrollX = left.toFloat()
+                scrollY = top.toFloat()
+                sheet.setScroll(left, top)
+                setZoom(zoomValue, true)
+                // Force a fresh position: the incremental UI cache uses a different
+                // partial-row convention. Full update preserves the clipped first row.
+                updateScroller(sheet, left, top, true)
+                drawThumbnail(canvas)
+            } finally {
+                sheet.setScroll(oldScrollX, oldScrollY)
+                sheet.setZoom(oldZoom)
+                this.sheet = oldSheet
+                scrollX = oldSheet.getScrollX().toFloat()
+                scrollY = oldSheet.getScrollY().toFloat()
+                clipRect = oldClipRect
+                try {
+                    setZoom(oldSheet.getZoom(), true)
+                    updateScroller(oldSheet, Math.round(scrollX), Math.round(scrollY), true)
+                } finally {
+                    PictureKit.instance().setDrawPictrue(b)
+                    canvas.restoreToCount(canvasSave)
+                }
+            }
         }
     }
 
@@ -340,18 +364,169 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
     }
 
     fun getMaxScrollY(): Int {
-        return Math.round(sheet!!.getMaxScrollY() * zoom)
+        return Math.round(maxDataScrollY(sheet!!) * zoom)
     }
 
     fun getMaxScrollX(): Int {
-        return Math.round(sheet!!.getMaxScrollX() * zoom)
+        return Math.round(maxDataScrollX(sheet!!) * zoom)
+    }
+
+    /**
+     * Renders the cell area with its top-left at sheet position ([originX], [originY]) (sheet
+     * units) into [canvas] at (0, 0). Leaves the scroller at the tile origin; drawSheet restores
+     * it once after all tiles of a frame.
+     */
+    internal fun renderTile(canvas: Canvas, originX: Int, originY: Int, width: Int, height: Int) {
+        val sheet = this.sheet!!
+        val oldScrollX = scrollX
+        val oldScrollY = scrollY
+        val oldClipRect = clipRect
+        val rowWidth = rowHeader!!.getRowHeaderWidth().toFloat()
+        val columnHeight = columnHeader!!.getColumnHeaderHeight().toFloat()
+        val save = canvas.save()
+        try {
+            scrollX = originX.toFloat()
+            scrollY = originY.toFloat()
+            tileScrollerDirty = true
+            updateScroller(sheet, originX, originY, true)
+            canvas.translate(-rowWidth, -columnHeight)
+            canvas.clipRect(rowWidth, columnHeight, rowWidth + width, columnHeight + height)
+            clipRect = canvas.clipBounds
+            drawRows(canvas)
+            tableFormatView!!.draw(canvas)
+        } finally {
+            canvas.restoreToCount(save)
+            scrollX = oldScrollX
+            scrollY = oldScrollY
+            clipRect = oldClipRect
+        }
+    }
+
+    /** Sheet units of the data area (used cells and shapes) plus [EXTRA_EMPTY] rows and columns. */
+    private fun updateDataExtent(sheet: Sheet) {
+        if (sheet !== extentSheet) {
+            extraColumns = EXTRA_EMPTY
+            extraRows = EXTRA_EMPTY
+        }
+        var signature = sheet.getLastRowNum().toLong()
+        for (v in longArrayOf(sheet.getState().toLong(), sheet.getShapeCount().toLong(),
+                sheet.getActiveCellRow().toLong(), sheet.getActiveCellColumn().toLong(),
+                extraColumns.toLong(), extraRows.toLong())) {
+            signature = signature * 31 + v
+        }
+        if (sheet === extentSheet && signature == extentSignature) return
+        extentSheet = sheet
+        extentSignature = signature
+        var lastCol = 0 // exclusive
+        var lastRow = -1
+        // only cells that show something: Row.getLastCol also counts blank cells that merely carry a
+        // style, which stretches the scroll range far into empty columns
+        for (r in sheet.getFirstRowNum()..sheet.getLastRowNum()) {
+            val row = sheet.getRow(r) ?: continue
+            for (cell in row.cellCollection()) {
+                if (!isVisibleCell(cell)) continue
+                lastCol = maxOf(lastCol, cell.getColNumber() + 1)
+                lastRow = r
+            }
+        }
+        // the selected cell is always reachable, even outside the data
+        lastCol = maxOf(lastCol, sheet.getActiveCellColumn() + 1)
+        lastRow = maxOf(lastRow, sheet.getActiveCellRow())
+        var width = 0f
+        for (c in 0 until lastCol + extraColumns) {
+            if (!sheet.isColumnHidden(c)) width += sheet.getColumnPixelWidth(c)
+        }
+        var height = 0f
+        for (r in 0..lastRow + extraRows) {
+            val row = sheet.getRow(r)
+            height += when {
+                row == null -> sheet.getDefaultRowHeight().toFloat()
+                row.isZeroHeight() -> 0f
+                else -> row.getRowPixelHeight()
+            }
+        }
+        for (shape in sheet.getShapes()) {
+            val b = shape.getBounds() ?: continue
+            width = maxOf(width, (b.x + b.width).toFloat())
+            height = maxOf(height, (b.y + b.height).toFloat())
+        }
+        extentWidth = width
+        extentHeight = height
+    }
+
+    /**
+     * Called on finger down. Only a drag that starts while already at the right/bottom edge
+     * opens more cells; a fling that merely reaches the edge stops there.
+     */
+    fun onGestureStart() {
+        synchronized(this) {
+            val sheet = this.sheet ?: return
+            gestureAtRightEdge = scrollX >= maxDataScrollX(sheet) - 1
+            gestureAtBottomEdge = scrollY >= maxDataScrollY(sheet) - 1
+        }
+    }
+
+    /** Pushing past the right edge opens more empty columns (up to the sheet's real limit). */
+    private fun growColumns(sheet: Sheet) {
+        val now = android.os.SystemClock.uptimeMillis()
+        // scroll events arrive every frame; grow step by step instead of hundreds of columns a second
+        if (!gestureAtRightEdge || now - lastColumnGrow < GROW_INTERVAL_MS || extentWidth >= sheet.getMaxScrollX()) return
+        lastColumnGrow = now
+        extraColumns += GROW_STEP
+    }
+
+    private fun growRows(sheet: Sheet) {
+        val now = android.os.SystemClock.uptimeMillis()
+        if (!gestureAtBottomEdge || now - lastRowGrow < GROW_INTERVAL_MS || extentHeight >= sheet.getMaxScrollY()) return
+        lastRowGrow = now
+        extraRows += GROW_STEP
+    }
+
+    private fun isVisibleCell(cell: Cell): Boolean {
+        if (cell.hasValidValue() && cell.getCellType() != Cell.CELL_TYPE_BLANK) return true
+        val style = cell.getCellStyle() ?: return false
+        return style.getFillPatternType().toInt() != 0 ||
+            style.getBorderLeft().toInt() != 0 || style.getBorderRight().toInt() != 0 ||
+            style.getBorderTop().toInt() != 0 || style.getBorderBottom().toInt() != 0
+    }
+
+    /** Largest scrollX (sheet units) that still shows data: extent minus the visible width. */
+    private fun maxDataScrollX(sheet: Sheet): Float {
+        val viewWidth = spreadsheet?.width ?: 0
+        if (viewWidth <= 0) return sheet.getMaxScrollX()
+        updateDataExtent(sheet)
+        val visible = (viewWidth - getRowHeaderWidth()) / zoom
+        return minOf(sheet.getMaxScrollX(), maxOf(0f, extentWidth - visible))
+    }
+
+    private fun maxDataScrollY(sheet: Sheet): Float {
+        val viewHeight = spreadsheet?.height ?: 0
+        if (viewHeight <= 0) return sheet.getMaxScrollY()
+        updateDataExtent(sheet)
+        val bottomBar = try { spreadsheet!!.getBottomBarHeight() } catch (e: Exception) { 0 }
+        val visible = (viewHeight - getColumnHeaderHeight() - bottomBar) / zoom
+        return minOf(sheet.getMaxScrollY(), maxOf(0f, extentHeight - visible))
+    }
+
+    /** Cell geometry or contents changed outside of loading (row/column resize). */
+    fun invalidateTiles() {
+        tileCache.invalidate()
     }
 
     /**
      *
      * @param canvas
      */
-    fun drawSheet(canvas: Canvas) {
+    fun drawSheet(canvas: Canvas) = drawSheet(canvas, false)
+
+    /**
+     * @param useTiles draw the cell area from [SheetTileCache]; only for the on-screen view,
+     * snapshots and pictures draw live
+     */
+    fun drawSheet(canvas: Canvas, useTiles: Boolean) {
+        val drawStarted = android.os.SystemClock.uptimeMillis()
+        drawCount++
+        var tilesPending = false
         synchronized(this) {
             val rowHeader = this.rowHeader!!
             val columnHeader = this.columnHeader!!
@@ -382,11 +557,33 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
             canvas.save()
             canvas.clipRect(rowWidth, columnHeight, rightPos.toFloat(), bottomPos.toFloat())
 
+            // while pinch-zooming (zoom differs from the last frame) or resizing headers, draw live:
+            // tiles for a zoom level that lasts one frame would cost more than drawing directly
+            val tiled = useTiles && zoom == lastDrawZoom && !isDrawMovingHeaderLine
+            lastDrawZoom = zoom
             //draw cell
-            drawRows(canvas)
+            val rowsStarted = android.os.SystemClock.uptimeMillis()
+            var tableElapsed = 0L
+            if (tiled) {
+                tilesPending = tileCache.draw(
+                    canvas, sheet!!, zoom, Math.round(scrollX), Math.round(scrollY),
+                    rowWidth, columnHeight, rightPos, bottomPos
+                )
+                if (tileScrollerDirty) {
+                    tileScrollerDirty = false
+                    updateScroller(sheet!!, Math.round(scrollX), Math.round(scrollY), true)
+                }
+            } else {
+                drawRows(canvas)
+            }
+            val rowsElapsed = android.os.SystemClock.uptimeMillis() - rowsStarted
 
-            //table format
-            tableFormatView!!.draw(canvas)
+            if (!tiled) {
+                //table format
+                val tableStarted = android.os.SystemClock.uptimeMillis()
+                tableFormatView!!.draw(canvas)
+                tableElapsed = android.os.SystemClock.uptimeMillis() - tableStarted
+            }
 
             //draw active cell border
             drawActiveCellBorder(canvas)
@@ -394,12 +591,32 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
             //if(!moving)
             run {
                 //draw shape(textbox, pict, chart)
+                val shapeStarted = android.os.SystemClock.uptimeMillis()
                 shapeView!!.draw(canvas)
+                val shapeElapsed = android.os.SystemClock.uptimeMillis() - shapeStarted
+                if (rowsElapsed >= 8 || tableElapsed >= 8 || shapeElapsed >= 8) {
+                    OpenTrace.d(
+                        "excel.scroll.draw.parts rows=${rowsElapsed}ms table=${tableElapsed}ms " +
+                            "shape=${shapeElapsed}ms"
+                    )
+                }
             }
 
             //draw moving header line when changing header height or width
             drawMovingHeaderLine(canvas)
             canvas.restore()
+        }
+        if (tilesPending) spreadsheet?.postInvalidateOnAnimation()
+        val elapsed = android.os.SystemClock.uptimeMillis() - drawStarted
+        if (elapsed >= 8 || drawCount % 20 == 0) {
+            val current = sheet
+            OpenTrace.d(
+                "excel.scroll.draw elapsed=${elapsed}ms frame=$drawCount " +
+                    "scroll=${scrollX.toInt()},${scrollY.toInt()} " +
+                    "min=${sheetScroller?.getMinRowIndex()},${sheetScroller?.getMinColumnIndex()} " +
+                    "rows=${current?.getFirstRowNum()}..${current?.getLastRowNum()} " +
+                    "sheet=${current?.getSheetName()}"
+            )
         }
     }
 
@@ -824,7 +1041,11 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
 
         // 逐行绘制
         val maxRow = sheet.getWorkbook()!!.getMaxRow()
+        var rowsRendered = 0
+        var slowestRow = 0L
+        var slowestRowIndex = -1
         while (!spreadsheet!!.isAbortDrawing() && cellInfor.getTop() <= clip.bottom && cellInfor.getRowIndex() < maxRow) {
+            val rowStarted = android.os.SystemClock.uptimeMillis()
             val row = sheet.getRow(cellInfor.getRowIndex())
             if (row != null && row.isZeroHeight()) {
                 cellInfor.increaseRow()
@@ -832,9 +1053,21 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
             }
 
             drawCells(canvas, row)
+            val rowElapsed = android.os.SystemClock.uptimeMillis() - rowStarted
+            if (rowElapsed > slowestRow) {
+                slowestRow = rowElapsed
+                slowestRowIndex = cellInfor.getRowIndex()
+            }
+            rowsRendered++
 
             cellInfor.increaseTopWithVisibleHeight()
             cellInfor.increaseRow()
+        }
+        if (slowestRow >= 8) {
+            OpenTrace.d(
+                "excel.scroll.rows rows=$rowsRendered slowest=${slowestRow}ms " +
+                    "row=$slowestRowIndex clipBottom=${clip.bottom}"
+            )
         }
     }
 
@@ -864,14 +1097,19 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
      * @param x the amount of pixels to scroll by horizontally
      * @param y the amount of pixels to scroll by vertically
      */
-    fun scrollBy(x: Float, y: Float) {
+    fun scrollBy(x: Float, y: Float) = scrollBy(x, y, false)
+
+    /** @param allowGrow the finger is dragging: pushing past the edge opens more empty cells */
+    fun scrollBy(x: Float, y: Float, allowGrow: Boolean) {
         synchronized(this) {
             val sheet = this.sheet!!
             scrollX += x / zoom
-            scrollX = sheet.getMaxScrollX().coerceAtMost(Math.max(0f, scrollX))
+            if (allowGrow && x > 0 && scrollX > maxDataScrollX(sheet)) growColumns(sheet)
+            scrollX = maxDataScrollX(sheet).coerceAtMost(Math.max(0f, scrollX))
 
             scrollY += y / zoom
-            scrollY = sheet.getMaxScrollY().coerceAtMost(Math.max(0f, scrollY))
+            if (allowGrow && y > 0 && scrollY > maxDataScrollY(sheet)) growRows(sheet)
+            scrollY = maxDataScrollY(sheet).coerceAtMost(Math.max(0f, scrollY))
 
             sheet.setScroll(Math.round(scrollX), Math.round(scrollY))
 
@@ -890,10 +1128,10 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
         synchronized(this) {
             val sheet = this.sheet!!
             scrollX = x
-            scrollX = sheet.getMaxScrollX().coerceAtMost(Math.max(0f, scrollX))
+            scrollX = maxDataScrollX(sheet).coerceAtMost(Math.max(0f, scrollX))
 
             scrollY = y
-            scrollY = sheet.getMaxScrollY().coerceAtMost(Math.max(0f, scrollY))
+            scrollY = maxDataScrollY(sheet).coerceAtMost(Math.max(0f, scrollY))
 
             sheet.setScroll(Math.round(scrollX), Math.round(scrollY))
 
@@ -905,11 +1143,13 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
      * called when changed header size by SSEventManage
      */
     fun updateMinRowAndColumnInfo() {
+            tileCache.invalidate()
             updateScroller(sheet!!, Math.round(scrollX), Math.round(scrollY))
     }
 
     private fun updateScroller(sheet: Sheet, x: Int, y: Int, force: Boolean = false) {
         if (!force && x == lastScrollerX && y == lastScrollerY) return
+        if (force) sheetScroller!!.resetPositionCache()
         sheetScroller!!.update(sheet, x, y)
         lastScrollerX = x
         lastScrollerY = y
@@ -1327,6 +1567,7 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
     }
 
     fun dispose() {
+        tileCache.clear()
         spreadsheet = null
         sheet = null
 
@@ -1447,6 +1688,10 @@ class SheetView(spreadsheet: Spreadsheet?, sheet: Sheet?) {
     }
 
     companion object {
+        // empty rows/columns kept after the last data cell so the grid does not end abruptly
+        private const val EXTRA_EMPTY = 2
+        private const val GROW_STEP = 5
+        private const val GROW_INTERVAL_MS = 200L
         const val MAXROW_03 = 65536
         const val MAXCOLUMN_03 = 256
 

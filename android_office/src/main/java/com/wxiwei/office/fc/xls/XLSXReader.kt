@@ -34,6 +34,15 @@ class XLSXReader(control: IControl, filePath: String) : SSReader() {
         this.control = control
     }
 
+    override fun abortReader() {
+        super.abortReader()
+        // Activity disposal must also stop the progressive worksheet job.
+        // Do not put this in dispose(): FileReaderThread disposes the reader
+        // after the first model is delivered, while progressive loading still
+        // has to continue for the visible workbook.
+        WorkbookReader.instance().cancelReading()
+    }
+
     override fun getModel(): Any? {
         book = Workbook(false)
         zipPackage = ZipPackage(filePath!!)
@@ -99,6 +108,11 @@ class XLSXReader(control: IControl, filePath: String) : SSReader() {
         val text = StringBuilder()
         try {
             while (true) {
+                // Activity.dispose() only flips the reader abort flag.  This
+                // loop used to ignore that flag while sharedStrings.xml was
+                // being consumed, so a cancelled 50MB workbook kept parsing
+                // (and allocating) until it either finished or OOMed.
+                if (isAborted()) throw AbortReaderError("abort Reader")
                 when (parser.next()) {
                     XmlPullParser.END_DOCUMENT -> break
                     XmlPullParser.START_TAG -> when (parser.name) {
@@ -112,6 +126,7 @@ class XLSXReader(control: IControl, filePath: String) : SSReader() {
                     XmlPullParser.END_TAG -> when (parser.name) {
                         "t" -> captureText = false
                         "si" -> {
+                            if (isAborted()) throw AbortReaderError("abort Reader")
                             book!!.addSharedString(sharedStringIndex++, text.toString())
                             inItem = false
                         }

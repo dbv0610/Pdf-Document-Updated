@@ -3,7 +3,6 @@ import java.util.Date
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.gmsGoogleServices)
     alias(libs.plugins.firebaseCrashlytics)
     id("kotlin-parcelize")
@@ -12,13 +11,13 @@ plugins {
 
 android {
     namespace = "com.azg.pdf8"
-    compileSdk = 36
+    compileSdk = 37
 
 
     defaultConfig {
         applicationId = "com.azg.pdf8"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "1.0.2"
 
@@ -148,7 +147,6 @@ dependencies {
     implementation(libs.play.services.ads)
 
 
-    implementation(libs.android.pdf.viewer)
     implementation(libs.pdfbox.android)
 
     implementation(libs.guava)

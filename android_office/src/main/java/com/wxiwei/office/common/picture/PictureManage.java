@@ -106,19 +106,19 @@ public class PictureManage
      */
     public int addPicture(PictureData pData)
     {
-        Integer index = picIndexs.get(pData.getTempFilePath());
+        Integer index = picIndexs.get(pData.tempFilePath);
         if (index == null)
         {
             Picture picture = new Picture();
             // 图片数据
-            picture.setTempFilePath(pData.getTempFilePath());    
+            picture.setTempFilePath(pData.tempFilePath);
             // 图片类型
-            picture.setPictureType((byte)pData.getType());
+            picture.setPictureType((byte) pData.getType());
             
             int size = pictures.size();
             pictures.add(picture);      
             
-            picIndexs.put(pData.getTempFilePath(), size);
+            picIndexs.put(pData.tempFilePath, size);
             return size;
         }
         return index;

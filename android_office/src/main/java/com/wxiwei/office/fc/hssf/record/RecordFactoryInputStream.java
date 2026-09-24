@@ -103,7 +103,9 @@ public final class RecordFactoryInputStream {
 				/*throw new EncryptedDocumentException(
 						(userPassword == null ? "Default" : "Supplied")
 						+ " password is invalid for docId/saltData/saltHash");*/
-				throw new EncryptedDocumentException("Cannot process encrypted office files!");
+				// OpenFileErrors maps these messages to PASSWORD_REQUIRED / PASSWORD_INCORRECT
+				throw new EncryptedDocumentException(userPassword == null
+						? "Cannot process encrypted office files!" : "Password is incorrect");
 			}
 			return new RecordInputStream(original, key, _initialRecordsSize);
 		}

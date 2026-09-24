@@ -6,9 +6,6 @@
  */
 package com.wxiwei.office.fc.hslf.record;
 
-import com.wxiwei.office.fc.hslf.record.PositionDependentRecordContainer;
-import com.wxiwei.office.fc.hslf.record.Record;
-
 /**
  * TODO: a command-animation behavior that performs a command as an animation
  * <p>

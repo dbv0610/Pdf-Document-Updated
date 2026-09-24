@@ -16,7 +16,6 @@ import com.wxiwei.office.fc.openxml4j.opc.PackagePart;
 import com.wxiwei.office.fc.openxml4j.opc.PackageRelationship;
 import com.wxiwei.office.fc.openxml4j.opc.PackageRelationshipTypes;
 import com.wxiwei.office.fc.openxml4j.opc.ZipPackage;
-import com.wxiwei.office.fc.pdf.PDFLib;
 import com.wxiwei.office.fc.ppt.PPTReader;
 import com.wxiwei.office.java.awt.Dimension;
 import com.wxiwei.office.pg.control.PGEditor;
@@ -306,41 +305,4 @@ public class ReaderThumbnail
         return BitmapFactory.decodeStream(part.getInputStream());
     }
     
-    /**
-     * 
-     * @param filePath
-     * @param zoom (0 < thumbnail zoom value <= 50)
-     * @return
-     * @throws Exception
-     */
-    public Bitmap getThumbnailForPDF(String filePath, float zoom) throws Exception
-    {
-        try
-        {
-            PDFLib lib = PDFLib.getPDFLib();            
-            lib.openFileSync(filePath);
-            if (lib.hasPasswordSync())
-            {
-                return null;
-            }
-            Rect rect = lib.getAllPagesSize()[0];
-            int w = (int)(rect.width() * zoom);
-            int h = (int)(rect.height() * zoom);
-            Bitmap bitmap = null;
-            try
-            {
-                bitmap = Bitmap.createBitmap(w, h,  Config.ARGB_8888);
-                lib.drawPageSync(bitmap, 0, w, h, 0, 0, w, h, 1);
-            }
-            catch(OutOfMemoryError e)
-            {
-                
-            }
-            return bitmap;
-        }
-        catch (Exception e)
-        {
-            return  null;
-        }
-    }
 }

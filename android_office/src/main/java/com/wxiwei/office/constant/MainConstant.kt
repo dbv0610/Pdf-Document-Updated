@@ -17,7 +17,6 @@ object MainConstant {
     // powerpoint应用
     const val APPLICATION_TYPE_PPT: Byte = 2
     // pdf应用
-    const val APPLICATION_TYPE_PDF: Byte = 3
     // text 应用
     const val APPLICATION_TYPE_TXT: Byte = 4
     // doc文档格式

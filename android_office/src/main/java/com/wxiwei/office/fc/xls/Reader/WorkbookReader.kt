@@ -14,8 +14,15 @@ import com.wxiwei.office.system.IReader
 import com.wxiwei.office.system.ReaderHandler
 import com.wxiwei.office.system.sysKit
 import com.wxiwei.office.system.OfficeCoroutineExecutor
+import com.wxiwei.office.system.OpenTrace
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
 class WorkbookReader private constructor() {
     companion object {
@@ -61,19 +68,35 @@ class WorkbookReader private constructor() {
         book.debugDump("xlsx-after-first-sheet")
 
         class WorkbookReaderHandler(private var control: IControl, private var currentReader: WorkbookReader?) : ReaderHandler() {
-            override fun handleMessage(msg: Message) {
+            override fun handleMessage(msg: Message) = synchronized(this@WorkbookReader) {
                 when (msg.what) {
                     MainConstant.HANDLER_MESSAGE_SUCCESS -> {
-                        sheetJob?.cancel()
+                        val previous = sheetJob
                         sheetJob = OfficeCoroutineExecutor.launchSuspend {
+                            val job = coroutineContext[Job]
                             try {
+                                // Preserve the join chain even when another sheet replaces this job.
+                                withContext(NonCancellable) { previous?.cancelAndJoin() }
+                                coroutineContext.ensureActive()
+                                OpenTrace.d("excel.job start sheet=${msg.obj}")
                                 currentReader?.readSheetInSlideWindow(control, msg.obj as Int)
+                            } catch (e: CancellationException) {
+                                OpenTrace.d("excel.job cancel sheet=${msg.obj}")
+                                throw e
+                            } catch (e: AbortReaderError) {
+                                OpenTrace.d("excel.job cancel sheet=${msg.obj} aborted=true")
                             } catch (e: OutOfMemoryError) {
+                                OpenTrace.e("excel.job fail sheet=${msg.obj}", e)
                                 control.sysKit.errorKit.writerLog(e, true)
-                                currentReader?.dispose()
+                                synchronized(this@WorkbookReader) {
+                                    if (sheetJob === job) currentReader?.dispose()
+                                }
                             } catch (e: Exception) {
+                                OpenTrace.e("excel.job fail sheet=${msg.obj}", e)
                                 control.sysKit.errorKit.writerLog(e, true)
-                                currentReader?.dispose()
+                                synchronized(this@WorkbookReader) {
+                                    if (sheetJob === job) currentReader?.dispose()
+                                }
                             }
                         }
                     }
@@ -107,8 +130,12 @@ class WorkbookReader private constructor() {
         if (currentSheet >= 0 && workbook.getSheet(currentSheet) != null) {
             val active = workbook.getSheet(currentSheet)!!
             while (!active.isAccomplished()) {
+                coroutineContext.ensureActive()
                 readSheet(control, currentSheet)
                 if (!active.isAccomplished()) {
+                    // Recalculate the scrollable extent as new rows arrive;
+                    // this also lets the user scroll while the tail is loading.
+                    active.setState(Sheet.State_Reading)
                     active.notifyReadingProgress()
                     delay(16)
                 }
@@ -116,7 +143,11 @@ class WorkbookReader private constructor() {
         }
         for (i in currentSheet - WINDOWWIDTH..currentSheet + WINDOWWIDTH) {
             if (i >= 0 && i != currentSheet && workbook.getSheet(i) != null && !workbook.getSheet(i)!!.isAccomplished()) {
-                while (!workbook.getSheet(i)!!.isAccomplished()) readSheet(control, i)
+                while (!workbook.getSheet(i)!!.isAccomplished()) {
+                    coroutineContext.ensureActive()
+                    readSheet(control, i)
+                    if (!workbook.getSheet(i)!!.isAccomplished()) workbook.getSheet(i)!!.setState(Sheet.State_Reading)
+                }
             }
         }
     }
@@ -192,7 +223,10 @@ class WorkbookReader private constructor() {
         return SheetReader.instance().searchContent(zipPackage!!, iReader, part, key)
     }
 
+    @Synchronized
     fun dispose() {
+        cancelReading()
+        SheetReader.instance().dispose()
         zipPackage = null
         book = null
         iReader = null
@@ -204,6 +238,17 @@ class WorkbookReader private constructor() {
         worksheetRelCollection = null
         chartsheetRelCollection?.clear()
         chartsheetRelCollection = null
+    }
+
+    /**
+     * Cancels only the asynchronous/progressive sheet reader. The model is
+     * intentionally kept alive because this is also called by abortReader()
+     * while the Activity is being torn down.
+     */
+    @Synchronized
+    fun cancelReading() {
+        sheetJob?.cancel()
+        // Keep the job so its replacement can join it before using the stream.
     }
 
     private inner class WorkBookSaxHandler : ElementHandler {

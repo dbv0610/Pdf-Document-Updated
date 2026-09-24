@@ -6,9 +6,6 @@
  */
 package com.wxiwei.office.fc.hslf.record;
 
-import com.wxiwei.office.fc.hslf.record.PositionDependentRecordContainer;
-import com.wxiwei.office.fc.hslf.record.Record;
-
 /**
  * TODO: A container record that specifies a subordinate time node whose start time 
  * depends on the relation to its master time node.At most one of the following fields 

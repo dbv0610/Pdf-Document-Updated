@@ -46,6 +46,30 @@
                 android:textSize="@dimen/_11sdp" />
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/lnDraw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/_12sdp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:padding="@dimen/_4sdp"
+                android:src="@drawable/ic_ink_draw" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:fontFamily="@font/rb_400"
+                android:includeFontPadding="false"
+                android:padding="@dimen/_5sdp"
+                android:text="@string/draw"
+                android:textColor="@color/textColor"
+                android:textSize="@dimen/_11sdp" />
+        </LinearLayout>
+        <LinearLayout
             android:id="@+id/lnRotate"
 
             android:layout_width="match_parent"

@@ -1181,9 +1181,10 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                 if (lineSpace != 0f) am.setParaLineSpace(attr, -lineSpace)
             }
             else -> {
+                // No lineRule means "auto" in OOXML: a multiple of single spacing, like the "auto" case.
+                // It was stored negated, which made every line height negative and collapsed tables to zero height.
                 am.setParaLineSpaceType(attr, WPAttrConstant.LINE_SAPCE_MULTIPLE.toInt())
-                // 行距默认值
-                if (lineSpace != 0f) am.setParaLineSpace(attr, -lineSpace / 240f)
+                if (lineSpace != 0f) am.setParaLineSpace(attr, lineSpace / 240f)
             }
         }
     }

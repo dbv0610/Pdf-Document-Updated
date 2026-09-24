@@ -14,6 +14,7 @@ object Constant {
     const val ARG_MEDIA_MODEL = "ARG_MEDIA_MODEL"
     const val ARG_LINK_WITH_PAGE = "ARG_LINK_WITH_PAGE"
     const val ARG_SEARCH_WITH_PAGE = "ARG_SEARCH_WITH_PAGE"
+    const val ARG_SEARCH_RESULT_PAGE = "ARG_SEARCH_RESULT_PAGE"
     //storage
     const val FOLDER_SCREEN_SHORT_DOWNLOAD = "Download/Pdf_screen_short"
     const val FOLDER_SCREEN_SHORT = "Pdf_screen_short"

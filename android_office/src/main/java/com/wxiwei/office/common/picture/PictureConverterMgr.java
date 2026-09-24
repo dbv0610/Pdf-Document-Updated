@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.wxiwei.office.constant.EventConstant;
-import com.wxiwei.office.fc.pdf.PDFLib;
 import com.wxiwei.office.system.IControl;
 import com.wxiwei.office.thirdpart.emf.util.EMFUtil;
 
@@ -101,8 +100,7 @@ public class PictureConverterMgr
     		 Bitmap sBitmap = null;
              if(type == Picture.WMF)
              {
-                 int ret = PDFLib.getPDFLib().wmf2Jpg(sourPath, destPath, picWidth, picHeight);    		     
-                 sBitmap = BitmapFactory.decodeFile(destPath);                 
+                 // WMF needs the native converter that shipped with the removed PDF module; not rendered
              }
              else if(type == Picture.EMF)
              {
@@ -199,7 +197,8 @@ public class PictureConverterMgr
     {
     	 try
          {
-    		 boolean ret = PDFLib.getPDFLib().convertToPNG(sourPath, destPath, picType);
+    		 // the native PNG converter shipped with the removed PDF module
+    		 boolean ret = false;
              
              if(control != null && (convertingPictPathMap.get(destPath) == null || control.getView() == null))
              {

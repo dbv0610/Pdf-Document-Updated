@@ -21,8 +21,6 @@ import com.wxiwei.office.common.picture.PictureKit
 import com.wxiwei.office.constant.EventConstant
 import com.wxiwei.office.constant.MainConstant
 import com.wxiwei.office.fc.doc.TXTKit
-import com.wxiwei.office.fc.pdf.PDFLib
-import com.wxiwei.office.pdf.PDFControl
 import com.wxiwei.office.pg.control.PGControl
 import com.wxiwei.office.pg.model.PGModel
 import com.wxiwei.office.simpletext.model.IDocument
@@ -68,21 +66,16 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
                             if (frame.isShowProgressBar()) dismissProgressDialog() else customDialog?.dismissDialog(ICustomDialog.DIALOGTYPE_LOADING)
                             createApplication(model)
                             onOpenFileListener?.onOpenFileSuccess()
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                             OpenTrace.e("creating application/view failed", e)
-                            sysKit.getErrorKit().writerLog(e, true)
+                            handleOpenFailure(e)
                         }
                     }
                 }
                 MainConstant.HANDLER_MESSAGE_ERROR -> {
                     val error = message.obj as? Throwable
                     handler.post {
-                        onOpenFileListener?.onOpenFileFailure()
-                        dismissProgressDialog()
-                        error?.let {
-                            OpenTrace.e("read failed message received", it)
-                            sysKit.getErrorKit().writerLog(it, true)
-                        } ?: OpenTrace.e("read failed message received without exception")
+                        handleOpenFailure(error ?: IllegalStateException("Reader failed without exception"))
                     }
                 }
                 MainConstant.HANDLER_MESSAGE_SHOW_PROGRESS -> {
@@ -113,6 +106,17 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
         autoTest = autoTestValue == "true"
     }
 
+    private fun handleOpenFailure(cause: Throwable) {
+        if (isCancel || isDispose || OpenFileErrors.isCancellation(cause)) return
+        val error = OpenFileErrors.wrap(cause, filePath)
+        val handled = onOpenFileListener?.onOpenFileFailure(error) == true
+        dismissProgressDialog()
+        customDialog?.dismissDialog(ICustomDialog.DIALOGTYPE_LOADING)
+        OpenTrace.e("open failed reason=${error.reason} path=${error.filePath}", error)
+        sysKit.getErrorKit().writerLog(cause, true, !handled)
+        if (handled) actionEvent(EventConstant.APP_ABORTREADING, true)
+    }
+
     private fun createApplication(obj: Any?) {
         val start = android.os.SystemClock.uptimeMillis()
         OpenTrace.mark("createApplication.begin type=$applicationType model=${obj?.javaClass?.simpleName}")
@@ -125,7 +129,6 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
             MainConstant.APPLICATION_TYPE_WP -> WPControl(this, obj as IDocument, filePath!!)
             MainConstant.APPLICATION_TYPE_SS -> SSControl(this, obj as Workbook, filePath!!)
             MainConstant.APPLICATION_TYPE_PPT -> PGControl(this, obj as PGModel, filePath!!)
-            MainConstant.APPLICATION_TYPE_PDF -> PDFControl(this, obj as PDFLib, filePath!!)
             else -> appControl
         }
         OpenTrace.mark("createApplication.controlCreated control=${appControl?.javaClass?.simpleName}", start)
@@ -137,8 +140,7 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
         val background = frame.getViewBackground()
         if (background is Int) view.setBackgroundColor(background)
         else if (background is Drawable) view.background = background
-        val hasPassword = applicationType == MainConstant.APPLICATION_TYPE_PDF && (obj as PDFLib).hasPasswordSync()
-        if (!hasPassword || applicationType != MainConstant.APPLICATION_TYPE_PDF) frame.openFileFinish()
+        frame.openFileFinish()
         OpenTrace.mark("createApplication.openFileFinish", start)
         view.post {
             OpenTrace.d("view ready class=${view.javaClass.name} size=${view.width}x${view.height} parent=${view.parent != null}")
@@ -152,7 +154,7 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
             OpenTrace.mark("createApplication.initEvent.begin", start)
             actionEvent(EventConstant.SYS_SET_PROGRESS_BAR_ID, false)
             actionEvent(EventConstant.SYS_INIT_ID, null)
-            if (!hasPassword || applicationType != MainConstant.APPLICATION_TYPE_PDF) frame.updateToolsbarStatus()
+            frame.updateToolsbarStatus()
             getView()?.postInvalidate()
             OpenTrace.mark("createApplication.initEvent.end", start)
         }
@@ -161,16 +163,21 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
     override fun openFile(filePath: String?): Boolean {
         val start = android.os.SystemClock.uptimeMillis()
         OpenTrace.mark("mainControl.openFile.begin path=$filePath")
-        OpenTrace.d("MainControl.openFile path=$filePath exists=${filePath?.let { java.io.File(it).exists() }}")
+        OpenTrace.d("MainControl.openFile path=$filePath")
         fileReader?.cancel()
         fileReader = null
         this.filePath = filePath
+        try {
+            OpenFileErrors.requireReadable(filePath)
+        } catch (error: Throwable) {
+            handler.obtainMessage(MainConstant.HANDLER_MESSAGE_ERROR, error).sendToTarget()
+            return false
+        }
         val name = filePath!!.lowercase()
         applicationType = when {
             name.endsWith(MainConstant.FILE_TYPE_DOC) || name.endsWith(MainConstant.FILE_TYPE_DOCX) || name.endsWith(MainConstant.FILE_TYPE_TXT) || name.endsWith(MainConstant.FILE_TYPE_DOT) || name.endsWith(MainConstant.FILE_TYPE_DOTX) || name.endsWith(MainConstant.FILE_TYPE_DOTM) -> MainConstant.APPLICATION_TYPE_WP
             name.endsWith(MainConstant.FILE_TYPE_XLS) || name.endsWith(MainConstant.FILE_TYPE_XLSX) || name.endsWith(MainConstant.FILE_TYPE_XLT) || name.endsWith(MainConstant.FILE_TYPE_XLTX) || name.endsWith(MainConstant.FILE_TYPE_XLTM) || name.endsWith(MainConstant.FILE_TYPE_XLSM) -> MainConstant.APPLICATION_TYPE_SS
             name.endsWith(MainConstant.FILE_TYPE_PPT) || name.endsWith(MainConstant.FILE_TYPE_PPTX) || name.endsWith(MainConstant.FILE_TYPE_POT) || name.endsWith(MainConstant.FILE_TYPE_PPTM) || name.endsWith(MainConstant.FILE_TYPE_POTX) || name.endsWith(MainConstant.FILE_TYPE_POTM) -> MainConstant.APPLICATION_TYPE_PPT
-            name.endsWith(MainConstant.FILE_TYPE_PDF) -> MainConstant.APPLICATION_TYPE_PDF
             else -> MainConstant.APPLICATION_TYPE_WP
         }
         OpenTrace.d("reader selection applicationType=$applicationType path=$filePath")

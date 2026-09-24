@@ -19,6 +19,7 @@ import com.wxiwei.office.ss.model.drawing.CellAnchor
 import com.wxiwei.office.ss.util.format.NumericFormatter
 import com.wxiwei.office.ss.view.SheetView
 import java.util.Locale
+import java.util.LinkedHashMap
 
 /**
  * excel用到工具类
@@ -30,6 +31,18 @@ import java.util.Locale
  */
 class ModelUtil {
     private val area = RectF()
+    private data class NumericFormatKey(
+        val format: String,
+        val number: Double,
+        val numericType: Short,
+        val date1904: Boolean
+    )
+
+    private val numericFormatCache = object : LinkedHashMap<NumericFormatKey, String>(256, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<NumericFormatKey, String>?): Boolean {
+            return size > 512
+        }
+    }
 
     /**
      * 得到合交单元的CellRangeAddress的Index
@@ -404,13 +417,22 @@ class ModelUtil {
                 }
 
                 try {
+                    val number = cell.getNumberValue()
+                    val date1904 = book.isUsing1904DateWindowing()
+                    val cacheKey = NumericFormatKey(key, number, numericType, date1904)
+                    val cached = synchronized(numericFormatCache) { numericFormatCache[cacheKey] }
+                    value = cached ?: if (numericType == Cell.CELL_TYPE_NUMERIC_SIMPLEDATE) {
+                        NumericFormatter.instance().getFormatContents(key, cell.getDateCellValue(date1904))
+                    } else {
+                        NumericFormatter.instance().getFormatContents(key, number, numericType)
+                    }
+                    if (cached == null && value != null) {
+                        synchronized(numericFormatCache) { numericFormatCache[cacheKey] = value!! }
+                    }
                     if (numericType == Cell.CELL_TYPE_NUMERIC_SIMPLEDATE) {
-                        value = NumericFormatter.instance().getFormatContents(key, cell.getDateCellValue(book.isUsing1904DateWindowing()))
                         //store string content, so no need to convert any more
                         cell.setCellType(Cell.CELL_TYPE_STRING)
                         cell.setCellValue(book.addSharedString(value))
-                    } else {
-                        value = NumericFormatter.instance().getFormatContents(key, cell.getNumberValue(), numericType)
                     }
                 } catch (ex: Exception) {
                     value = cell.getNumberValue().toString()

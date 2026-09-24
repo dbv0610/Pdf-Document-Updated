@@ -14,6 +14,8 @@ import com.wxiwei.office.fc.poifs.filesystem.DirectoryNode
 import com.wxiwei.office.fc.poifs.filesystem.POIFSFileSystem
 import com.wxiwei.office.ss.model.XLSModel.ACell
 import com.wxiwei.office.ss.model.XLSModel.AWorkbook
+import com.wxiwei.office.fc.hssf.record.crypto.Biff8EncryptionKey
+import com.wxiwei.office.system.DocumentPasswords
 import com.wxiwei.office.ss.model.baseModel.Cell
 import com.wxiwei.office.system.AbortReaderError
 import com.wxiwei.office.system.IControl
@@ -31,7 +33,13 @@ class XLSReader(control: IControl, filePath: String) : SSReader() {
 
     override fun getModel(): Any? {
         val input = FileInputStream(filePath!!)
-        return AWorkbook(input, this)
+        // BIFF8 decryption reads the password from a thread-local while the workbook is parsed
+        Biff8EncryptionKey.setCurrentUserPassword(DocumentPasswords.get(filePath))
+        try {
+            return AWorkbook(input, this)
+        } finally {
+            Biff8EncryptionKey.setCurrentUserPassword(null)
+        }
     }
 
     override fun searchContent(file: File?, key: String): Boolean {

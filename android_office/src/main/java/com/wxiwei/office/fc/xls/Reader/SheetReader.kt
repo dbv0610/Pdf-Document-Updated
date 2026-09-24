@@ -24,6 +24,7 @@ import java.io.InputStream
 class SheetReader private constructor() {
     companion object {
         private val reader = SheetReader()
+        private const val STREAMING_THRESHOLD = 1500
         private const val INITIAL_ROW_BATCH = 240
         private const val CONTINUATION_ROW_BATCH = 480
         @JvmStatic fun instance(): SheetReader = reader
@@ -39,7 +40,11 @@ class SheetReader private constructor() {
         streamInput = sheetPart.inputStream
         streamParser = Xml.newPullParser().also { it.setInput(streamInput, null) }
         streamTarget = sheet
-        val complete = parseWorksheetStreaming(sheet, INITIAL_ROW_BATCH)
+        // Small sheets are parsed in one pass. Repeatedly changing the sheet
+        // state and invalidating the view for a 200-row sheet only adds UI
+        // work and makes scrolling feel worse. Large sheets retain the
+        // progressive path to protect the heap.
+        val complete = parseWorksheetStreaming(sheet, if (shouldReadInOnePass(sheetPart)) Int.MAX_VALUE else INITIAL_ROW_BATCH)
         if (!complete) {
             sheet.setState(Sheet.State_Reading)
             return
@@ -63,6 +68,41 @@ class SheetReader private constructor() {
 
     fun isStreaming(sheet: Sheet): Boolean = streamTarget === sheet && streamParser != null
 
+    private fun shouldReadInOnePass(sheetPart: PackagePart): Boolean {
+        val input = sheetPart.inputStream
+        var onePass = false
+        try {
+            val parser = Xml.newPullParser()
+            parser.setInput(input, null)
+            scan@ while (true) {
+                when (parser.next()) {
+                    XmlPullParser.END_DOCUMENT -> break@scan
+                    XmlPullParser.START_TAG -> if (parser.name == "dimension") {
+                        val ref = parser.attr("ref") ?: break@scan
+                        val parts = ref.replace("$", "").split(":")
+                        val first = cellAddress(parts.first()) ?: break@scan
+                        val last = cellAddress(parts.last()) ?: break@scan
+                        onePass = (last.first - first.first + 1) <= STREAMING_THRESHOLD &&
+                            (last.second - first.second + 1) <= STREAMING_THRESHOLD
+                        break@scan
+                    }
+                }
+            }
+        } finally {
+            try { input.close() } catch (_: Exception) {}
+        }
+        return onePass
+    }
+
+    private fun cellAddress(value: String): Pair<Int, Int>? {
+        val match = Regex("([A-Za-z]+)([0-9]+)").matchEntire(value.trim()) ?: return null
+        val column = match.groupValues[1].uppercase().fold(0) { result, char ->
+            result * 26 + (char - 'A' + 1)
+        } - 1
+        val row = match.groupValues[2].toIntOrNull()?.minus(1) ?: return null
+        return row to column
+    }
+
     private fun finishSheet(control: IControl, zipPackage: ZipPackage, sheet: Sheet, sheetPart: PackagePart) {
         val tableRelations = sheetPart.getRelationshipsByType(PackageRelationshipTypes.TABLE_PART)
         for (relation in tableRelations) TableReader.instance().read(control, zipPackage.getPart(relation.targetURI), sheet)
@@ -74,13 +114,13 @@ class SheetReader private constructor() {
         PictureReader.instance().dispose()
         checkTableCell(sheet)
         sheet.setState(Sheet.State_Accomplished)
+        OpenTrace.d("excel.sheet.accomplished sheet=${sheet.getSheetName()} rows=${sheet.getPhysicalNumberOfRows()}")
         dispose()
     }
 
     private fun parseWorksheetStreaming(target: Sheet, maxRows: Int): Boolean {
         val parser = streamParser ?: return true
         val input = streamInput ?: return true
-        parser.setInput(input, null)
         var row: Row? = null
         var cellRef: String? = null
         var cellType: String? = null
@@ -94,7 +134,10 @@ class SheetReader private constructor() {
             while (true) {
                 if (iReader?.isAborted() == true) throw AbortReaderError("abort Reader")
                 when (parser.next()) {
-                    XmlPullParser.END_DOCUMENT -> return true
+                    XmlPullParser.END_DOCUMENT -> {
+                        OpenTrace.d("excel.progress sheet=${target.getSheetName()} rows=${target.getPhysicalNumberOfRows()} lastRow=${target.getLastRowNum()}")
+                        return true
+                    }
                     XmlPullParser.START_TAG -> when (parser.name) {
                         "sheetFormatPr" -> {
                             parser.attr("defaultRowHeight")?.let {
@@ -161,12 +204,20 @@ class SheetReader private constructor() {
                                 cell.setColNumber(ReferenceUtil.instance().getColumnIndex(ref))
                                 cell.setCellStyle(cellStyle)
                                 val workbook = target.getWorkbook()!!
-                                when (cellType) {
+                                if (text.isEmpty()) {
+                                    cell.setCellType(Cell.CELL_TYPE_BLANK)
+                                } else when (cellType) {
                                     "s" -> cell.setCellValue(text.toIntOrNull() ?: -1)
-                                    "str", "inlineStr" -> cell.setCellValue(workbook.addSharedString(text))
+                                    "str", "inlineStr", "d" -> cell.setCellValue(workbook.addSharedString(text))
                                     "b" -> cell.setCellValue(text == "1")
                                     "e" -> cell.setCellValue(text.toByteOrNull() ?: 0)
-                                    else -> cell.setCellValue(text.toDoubleOrNull() ?: text)
+                                    else -> {
+                                        val number = text.toDoubleOrNull()
+                                        if (number != null) cell.setCellValue(number) else {
+                                            cell.setCellType(Cell.CELL_TYPE_STRING)
+                                            cell.setCellValue(workbook.addSharedString(text))
+                                        }
+                                    }
                                 }
                                 row!!.addCell(cell)
                             }
@@ -185,19 +236,26 @@ class SheetReader private constructor() {
                             row = null
                             rowHasMetadata = false
                             rowsRead++
-                            if (rowsRead >= maxRows) return false
+                            if (rowsRead >= maxRows) {
+                                OpenTrace.d("excel.progress sheet=${target.getSheetName()} rows=${target.getPhysicalNumberOfRows()} lastRow=${target.getLastRowNum()}")
+                                return false
+                            }
                         }
                     }
                 }
             }
-        } finally {
-            if (streamParser == null) input.close()
+        } catch (error: Throwable) {
+            try { input.close() } catch (_: Exception) {}
+            streamInput = null
+            streamParser = null
+            streamTarget = null
+            throw error
         }
         return true
     }
 
     private fun cellTypeToModelType(type: String?): Short = when (type) {
-        "s", "str", "inlineStr" -> Cell.CELL_TYPE_STRING
+        "s", "str", "inlineStr", "d" -> Cell.CELL_TYPE_STRING
         "b" -> Cell.CELL_TYPE_BOOLEAN
         "e" -> Cell.CELL_TYPE_ERROR
         else -> Cell.CELL_TYPE_NUMERIC
@@ -212,7 +270,28 @@ class SheetReader private constructor() {
             ReferenceUtil.instance().getRowIndex(parts[1]),
             ReferenceUtil.instance().getColumnIndex(parts[1])
         )
-        target.addMergeRange(range)
+        val index = target.addMergeRange(range) - 1
+        for (rowIndex in range.getFirstRow()..range.getLastRow()) {
+            var row = target.getRow(rowIndex)
+            if (row == null) {
+                row = Row(range.getLastColumn() - range.getFirstColumn() + 1)
+                row.setSheet(target)
+                row.setRowNumber(rowIndex)
+                target.addRow(row)
+            }
+            for (columnIndex in range.getFirstColumn()..range.getLastColumn()) {
+                var cell = row.getCell(columnIndex, false)
+                if (cell == null) {
+                    cell = Cell(Cell.CELL_TYPE_BLANK)
+                    cell.setRowNumber(rowIndex)
+                    cell.setColNumber(columnIndex)
+                    cell.setSheet(target)
+                    cell.setCellStyle(row.getRowStyle())
+                    row.addCell(cell)
+                }
+                cell.setRangeAddressIndex(index)
+            }
+        }
     }
 
     private fun XmlPullParser.attr(name: String): String? = getAttributeValue(null, name)
@@ -429,7 +508,7 @@ class SheetReader private constructor() {
         }
     }
 
-    private fun dispose() {
+    fun dispose() {
         try { streamInput?.close() } catch (_: Exception) {}
         streamInput = null
         streamParser = null

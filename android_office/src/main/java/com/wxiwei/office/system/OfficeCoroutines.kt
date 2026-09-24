@@ -1,15 +1,6 @@
 package com.wxiwei.office.system
 
 import android.util.Log
-import com.wxiwei.office.constant.MainConstant
-import com.wxiwei.office.fc.doc.DOCReader
-import com.wxiwei.office.fc.doc.DOCXReader
-import com.wxiwei.office.fc.doc.TXTReader
-import com.wxiwei.office.fc.pdf.PDFReader
-import com.wxiwei.office.fc.ppt.PPTReader
-import com.wxiwei.office.fc.ppt.PPTXReader
-import com.wxiwei.office.fc.xls.XLSReader
-import com.wxiwei.office.fc.xls.XLSXReader
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +26,7 @@ class OfficeFileLoader @JvmOverloads constructor(
         fun onLoading(loading: Boolean)
         fun onReaderCreated(reader: IReader)
         fun onSuccess(model: Any?)
-        fun onFailure(error: Throwable)
+        fun onFailure(error: OpenFileException)
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -67,15 +58,20 @@ class OfficeFileLoader @JvmOverloads constructor(
                 // would call MainControl.dismissProgressDialog(), which removes
                 // the queued SUCCESS message as well.
                 OpenTrace.d("alternate loader read succeeded callback main=${Thread.currentThread().name}")
+                if (model == null) throw IllegalStateException("Document with password")
                 callback.onSuccess(model)
             } catch (cancelled: CancellationException) {
                 OpenTrace.d("alternate loader cancelled path=$filePath")
                 activeReader?.abortReader()
                 callback.onLoading(false)
             } catch (error: Throwable) {
+                if (OpenFileErrors.isCancellation(error)) {
+                    callback.onLoading(false)
+                    return@launch
+                }
                 OpenTrace.e("alternate loader read failed path=$filePath", error)
                 callback.onLoading(false)
-                callback.onFailure(error)
+                callback.onFailure(OpenFileErrors.wrap(error, filePath))
             }
         }
     }
@@ -93,25 +89,7 @@ class OfficeFileLoader @JvmOverloads constructor(
     }
 
     private fun createReader(filePath: String, encoding: String?): IReader {
-        val name = filePath.lowercase()
-        return when {
-            name.endsWith(MainConstant.FILE_TYPE_DOC) || name.endsWith(MainConstant.FILE_TYPE_DOT) ->
-                DOCReader(control, filePath)
-            name.endsWith(MainConstant.FILE_TYPE_DOCX) || name.endsWith(MainConstant.FILE_TYPE_DOTX) ||
-                name.endsWith(MainConstant.FILE_TYPE_DOTM) -> DOCXReader(control, filePath)
-            name.endsWith(MainConstant.FILE_TYPE_XLS) || name.endsWith(MainConstant.FILE_TYPE_XLT) ->
-                XLSReader(control, filePath)
-            name.endsWith(MainConstant.FILE_TYPE_XLSX) || name.endsWith(MainConstant.FILE_TYPE_XLTX) ||
-                name.endsWith(MainConstant.FILE_TYPE_XLTM) || name.endsWith(MainConstant.FILE_TYPE_XLSM) ->
-                XLSXReader(control, filePath)
-            name.endsWith(MainConstant.FILE_TYPE_PPT) || name.endsWith(MainConstant.FILE_TYPE_POT) ->
-                PPTReader(control, filePath)
-            name.endsWith(MainConstant.FILE_TYPE_PPTX) || name.endsWith(MainConstant.FILE_TYPE_PPTM) ||
-                name.endsWith(MainConstant.FILE_TYPE_POTX) || name.endsWith(MainConstant.FILE_TYPE_POTM) ->
-                PPTXReader(control, filePath)
-            name.endsWith(MainConstant.FILE_TYPE_PDF) -> PDFReader(control, filePath)
-            else -> TXTReader(control, filePath, encoding)
-        }
+        return OfficeReaderFactory.createReader(control, filePath, encoding)
     }
 
     private companion object {

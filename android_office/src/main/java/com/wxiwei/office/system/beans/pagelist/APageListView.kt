@@ -99,10 +99,12 @@ open class APageListView : AdapterView<Adapter> {
 
     private fun layoutHorizontal() {
         var currentView = childViewsCache.get(currentIndex)
-        if (!isResetLayout && currentView != null) {
+        if (!isResetLayout) {
+            if (currentView != null && kotlin.math.abs(currentView.left) < currentView.width) {
             val offset = getScreenSizeOffset(currentView)
             if (currentView.left + currentView.measuredWidth + offset.x + GAP / 2 + eventManage!!.getScrollX() < width / 2 && currentIndex + 1 < pageAdapter!!.count && !eventManage!!.isOnFling()) { postUnRepaint(currentView); post(eventManage); currentIndex++ }
             else if (currentView.left - offset.x - GAP / 2 + eventManage!!.getScrollX() >= width / 2 && currentIndex > 0 && !eventManage!!.isOnFling()) { postUnRepaint(currentView); post(eventManage); currentIndex-- }
+            }
             removeUnusedViews()
         } else {
             isResetLayout = false
@@ -112,10 +114,11 @@ open class APageListView : AdapterView<Adapter> {
             indexes.forEach { index -> if (index < currentIndex - 1 || index > currentIndex + 1) { val view = childViewsCache.get(index); view.releaseResources(); pageViewCache.add(view); removeViewInLayout(view); childViewsCache.remove(index); repaint = index == currentIndex } }
             if ((zoom * 100).toInt() != 100 || !repaint) post(eventManage)
         }
+        val notPresent = currentView == null
         currentView = createPageView(currentIndex)
         val offset = getScreenSizeOffset(currentView)
-        val left = if (currentView.left == 0 && currentView.top == 0) offset.x else currentView.left + eventManage!!.getScrollX()
-        val top = if (currentView.left == 0 && currentView.top == 0) offset.y else currentView.top + eventManage!!.getScrollY()
+        val left = if (notPresent) offset.x else currentView.left + eventManage!!.getScrollX()
+        val top = if (notPresent) offset.y else currentView.top + eventManage!!.getScrollY()
         eventManage!!.setScrollAxisValue(0, 0)
         var l = left
         var t = top
@@ -135,22 +138,26 @@ open class APageListView : AdapterView<Adapter> {
 
     private fun layoutVertical() {
         var currentView = childViewsCache.get(currentIndex)
-        if (!isResetLayout && currentView != null) {
+        if (!isResetLayout) {
+            if (currentView != null) {
             val offset = getScreenSizeOffset(currentView)
             if (currentView.top + currentView.measuredHeight + offset.y + GAP / 2 + eventManage!!.getScrollY() < height / 2 && currentIndex + 1 < pageAdapter!!.count && !eventManage!!.isOnFling()) { postUnRepaint(currentView); post(eventManage); currentIndex++; Log.e("current ++", currentIndex.toString()) }
             else if (currentView.top - offset.y - GAP / 2 + eventManage!!.getScrollY() >= height / 2 && currentIndex > 0 && !eventManage!!.isOnFling()) { postUnRepaint(currentView); post(eventManage); currentIndex--; Log.e("current --", currentIndex.toString()) }
+            }
             removeUnusedViews()
         } else {
-            val shouldPostEvent = currentView == null || isResetLayout
             isResetLayout = false
+            var repaint = false
             eventManage!!.setScrollAxisValue(0, 0)
-            removeUnusedViews()
-            if (shouldPostEvent) post(eventManage)
+            val indexes = IntArray(childViewsCache.size()) { childViewsCache.keyAt(it) }
+            indexes.forEach { index -> if (index < currentIndex - 1 || index > currentIndex + 1) { val view = childViewsCache.get(index); view.releaseResources(); pageViewCache.add(view); removeViewInLayout(view); childViewsCache.remove(index); repaint = index == currentIndex } }
+            if ((zoom * 100).toInt() != 100 || !repaint) post(eventManage)
         }
+        val notPresent = currentView == null
         currentView = createPageView(currentIndex)
         val offset = getScreenSizeOffset(currentView)
-        var l = if (currentView.left == 0 && currentView.top == 0) offset.x else currentView.left + eventManage!!.getScrollX()
-        var t = if (currentView.left == 0 && currentView.top == 0) offset.y else currentView.top + eventManage!!.getScrollY()
+        var l = if (notPresent) offset.x else currentView.left + eventManage!!.getScrollX()
+        var t = if (notPresent) offset.y else currentView.top + eventManage!!.getScrollY()
         eventManage!!.setScrollAxisValue(0, 0)
         var r = l + currentView.measuredWidth
         var b = t + currentView.measuredHeight
@@ -171,7 +178,21 @@ open class APageListView : AdapterView<Adapter> {
     fun previousPageview() { if (currentIndex == 0) return; val view = childViewsCache.get(currentIndex - 1); if (view != null) { currentIndex--; eventManage!!.slideViewOntoScreen(view) } }
     fun exportImage(view: APageListItem, srcBitmap: Bitmap?) { if (view.pageIndex == currentIndex && !eventManage!!.isTouchEventIn() && eventManage!!.isScrollerFinished()) pageListViewListener!!.exportImage(view, srcBitmap) }
     fun isPointVisibleOnScreen(xValue: Int, yValue: Int): Boolean { val x = (xValue * zoom).toInt(); val y = (yValue * zoom).toInt(); val item = getCurrentPageView() ?: return false; val left = maxOf(item.left, 0) - item.left; val top = maxOf(item.top, 0) - item.top; return x >= left && x < left + width && y >= top && y < top + height }
-    fun setItemPointVisibleOnScreen(xValue: Int, yValue: Int) { if (xValue < 0 && yValue < 0) return; val item = getCurrentPageView() ?: return; if (isPointVisibleOnScreen(xValue, yValue)) return; val x = (xValue * zoom).toInt(); val y = (yValue * zoom).toInt(); val l = if (x + width > item.measuredWidth) -(item.measuredWidth - width) else -x; val t = if (y + height > item.measuredHeight) -(item.measuredHeight - height) else -y; val r = l + item.measuredWidth; val b = t + item.measuredHeight; item.layout(l, t, r, b); postRepaint(item) }
+    fun setItemPointVisibleOnScreen(xValue: Int, yValue: Int) {
+        if (xValue < 0 && yValue < 0) return
+        val item = getCurrentPageView() ?: return
+        if (isPointVisibleOnScreen(xValue, yValue)) return
+        val x = (xValue * zoom).toInt()
+        val y = (yValue * zoom).toInt()
+        val l = if (x + width > item.measuredWidth) -(item.measuredWidth - width) else -x
+        // Leave the point a third down the screen rather than at the very top edge, where it is easily hidden
+        val ty = maxOf(0, y - height / 3)
+        val t = if (ty + height > item.measuredHeight) -(item.measuredHeight - height) else -ty
+        val r = l + item.measuredWidth
+        val b = t + item.measuredHeight
+        item.layout(l, t, r, b)
+        postRepaint(item)
+    }
     @get:JvmName("getModelProperty")
     val model: Any? get() = pageListViewListener!!.getModel()
     fun getModel(): Any? = pageListViewListener!!.getModel()

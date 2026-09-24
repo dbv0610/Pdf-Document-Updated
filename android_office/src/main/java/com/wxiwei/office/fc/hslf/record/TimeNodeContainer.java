@@ -6,9 +6,6 @@
  */
 package com.wxiwei.office.fc.hslf.record;
 
-import com.wxiwei.office.fc.hslf.record.PositionDependentRecordContainer;
-import com.wxiwei.office.fc.hslf.record.Record;
-
 /**
  * TODO: A container record that specifies a time node. This time node is
  *  used to store all information necessary to cause a time-based or an

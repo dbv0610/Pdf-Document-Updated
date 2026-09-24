@@ -218,13 +218,6 @@ object EventConstant {
     const val PG_SLIDESHOW_ANIMATIONSTEPS = PG_SLIDESHOW_SLIDEEXIST + 1 // 0x51000009
     const val PG_SLIDESHOW_SLIDESHOWTOIMAGE = PG_SLIDESHOW_ANIMATIONSTEPS + 1 // 0x5100000A
 
-    /* ============ PDF action ID ============ */
-    // show page
-    const val PDF_SHOW_PAGE = 0x60000000 // 0x60000000
-    // page to image
-    const val PDF_PAGE_TO_IMAGE = PDF_SHOW_PAGE + 1 // 0x60000001
-    // get page size
-    const val PDF_GET_PAGE_SIZE = PDF_PAGE_TO_IMAGE + 1 // 0x60000002
     /* ===========  以下是用于测试的action 后期可能会删除 =========*/
 
     //

@@ -14,6 +14,7 @@ import com.wxiwei.office.ss.other.FocusCell
 import com.wxiwei.office.ss.view.SheetView
 import com.wxiwei.office.system.IControl
 import com.wxiwei.office.system.ITimerListener
+import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.beans.AEventManage
 import com.wxiwei.office.system.beans.ATimer
 
@@ -98,6 +99,8 @@ class SSEventManage(spreadsheet: Spreadsheet, control: IControl) : AEventManage(
     private var actionDown = false
     private var scrolling = false
     private var timer: ATimer? = ATimer(1000, this)
+    private var moveCount = 0
+    private var gestureStart = 0L
 
     override fun actionPerformed() {
         timer?.stop()
@@ -313,6 +316,7 @@ class SSEventManage(spreadsheet: Spreadsheet, control: IControl) : AEventManage(
 
     override fun onTouch(v: View?, event: MotionEvent): Boolean {
         val ss = spreadsheet ?: return false
+        val touchStarted = android.os.SystemClock.uptimeMillis()
         super.onTouch(v, event)
         if (event.pointerCount == 2) {
             scrolling = true
@@ -325,17 +329,35 @@ class SSEventManage(spreadsheet: Spreadsheet, control: IControl) : AEventManage(
             return true
         }
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> actionDown = true
+            MotionEvent.ACTION_DOWN -> {
+                actionDown = true
+                moveCount = 0
+                gestureStart = touchStarted
+                spreadsheet?.getSheetView()?.onGestureStart()
+                OpenTrace.d("excel.scroll.touch action=DOWN x=${event.x} y=${event.y}")
+            }
             MotionEvent.ACTION_MOVE -> {
+                moveCount++
                 changingHeader(event)
                 ss.abortDrawing()
                 ss.postInvalidateOnAnimation()
+                val elapsed = android.os.SystemClock.uptimeMillis() - touchStarted
+                if (elapsed >= 8 || moveCount % 20 == 0) {
+                    OpenTrace.d(
+                        "excel.scroll.touch action=MOVE elapsed=${elapsed}ms moves=$moveCount " +
+                            "x=${event.x} y=${event.y} scroll=${ss.getSheetView()?.getScrollX()},${ss.getSheetView()?.getScrollY()}"
+                    )
+                }
             }
             MotionEvent.ACTION_UP -> {
                 actionUp(event)
                 scrolling = false
                 actionDown = false
                 ss.postInvalidateOnAnimation()
+                OpenTrace.d(
+                    "excel.scroll.touch action=UP gesture=${android.os.SystemClock.uptimeMillis() - gestureStart}ms " +
+                        "moves=$moveCount totalHandler=${android.os.SystemClock.uptimeMillis() - touchStarted}ms"
+                )
             }
         }
         return false
@@ -435,7 +457,7 @@ class SSEventManage(spreadsheet: Spreadsheet, control: IControl) : AEventManage(
             isScroll = true
             scrolling = true
             sheetView.rowHeader.calculateRowHeaderWidth(sheetView.zoom)
-            sheetView.scrollBy(Math.round(dx).toFloat(), Math.round(dy).toFloat())
+            sheetView.scrollBy(Math.round(dx).toFloat(), Math.round(dy).toFloat(), true)
             spreadsheet!!.abortDrawing()
             spreadsheet!!.postInvalidateOnAnimation()
         }

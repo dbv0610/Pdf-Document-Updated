@@ -348,7 +348,7 @@ class Spreadsheet(context: Context, filepath: String?, book: Workbook?, control:
             return
         }
         try {
-            sheetview!!.drawSheet(canvas)
+            sheetview!!.drawSheet(canvas, true)
 
             // auto test code
             if (control!!.isAutoTest()/* && sheetbar != null*/) {
@@ -676,6 +676,10 @@ class Spreadsheet(context: Context, filepath: String?, book: Workbook?, control:
                 }
             })
         }
+    }
+
+    override fun OnReadingProgress() {
+        if (parent != null) postInvalidateOnAnimation()
     }
 
     fun getFileName(): String? {

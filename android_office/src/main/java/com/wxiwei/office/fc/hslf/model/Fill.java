@@ -157,7 +157,7 @@ public final class Fill
                 EscherBSERecord bse = (EscherBSERecord)lst.get(idx - 1);
                 for (int i = 0; i < pict.length; i++)
                 {
-                    if (pict[i].getOffset() == bse.getOffset())
+                    if (pict[i].offset == bse.getOffset())
                     {
                         return pict[i];
                     }

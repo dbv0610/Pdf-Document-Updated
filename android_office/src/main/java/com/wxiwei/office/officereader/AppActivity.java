@@ -49,7 +49,6 @@ import com.wxiwei.office.officereader.beans.AImageButton;
 import com.wxiwei.office.officereader.beans.AImageCheckButton;
 import com.wxiwei.office.officereader.beans.AToolsbar;
 import com.wxiwei.office.officereader.beans.CalloutToolsbar;
-import com.wxiwei.office.officereader.beans.PDFToolsbar;
 import com.wxiwei.office.officereader.beans.PGToolsbar;
 import com.wxiwei.office.officereader.beans.SSToolsbar;
 import com.wxiwei.office.officereader.beans.WPToolsbar;
@@ -672,11 +671,7 @@ public class AppActivity extends AppCompatActivity implements IMainFrame {
             applicationType = MainConstant.APPLICATION_TYPE_PPT;
             toolsbar = new PGToolsbar(getApplicationContext(), control);
         }
-        // PDF document
-        else if (file.endsWith(MainConstant.FILE_TYPE_PDF)) {
-            applicationType = MainConstant.APPLICATION_TYPE_PDF;
-            toolsbar = new PDFToolsbar(getApplicationContext(), control);
-        } else {
+        else {
             applicationType = MainConstant.APPLICATION_TYPE_WP;
             toolsbar = new WPToolsbar(getApplicationContext(), control);
         }

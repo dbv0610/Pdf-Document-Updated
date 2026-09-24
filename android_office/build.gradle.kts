@@ -2,18 +2,21 @@ import org.gradle.api.tasks.compile.JavaCompile
 
 plugins {
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.wxiwei.office"
-    compileSdk = 36
+    compileSdk = 37
+    ndkVersion = "29.0.13846066"
 
     defaultConfig {
         minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
     }
 
     buildTypes {
@@ -28,6 +31,11 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path = file("src/main/jni/Android.mk")
+        }
     }
 }
 
@@ -45,6 +53,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation(libs.gson)
     implementation(libs.lottie)
     implementation(libs.material)

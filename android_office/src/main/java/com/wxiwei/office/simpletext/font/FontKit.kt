@@ -30,6 +30,7 @@ import java.util.regex.Pattern
 class FontKit {
     // 断词、断行算法
     private val lineBreak: BreakIterator = BreakIterator.getLineInstance()
+    private val typefaceCache = HashMap<Int, Typeface>()
 
     /**
      *
@@ -70,7 +71,10 @@ class FontKit {
         }
 
         // 字符样式
-        paint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+        val fontIndex = s!!.getFontIndex().toInt()
+        paint.typeface = typefaceCache.getOrPut(fontIndex) {
+            Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+        }
         // fontsize
         paint.textSize = (font.getFontSize() * MainConstant.POINT_TO_PIXEL + 0.5f).toFloat()
         // color

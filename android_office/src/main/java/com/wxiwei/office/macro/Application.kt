@@ -158,10 +158,7 @@ class Application(activity: Activity, parent: ViewGroup?) {
         ) {
             applicationType = MainConstant.APPLICATION_TYPE_PPT
         }
-        // PDF document
-        else if (file.endsWith(MainConstant.FILE_TYPE_PDF)) {
-            applicationType = MainConstant.APPLICATION_TYPE_PDF
-        } else {
+        else {
             // set word default view is normal view mode
             if (frame != null && frame!!.isThumbnail()) {
                 setDefaultViewMode(0)
@@ -196,7 +193,6 @@ class Application(activity: Activity, parent: ViewGroup?) {
      * @return  = 0  word application
      *           = 1  excel application
      *           = 2  PowerPoint application
-     *           = 3  PDF application
      *           = 4  TXT application
      *           = -1 error
      */
@@ -244,9 +240,6 @@ class Application(activity: Activity, parent: ViewGroup?) {
         }
         val finded = mainControl!!.getFind().find(str)
         if (!finded && mainControl!!.getMainFrame().isShowFindDlg) {
-            if (applicationType == APPLICATION_TYPE_PDF) {
-                return finded
-            }
             if (toast == null) {
                 toast = Toast.makeText(mainControl!!.getView().context, "", Toast.LENGTH_SHORT)
             }
@@ -269,9 +262,6 @@ class Application(activity: Activity, parent: ViewGroup?) {
         }
         val finded = mainControl!!.getFind().findBackward()
         if (!finded && mainControl!!.getMainFrame().isShowFindDlg) {
-            if (applicationType == APPLICATION_TYPE_PDF) {
-                return finded
-            }
             if (toast == null) {
                 toast = Toast.makeText(mainControl!!.getView().context, "", Toast.LENGTH_SHORT)
             }
@@ -293,9 +283,6 @@ class Application(activity: Activity, parent: ViewGroup?) {
         }
         val finded = mainControl!!.getFind().findForward()
         if (!finded && mainControl!!.getMainFrame().isShowFindDlg) {
-            if (applicationType == APPLICATION_TYPE_PDF) {
-                return finded
-            }
             if (toast == null) {
                 toast = Toast.makeText(mainControl!!.getView().context, "", Toast.LENGTH_SHORT)
             }
@@ -405,7 +392,7 @@ class Application(activity: Activity, parent: ViewGroup?) {
 
     /**
      *  set change page flag, Only when effectively the PageSize greater than ViewSize.
-     *  (for PPT, word print mode, PDF)
+     *  (for PPT, word print mode)
      */
     fun setChangePage(b: Boolean) {
         frame?.setChangePage(b)
@@ -878,91 +865,6 @@ class Application(activity: Activity, parent: ViewGroup?) {
         return if (obj == null) null else obj as Bitmap
     }
 
-    // ============= PDF engine method ===============
-    /**
-     * switch page for page index (base 0)
-     */
-    fun showPDFPage(index: Int) {
-        if (mainControl == null || index < 0) {
-            return
-        }
-        mainControl!!.actionEvent(EventConstant.PDF_SHOW_PAGE, index)
-    }
-
-    /**
-     * page to image for page number (base 1)
-     *
-     * @return bitmap raw data
-     */
-    fun getPDFPageToImage(pageNumber: Int): Bitmap? {
-        if (mainControl == null || pageNumber < 1) {
-            return null
-        }
-        val obj = mainControl!!.getActionValue(EventConstant.PDF_PAGE_TO_IMAGE, pageNumber)
-        return if (obj == null) null else obj as Bitmap
-    }
-
-    /**
-     * get specific area of whole page to image with specified size.
-     * if the specific area is not completely contained in the entire page area, return null
-     */
-    fun getPDFPageAreaToImage(
-        pageNumber: Int, srcLeft: Int, srcTop: Int, srcWidth: Int, srcHeight: Int,
-        desWidth: Int, desHeight: Int
-    ): Bitmap? {
-        if (applicationType != MainConstant.APPLICATION_TYPE_PDF) {
-            return null
-        }
-
-        return getAreaToImage(pageNumber, srcLeft, srcTop, srcWidth, srcHeight, desWidth, desHeight)
-    }
-
-    /**
-     * get PDF thumbnail raw data
-     * @see #MAXZOOM_THUMBNAIL
-     * @param pageNumber   page number (base 1)
-     * @param zoomValue    thumbnail zoom value
-     */
-    fun getPDFPageThumbnail(pageNumber: Int, zoomValue: Int): Bitmap? {
-        if (applicationType != APPLICATION_TYPE_PDF
-            || mainControl == null
-            || pageNumber < 1
-            || zoomValue <= 0
-            || zoomValue > MAXZOOM_THUMBNAIL
-        ) {
-            return null
-        }
-        val obj = mainControl!!.getActionValue(EventConstant.APP_THUMBNAIL_ID, intArrayOf(pageNumber, zoomValue))
-        return if (obj == null) null else obj as Bitmap
-    }
-
-    /**
-     * get PDF hyper link URL with page index
-     *
-     * @param pageNumber   page number (base 1)
-     */
-    @Suppress("UNCHECKED_CAST")
-    fun getPDFHyperlinkURL(pageNumber: Int): Array<String>? {
-        if (mainControl == null || pageNumber < 1) {
-            return null
-        }
-        val obj = mainControl!!.getActionValue(EventConstant.APP_GET_HYPERLINK_URL_ID, pageNumber)
-        return if (obj == null) null else obj as Array<String>
-    }
-
-    /**
-     * get PDF page size
-     *
-     * @param pageNumber   page number (base 1)
-     */
-    fun getPDFPageSize(pageNumber: Int): Rectangle? {
-        if (mainControl == null) {
-            return null
-        }
-        val obj = mainControl!!.getActionValue(EventConstant.PDF_GET_PAGE_SIZE, pageNumber)
-        return if (obj == null) null else obj as Rectangle
-    }
-
     /**
      * added resource ID for internationalization
      *
@@ -1420,8 +1322,6 @@ class Application(activity: Activity, parent: ViewGroup?) {
         const val APPLICATION_TYPE_SS = MainConstant.APPLICATION_TYPE_SS
         // PowerPoint application
         const val APPLICATION_TYPE_PPT = MainConstant.APPLICATION_TYPE_PPT
-        // PDF application
-        const val APPLICATION_TYPE_PDF = MainConstant.APPLICATION_TYPE_PDF
         // text application
         const val APPLICATION_TYPE_TXT = MainConstant.APPLICATION_TYPE_WP
 

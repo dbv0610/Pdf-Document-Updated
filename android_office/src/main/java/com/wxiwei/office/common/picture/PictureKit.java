@@ -15,7 +15,6 @@ import com.wxiwei.office.common.pictureefftect.PictureEffectInfo;
 import com.wxiwei.office.common.pictureefftect.PictureEffectUtil;
 import com.wxiwei.office.constant.EventConstant;
 import com.wxiwei.office.fc.hslf.blip.JPEG;
-import com.wxiwei.office.fc.pdf.PDFLib;
 import com.wxiwei.office.pg.animate.IAnimation;
 import com.wxiwei.office.pg.animate.ShapeAnimation;
 import com.wxiwei.office.system.IControl;

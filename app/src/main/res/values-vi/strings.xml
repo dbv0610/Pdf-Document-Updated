@@ -164,4 +164,18 @@
     <string name="to_send_you_notifications">để gửi cho bạn \ nnotifications</string>
     <string name="allow">Cho phép</string>
     <string name="are_you_sure_you_want_to_close_the_app">Bạn có chắc là bạn muốn đóng ứng dụng?</string>
+    <string name="draw">Vẽ</string>
+    <string name="undo">Hoàn tác</string>
+    <string name="redo">Làm lại</string>
+    <string name="saved_successfully">Đã lưu</string>
+    <string name="error_file_damaged">Tệp này bị hỏng hoặc không phải là tài liệu hợp lệ.</string>
+    <string name="error_file_rtf">Đây là tài liệu RTF. Vui lòng mở bằng ứng dụng hỗ trợ RTF.</string>
+    <string name="error_file_old_format">Tài liệu này sử dụng định dạng cũ không được hỗ trợ.</string>
+    <string name="error_file_password">Tài liệu được bảo vệ bằng mật khẩu. Bạn cần mật khẩu để mở tài liệu này.</string>
+    <string name="error_file_password_incorrect">Mật khẩu của tài liệu không đúng.</string>
+    <string name="password_hint">Mật khẩu</string>
+    <string name="error_file_not_found">Không tìm thấy hoặc không thể đọc tệp này. Vui lòng kiểm tra tệp còn khả dụng.</string>
+    <string name="error_file_too_large_memory">Không đủ bộ nhớ để mở tài liệu này.</string>
+    <string name="error_file_storage">Không thể xử lý tài liệu do lỗi lưu trữ. Vui lòng kiểm tra dung lượng trống và quyền truy cập.</string>
+    <string name="error_file_open_generic">Không thể mở hoặc xử lý tài liệu này. Vui lòng thử tệp khác.</string>
 </resources>

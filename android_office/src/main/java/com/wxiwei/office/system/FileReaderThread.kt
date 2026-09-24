@@ -3,14 +3,6 @@ package com.wxiwei.office.system
 import android.os.Handler
 import android.util.Log
 import com.wxiwei.office.constant.MainConstant
-import com.wxiwei.office.fc.doc.DOCReader
-import com.wxiwei.office.fc.doc.DOCXReader
-import com.wxiwei.office.fc.doc.TXTReader
-import com.wxiwei.office.fc.pdf.PDFReader
-import com.wxiwei.office.fc.ppt.PPTReader
-import com.wxiwei.office.fc.ppt.PPTXReader
-import com.wxiwei.office.fc.xls.XLSReader
-import com.wxiwei.office.fc.xls.XLSXReader
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -74,6 +66,10 @@ class FileReaderThread @JvmOverloads constructor(
                 OpenTrace.d("read cancelled path=$path")
                 activeReader?.abortReader()
                 send(currentHandler, MainConstant.HANDLER_MESSAGE_DISMISS_PROGRESS)
+            } catch (aborted: AbortReaderError) {
+                // Reader abort is a normal lifecycle event, not a read error.
+                OpenTrace.d("read aborted path=$path")
+                send(currentHandler, MainConstant.HANDLER_MESSAGE_DISMISS_PROGRESS)
             } catch (error: OutOfMemoryError) {
                 OpenTrace.e("read failed with OOM path=$path", error)
                 send(currentHandler, MainConstant.HANDLER_MESSAGE_ERROR, error)
@@ -116,18 +112,7 @@ class FileReaderThread @JvmOverloads constructor(
     }
 
     private fun createReader(control: IControl, path: String, encoding: String?): IReader {
-        val name = path.lowercase()
-        return when {
-            name.endsWith(MainConstant.FILE_TYPE_DOC) || name.endsWith(MainConstant.FILE_TYPE_DOT) -> DOCReader(control, path)
-            name.endsWith(MainConstant.FILE_TYPE_DOCX) || name.endsWith(MainConstant.FILE_TYPE_DOTX) || name.endsWith(MainConstant.FILE_TYPE_DOTM) -> DOCXReader(control, path)
-            name.endsWith(MainConstant.FILE_TYPE_TXT) -> TXTReader(control, path, encoding)
-            name.endsWith(MainConstant.FILE_TYPE_XLS) || name.endsWith(MainConstant.FILE_TYPE_XLT) -> XLSReader(control, path)
-            name.endsWith(MainConstant.FILE_TYPE_XLSX) || name.endsWith(MainConstant.FILE_TYPE_XLTX) || name.endsWith(MainConstant.FILE_TYPE_XLTM) || name.endsWith(MainConstant.FILE_TYPE_XLSM) -> XLSXReader(control, path)
-            name.endsWith(MainConstant.FILE_TYPE_PPT) || name.endsWith(MainConstant.FILE_TYPE_POT) -> PPTReader(control, path)
-            name.endsWith(MainConstant.FILE_TYPE_PPTX) || name.endsWith(MainConstant.FILE_TYPE_PPTM) || name.endsWith(MainConstant.FILE_TYPE_POTX) || name.endsWith(MainConstant.FILE_TYPE_POTM) -> PPTXReader(control, path)
-            name.endsWith(MainConstant.FILE_TYPE_PDF) -> PDFReader(control, path)
-            else -> TXTReader(control, path, encoding)
-        }
+        return OfficeReaderFactory.createReader(control, path, encoding)
     }
 
     private companion object { const val TAG = "OfficeFileReader" }

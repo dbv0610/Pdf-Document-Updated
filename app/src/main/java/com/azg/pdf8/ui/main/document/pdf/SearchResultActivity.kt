@@ -1,6 +1,8 @@
 package com.azg.pdf8.ui.main.document.pdf
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.core.view.isVisible
@@ -10,6 +12,7 @@ import com.azg.pdf8.adapter.SearchAdapter
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivitySearchResultBinding
 import com.azg.pdf8.model.ContentWithPage
+import com.azg.pdf8.utils.Constant.ARG_SEARCH_RESULT_PAGE
 import com.azg.pdf8.utils.Constant.ARG_SEARCH_WITH_PAGE
 import com.dong.baselib.api.parcelableList
 
@@ -21,7 +24,10 @@ class SearchResultActivity :
         }
     }
     private val adapter by lazy {
-        SearchAdapter()
+        SearchAdapter { item ->
+            setResult(Activity.RESULT_OK, Intent().putExtra(ARG_SEARCH_RESULT_PAGE, item.page))
+            finish()
+        }
     }
 
     private fun initRecyclerview(searchList: List<ContentWithPage>) {

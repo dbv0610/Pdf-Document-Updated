@@ -30,6 +30,8 @@ import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadFileBinding
 import com.azg.pdf8.databinding.PopupMoreActionBinding
 import com.azg.pdf8.dialog.DialogProcess
+import com.azg.pdf8.dialog.DocumentPasswordDialog
+import com.azg.pdf8.dialog.OpenFileErrorDialog
 import com.azg.pdf8.dialog.PdfNameDialog
 import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.model.DocumentType
@@ -63,10 +65,14 @@ import com.wxiwei.office.pg.control.PGFind
 import com.wxiwei.office.pg.control.Presentation
 import com.wxiwei.office.res.ResKit
 import com.wxiwei.office.ss.control.ExcelView
+import com.wxiwei.office.ss.model.baseModel.Cell
 import com.wxiwei.office.ss.other.FindingMgr
+import com.wxiwei.office.ss.view.SheetView
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
 import com.wxiwei.office.system.OpenTrace
+import com.wxiwei.office.system.DocumentPasswords
+import com.wxiwei.office.system.OpenFileException
 import com.wxiwei.office.system.OnOpenFileListener
 import com.wxiwei.office.system.view
 import com.wxiwei.office.system.find
@@ -80,12 +86,92 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
 import org.koin.android.ext.android.inject
 import java.io.File
 
 class ReadDocumentActivity :
     BaseActivity<ActivityReadFileBinding>(ActivityReadFileBinding::inflate),
-    IMainFrame {
+    IMainFrame, OnOpenFileListener {
+    private var openErrorDialog: OpenFileErrorDialog? = null
+    private var passwordDialog: DocumentPasswordDialog? = null
+
+    override fun onOpenFileSuccess() {
+        mainControl?.jumpToPage(0)
+    }
+
+    override fun onOpenFileFailure(error: OpenFileException): Boolean {
+        OpenTrace.e("host open failed reason=${error.reason} path=${error.filePath}", error)
+        if (isFinishing || isDestroyed) return true
+        processDialog.dismiss()
+        mainControl?.dismissProgressDialog()
+        if (openErrorDialog?.isShowing == true || passwordDialog?.isShowing == true) return true
+        if (showPasswordDialog(error)) return true
+        val message = openErrorMessage(error)
+        openErrorDialog = OpenFileErrorDialog(this, getString(message)).apply {
+            setOnDismissListener {
+                openErrorDialog = null
+                if (!isFinishing && !isDestroyed) finish()
+            }
+            show()
+        }
+        return true
+    }
+
+    /** Encrypted .docx/.xlsx/.pptx and .xls can be decrypted; legacy .doc/.ppt encryption cannot. */
+    private fun showPasswordDialog(error: OpenFileException): Boolean {
+        val incorrect = error.reason == OpenFileException.Reason.PASSWORD_INCORRECT
+        if (!incorrect && error.reason != OpenFileException.Reason.PASSWORD_REQUIRED) return false
+        val path = dataModel.getOrNull()?.path ?: return false
+        if (File(path).extension.lowercase() !in PASSWORD_EXTENSIONS) return false
+        var submitted = false
+        val message = getString(if (incorrect) R.string.error_file_password_incorrect else R.string.error_file_password)
+        passwordDialog = DocumentPasswordDialog(this, message) { password ->
+            submitted = true
+            DocumentPasswords.set(path, password)
+            passwordDialog?.dismiss()
+            // reopen from scratch; the reader picks the password up from DocumentPasswords
+            recreate()
+        }.apply {
+            setOnDismissListener {
+                passwordDialog = null
+                if (!submitted && !isFinishing && !isDestroyed) finish()
+            }
+            show()
+        }
+        return true
+    }
+
+    private fun openErrorMessage(error: OpenFileException): Int = when (error.reason) {
+        OpenFileException.Reason.BAD_FILE -> R.string.error_file_damaged
+        OpenFileException.Reason.RTF_DOCUMENT -> R.string.error_file_rtf
+        OpenFileException.Reason.OLD_DOCUMENT -> R.string.error_file_old_format
+        OpenFileException.Reason.PASSWORD_REQUIRED -> R.string.error_file_password
+        OpenFileException.Reason.PASSWORD_INCORRECT -> R.string.error_file_password_incorrect
+        OpenFileException.Reason.OUT_OF_MEMORY -> R.string.error_file_too_large_memory
+        OpenFileException.Reason.FILE_NOT_FOUND -> R.string.error_file_not_found
+        OpenFileException.Reason.STORAGE -> R.string.error_file_storage
+        OpenFileException.Reason.UNKNOWN -> R.string.error_file_open_generic
+    }
+
+    override fun onDestroy() {
+        passwordDialog?.setOnDismissListener(null)
+        passwordDialog?.dismiss()
+        passwordDialog = null
+        if (isFinishing) {
+            DocumentPasswords.clear(dataModel.getOrNull()?.path)
+            // plaintext copies of decrypted documents
+            File(cacheDir, "decrypted").deleteRecursively()
+        }
+        openErrorDialog?.setOnDismissListener(null)
+        openErrorDialog?.dismiss()
+        openErrorDialog = null
+        processDialog.dismiss()
+        dispose()
+        super.onDestroy()
+    }
     override fun backPressed() {
         lifecycleScope.launch {
             MainActivity.isShowRateFirstView.emit(true)
@@ -94,6 +180,10 @@ class ReadDocumentActivity :
     }
 
     companion object {
+        private val PASSWORD_EXTENSIONS = setOf(
+            "docx", "dotx", "dotm", "xlsx", "xltx", "xltm", "xlsm", "xls", "xlt",
+            "pptx", "pptm", "potx", "potm"
+        )
         val listDataSlideShow = MutableStateFlow(mutableListOf<DocumentPage>())
     }
 
@@ -218,6 +308,7 @@ class ReadDocumentActivity :
                         slideViewModel.convertToPdf(
                             newName,
                             model = doc,
+                            excelSheetView = (mainControl?.view as? ExcelView)?.getSheetView(),
                             onNameExit = {
                                 toastShort(getString(R.string.file_have_exit_file))
                             },
@@ -249,9 +340,10 @@ class ReadDocumentActivity :
 
                                 processDialog.dismiss()
                             },
-                            onError = {
+                            onError = { error ->
+                                // The document is already open: report the reason but keep the reader
                                 processDialog.dismiss()
-                                toastShort(getString(R.string.error_create_pdf_file))
+                                toastShort(getString(openErrorMessage(error)))
                             }
                         )
                     }.showWith(getString(R.string.convert_to_pdf))
@@ -315,12 +407,13 @@ class ReadDocumentActivity :
                 countText = if (safeList.isEmpty()) {
                     getString(R.string.no_result_found)
                 } else {
-                    getString(R.string.result) + " ${safeIndex}/${safeList.size}"
+                    // safeIndex is 0-based
+                    getString(R.string.result) + " ${safeIndex + 1}/${safeList.size}"
                 },
                 prevEnabled = safeList.isNotEmpty() && safeIndex > 0,
                 nextEnabled = safeList.isNotEmpty() && safeIndex < safeList.size - 1,
-                prevColor = if (safeList.isEmpty() || safeIndex == 0) gray else Color.TRANSPARENT,
-                nextColor = if (safeList.isEmpty() || safeIndex == safeList.size) gray else Color.TRANSPARENT
+                prevColor = if (safeList.isEmpty() || safeIndex <= 0) gray else Color.TRANSPARENT,
+                nextColor = if (safeList.isEmpty() || safeIndex >= safeList.size - 1) gray else Color.TRANSPARENT
             )
         }.observe(this) { state ->
             binding.tvCountSearch.text = state.countText
@@ -348,141 +441,127 @@ class ReadDocumentActivity :
     private var wordFinder: WPFind? = null
     private var pptFinder: PGFind? = null
 
+    /** An Excel match, with the index of the sheet that holds the cell */
+    private class ExcelHit(val sheetIndex: Int, val cell: Cell)
+
+    // Results of the last search, only the list of the searched document type is filled
+    private var pptResults: List<PGFind.SearchResult> = emptyList()
+    private var excelResults: List<ExcelHit> = emptyList()
+    private var excelView: ExcelView? = null
+    private var searchJob: Job? = null
+
+    /**
+     * Search [keyword] in the open document off the main thread, then focus the first result.
+     * [currentIndexSearch] is the 0-based index of the focused result in [listSearchData].
+     */
     fun performSearch(keyword: String) {
         currentKeyword = keyword
-        mainControl?.view?.let { view ->
-            when (view) {
-                is Word -> {
-                    allHits.clear()
-                    view.getFind().let { find ->
+        searchJob?.cancel()
+        clearSearchResults()
+        val view = mainControl?.view ?: return
+        processDialog.show()
+        searchJob = lifecycleScope.launch {
+            try {
+                when (view) {
+                    is Word -> {
+                        val find = view.getFind()
+                        allHits = withContext(Dispatchers.Default) { find.findAll(keyword) {} }
                         wordFinder = find
-                        processDialog.show()
-                        try {
-                            allHits = find.findAll(keyword) {
-                                currentIndexSearch.value = it
-                            }
-
-                            find.findBackward()
-                        } catch (e: Exception) {
-                            Log.d("ErrorNavigate", "Error Word: ${e.message}")
-                            toastShort(getString(R.string.search_error_occurred))
-                        }
-                        listSearchData.value = allHits.toList()
-                        currentIndexSearch.value = allHits.size
-                        binding.lnResultSearch.visible()
-                        processDialog.dismiss()
                     }
-                }
-                is ExcelView -> {
-                    allHits.clear()
-                    view.let {
-                        val sheet = view.getSheetView()
-                        processDialog.show()
-                        try {
-                            excelFinder = sheet?.getFindingMgr()
-                            sheet?.findAll(keyword) {
-                                it.forEachIndexed { index, cell ->
-                                    allHits.add(index.toLong())
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.d("ErrorNavigate", "Error Excel: ${e.message}")
-                            toastShort(getString(R.string.search_error_occurred))
-                        }
-                        listSearchData.value = allHits.toList()
-                        currentIndexSearch.value = 0
-                        binding.lnResultSearch.visible()
-                        processDialog.dismiss()
+                    is ExcelView -> {
+                        excelResults = withContext(Dispatchers.Default) { findInAllSheets(view, keyword) }
+                        excelView = view
+                        allHits = MutableList(excelResults.size) { it.toLong() }
                     }
-                }
-                is Presentation -> {
-                    allHits.clear()
-                    view.let {
-                        pptFinder = view.getFind()
-                        processDialog.show()
-                        try {
-                            val listSearch = pptFinder?.findAll(keyword)
-                            listSearch?.forEachIndexed { index, cell ->
-                                allHits.add(index.toLong())
-                            }
-                        } catch (e: Exception) {
-                            Log.d("ErrorNavigate", "Error Word: ${e.message}")
-                            toastShort(getString(R.string.search_error_occurred))
-                        }
-                        processDialog.dismiss()
-                        listSearchData.value = allHits.toList()
-                        currentIndexSearch.value = 0
-                        binding.lnResultSearch.visible()
-                        processDialog.dismiss()
+                    is Presentation -> {
+                        val find = view.getFind()
+                        pptResults = withContext(Dispatchers.Default) { find?.findAll(keyword).orEmpty() }
+                        pptFinder = find
+                        allHits = MutableList(pptResults.size) { it.toLong() }
                     }
+                    else -> Unit
                 }
-                else -> Unit
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.d("ErrorNavigate", "Search error: ${e.message}")
+                toastShort(getString(R.string.search_error_occurred))
+            } finally {
+                processDialog.dismiss()
             }
+            if (isFinishing || isDestroyed) return@launch
+            listSearchData.value = allHits.toList()
+            focusSearchResult(0)
+            binding.lnResultSearch.visible()
         }
+    }
+
+    /**
+     * Matches of every sheet, in sheet order. Sheets still being read only give the rows read so far.
+     */
+    private fun findInAllSheets(view: ExcelView, keyword: String): List<ExcelHit> {
+        val workbook = view.getSpreadsheet()?.getWorkbook() ?: return emptyList()
+        val hits = ArrayList<ExcelHit>()
+        for (sheetIndex in 0 until workbook.getSheetCount()) {
+            val sheet = workbook.getSheet(sheetIndex) ?: continue
+            FindingMgr().findAll(sheet, keyword).mapTo(hits) { ExcelHit(sheetIndex, it) }
+        }
+        return hits
+    }
+
+    /**
+     * Show and highlight the result at [index], the same way for every document type
+     */
+    private fun focusSearchResult(index: Int) {
+        val count = allHits.size
+        if (index !in 0 until count) {
+            currentIndexSearch.value = 0
+            return
+        }
+        try {
+            when {
+                wordFinder != null -> wordFinder?.focusBy(index)
+                pptFinder != null -> pptFinder?.focus(pptResults[index])
+                excelView != null -> {
+                    val hit = excelResults[index]
+                    val view = excelView!!
+                    // showSheet does nothing when the sheet is already shown
+                    view.showSheet(hit.sheetIndex)
+                    view.getSheetView()?.goToFindedCell(hit.cell)
+                }
+            }
+        } catch (e: Exception) {
+            Log.d("ErrorNavigate", "Focus error: ${e.message}")
+        }
+        currentIndexSearch.value = index
+    }
+
+    private fun clearSearchResults() {
+        wordFinder = null
+        pptFinder = null
+        excelFinder = null
+        excelView = null
+        pptResults = emptyList()
+        excelResults = emptyList()
+        allHits = mutableListOf()
+        listSearchData.value = emptyList()
+        currentIndexSearch.value = 0
     }
 
     fun goToNext() {
-        val hits = allHits
-        if (hits.isEmpty()) return
-        if (documentType == DocumentType.Doc) {
-            wordFinder?.let { find ->
-                try {
-                    val prevData = ((currentIndexSearch.value ?: 0))
-
-                    if (prevData <= (listSearchData.value?.size ?: 0)) {
-                        currentIndexSearch.value = if (prevData >= (listSearchData.value?.size
-                                ?: 0)
-                        ) prevData else (listSearchData.value?.size ?: 0) + 1
-                        find.findForward()
-                    }
-                } catch (e: Exception) {
-                    Log.d("ErrorNavigate", "Error: ${e.message}")
-                }
-            }
-        } else if (documentType == DocumentType.Ppt) {
-            pptFinder?.let { find ->
-                try {
-                    pptFinder?.findForward()
-                } catch (e: Exception) {
-                    Log.d("ErrorNavigate", "Error: ${e.message}")
-                }
-            }
-        }
+        val index = currentIndexSearch.value ?: 0
+        if (index < allHits.size - 1) focusSearchResult(index + 1)
     }
 
     fun goToPrev() {
-        val hits = allHits
-        if (hits.isEmpty()) return
-        if (documentType == DocumentType.Doc) {
-            wordFinder?.let { find ->
-                try {
-                    val prevData = (currentIndexSearch.value ?: 0) - 1
-                    currentIndexSearch.value = if (prevData >= 0) prevData else 0
-                    if (prevData >= 0) {
-                        find.findBackward()
-                    }
-                } catch (e: Exception) {
-                    Log.d("ErrorNavigate", "Error: ${e.message}")
-                }
-            }
-        } else if (documentType == DocumentType.Ppt) {
-            pptFinder?.let { find ->
-                try {
-                    pptFinder?.findBackward()
-                } catch (e: Exception) {
-                    Log.d("ErrorNavigate", "Error: ${e.message}")
-                }
-            }
-        }
+        val index = currentIndexSearch.value ?: 0
+        if (index > 0) focusSearchResult(index - 1)
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         when (ev.actionMasked) {
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 Log.d("ErrorNavigate", "Action Cancel")
-                wordFinder?.focusByCurrent {
-                    currentIndexSearch.value = it
-                }
             }
         }
         return super.dispatchTouchEvent(ev)
@@ -499,6 +578,8 @@ class ReadDocumentActivity :
             lnSearch.gone()
             lnResultSearch.gone()
             edtSearch.setText("")
+            searchJob?.cancel()
+            clearSearchResults()
         }
         icSearchApp.click {
             lnDefault.gone()
@@ -508,11 +589,6 @@ class ReadDocumentActivity :
             popupHerper.show(icOpenTools)
         }
 
-        icViewPrev.click {
-            currentIndexSearch.value =
-                ((currentIndexSearch.value ?: 0) - 1).coerceIn(0, listSearchData.value!!.size)
-            mainControl?.getFind()?.findBackward()
-        }
         icSearch.setOnClickListener {
             val key = edtSearch.text.toString().trim()
             if (key.isNotEmpty()) {
@@ -542,6 +618,7 @@ class ReadDocumentActivity :
         OpenTrace.mark("activity.initReader.begin type=$type path=${file.absolutePath}")
         OpenTrace.d("file clicked type=$type path=${file.absolutePath} exists=${file.exists()} isFile=${file.isFile} length=${file.length()}")
         mainControl = MainControl(this@ReadDocumentActivity)
+        mainControl?.setOpenFileListener(this)
         appFrame = AppFrame(applicationContext)
         appFrame?.post {
             OpenTrace.d("starting MainControl.openFile path=${file.absolutePath}")
@@ -642,13 +719,6 @@ class ReadDocumentActivity :
             }
         }
 
-        mainControl?.setOpenFileListener(object : OnOpenFileListener {
-            override fun onOpenFileSuccess() {
-                mainControl?.jumpToPage(0)
-            }
-
-            override fun onOpenFileFailure() = Unit
-        })
         OpenTrace.mark("activity.openFileFinish.end", start)
     }
 
@@ -695,14 +765,6 @@ class ReadDocumentActivity :
         adapter.setCurrentPage(if (page <= 0) 0 else page)
         mainControl?.view?.let { view ->
             when (view) {
-                is ExcelView -> {
-                    Log.d("ViewInitData", "DataInit: ${view.javaClass.name}")
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        slideViewModel.initXlsPages(view) {
-                            slideViewModel.excelBitmap.value = it
-                        }
-                    }
-                }
                 is Presentation -> {
                     OpenTrace.mark("activity.changePage.presentation")
                     if (lastRenderPptFile == 0 || lastRenderPptFile != mainControl?.getPageCount()) {

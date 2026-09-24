@@ -8,6 +8,7 @@ import com.wxiwei.office.java.awt.Rectangle
 import com.wxiwei.office.pg.model.PGSlide
 import com.wxiwei.office.simpletext.model.SectionElement
 import com.wxiwei.office.system.IFind
+import com.wxiwei.office.wp.control.WPFind
 
 class PGFind(private var presentation: Presentation?) : IFind {
     private var isSetPointToVisible = false
@@ -124,12 +125,26 @@ class PGFind(private var presentation: Presentation?) : IFind {
                 val shape = slide.getShapeForFind(sh)
                 if (shape != null && shape.getType() == AbstractShape.SHAPE_TEXTBOX) {
                     val elem = (shape as TextBox).getElement() ?: continue
-                    val text = elem.getText(p.getRenderersDoc()); var idx = text!!.indexOf(query)
-                    while (idx >= 0) { all.add(SearchResult(si, sh, idx)); idx = text!!.indexOf(query, idx + query.length) }
+                    // Folding keeps the length, so positions stay valid in the original text
+                    val text = WPFind.fold(elem.getText(p.getRenderersDoc()) ?: continue)
+                    val folded = WPFind.fold(query)
+                    var idx = text.indexOf(folded)
+                    while (idx >= 0) { all.add(SearchResult(si, sh, idx)); idx = text.indexOf(folded, idx + folded.length) }
                 }
             }
         }
         return all
+    }
+
+    /** Show and highlight a result returned by [findAll]. */
+    fun focus(result: SearchResult): Boolean {
+        val p = presentation ?: return false
+        val slide = p.getSlide(result.slideIndex) ?: return false
+        val shape = slide.getShapeForFind(result.shapeIndex) as? TextBox ?: return false
+        shapeIndex = result.shapeIndex
+        startOffset = result.startOffset
+        addHighlight(result.slideIndex, shape)
+        return true
     }
 
     override fun getPageIndex(): Int = slideIndex

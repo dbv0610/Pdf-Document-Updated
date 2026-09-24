@@ -17,19 +17,10 @@
 
 package com.wxiwei.office.fc.hslf.usermodel;
 
-import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import com.wxiwei.office.constant.MainConstant;
 import com.wxiwei.office.fc.ShapeKit;
 import com.wxiwei.office.fc.hslf.HSLFSlideShow;
+import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
 import com.wxiwei.office.fc.hslf.model.HeadersFooters;
 import com.wxiwei.office.fc.hslf.model.Hyperlink;
 import com.wxiwei.office.fc.hslf.model.MovieShape;
@@ -50,7 +41,9 @@ import com.wxiwei.office.fc.hslf.record.ExOleObjAtom;
 import com.wxiwei.office.fc.hslf.record.ExVideoContainer;
 import com.wxiwei.office.fc.hslf.record.ExtendedParagraphHeaderAtom;
 import com.wxiwei.office.fc.hslf.record.ExtendedPresRuleContainer;
+import com.wxiwei.office.fc.hslf.record.ExtendedPresRuleContainer.ExtendedParaAtomsSet;
 import com.wxiwei.office.fc.hslf.record.FontCollection;
+import com.wxiwei.office.fc.hslf.record.Record;
 import com.wxiwei.office.fc.hslf.record.HeadersFootersContainer;
 import com.wxiwei.office.fc.hslf.record.PersistPtrHolder;
 import com.wxiwei.office.fc.hslf.record.PositionDependentRecord;
@@ -59,10 +52,17 @@ import com.wxiwei.office.fc.hslf.record.Record;
 import com.wxiwei.office.fc.hslf.record.RecordContainer;
 import com.wxiwei.office.fc.hslf.record.RecordTypes;
 import com.wxiwei.office.fc.hslf.record.SlideListWithText;
-import com.wxiwei.office.fc.hslf.record.SlidePersistAtom;
-import com.wxiwei.office.fc.hslf.record.ExtendedPresRuleContainer.ExtendedParaAtomsSet;
 import com.wxiwei.office.fc.hslf.record.SlideListWithText.SlideAtomsSet;
+import com.wxiwei.office.fc.hslf.record.SlidePersistAtom;
 import com.wxiwei.office.java.awt.Dimension;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 
 /**

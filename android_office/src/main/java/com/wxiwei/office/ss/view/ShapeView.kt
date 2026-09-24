@@ -138,6 +138,7 @@ class ShapeView(sheetView: SheetView?) {
         panzoomViewRect(bounds!!, parent)
 
         if (!temRect!!.intersect(clip) && parent == null) {
+            canvas.restore()
             return
         }
         if (shape is GroupShape) {

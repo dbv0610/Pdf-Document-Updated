@@ -156,6 +156,8 @@ class WPLayouter(root: PageRoot) {
         Log.e("WPLayouter.115", "para.setEndOffset = " + elem!!.getEndOffset())
         para.setEndOffset(elem.getEndOffset())
         var keepOne = true
+        // The last paragraph or table did not fit at all and was removed, the next page starts with it again
+        var removedUnfitPara = false
         while (spanH > 0 && currentLayoutOffset < maxEnd && breakType != WPViewConstant.BREAK_LIMIT.toInt()
             && breakType != WPViewConstant.BREAK_PAGE.toInt()
         ) {
@@ -181,6 +183,11 @@ class WPLayouter(root: PageRoot) {
                     elem = doc.getParagraph(currentLayoutOffset - 1)
                 }
                 pageView.deleteView(para, true)
+                removedUnfitPara = true
+                if (para.getType() == WPViewConstant.TABLE_VIEW) {
+                    // Nothing of the table was laid out on this page, do not continue it as a broken table
+                    tableLayout!!.clearBreakPages()
+                }
                 break
             }
             //
@@ -237,7 +244,10 @@ class WPLayouter(root: PageRoot) {
             keepOne = false
         }
         // table
-        if (para.getType() == WPViewConstant.TABLE_VIEW && tableLayout!!.isTableBreakPages()) {
+        if (removedUnfitPara) {
+            // Restart from the removed paragraph or table on the next page, from the model at currentLayoutOffset
+            breakPara = null
+        } else if (para.getType() == WPViewConstant.TABLE_VIEW && tableLayout!!.isTableBreakPages()) {
             breakPara = ViewFactory.createView(root.getControl()!!, elem, null, WPViewConstant.TABLE_VIEW.toInt()) as ParagraphView
             pageView.setHasBreakTable(true)
             (para as TableView).setBreakPages(true)

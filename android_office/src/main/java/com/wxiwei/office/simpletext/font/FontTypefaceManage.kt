@@ -28,6 +28,9 @@ class FontTypefaceManage {
     //
     private var tfs: LinkedHashMap<String, Typeface>? = null
 
+    // fonts embedded in the open document, keyed by typeface name; read on the reader thread
+    private val embeddedFonts = java.util.concurrent.ConcurrentHashMap<String, Typeface>()
+
     /**
      *
      */
@@ -85,6 +88,7 @@ class FontTypefaceManage {
             fontName = "sans-serif"
         }
         //fontName = "Arial";
+        embeddedFonts[fontName]?.let { return it }
         var tf = tfs!![fontName]
         if (tf == null) {
             tf = Typeface.create(fontName, Typeface.NORMAL)
@@ -95,6 +99,12 @@ class FontTypefaceManage {
         }
         return tf!!
     }
+
+    fun addEmbeddedFont(fontName: String, typeface: Typeface) {
+        embeddedFonts[fontName] = typeface
+    }
+
+    fun hasEmbeddedFont(fontName: String): Boolean = embeddedFonts.containsKey(fontName)
 
     /**
      *

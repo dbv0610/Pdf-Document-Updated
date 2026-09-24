@@ -17,13 +17,13 @@
 
 package com.wxiwei.office.fc.hslf.usermodel;
 
-import java.util.ArrayList;
-
 import com.wxiwei.office.fc.hslf.record.Document;
 import com.wxiwei.office.fc.hslf.record.Record;
 import com.wxiwei.office.fc.hslf.record.RecordContainer;
 import com.wxiwei.office.fc.hslf.record.RecordTypes;
 import com.wxiwei.office.fc.hslf.record.Sound;
+
+import java.util.ArrayList;
 
 
 /**

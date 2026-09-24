@@ -84,8 +84,7 @@ class FileKit private constructor() {
                 lowerName.endsWith(MainConstant.FILE_TYPE_POT) ||
                 lowerName.endsWith(MainConstant.FILE_TYPE_PPTM) ||
                 lowerName.endsWith(MainConstant.FILE_TYPE_POTX) ||
-                lowerName.endsWith(MainConstant.FILE_TYPE_POTM) ||
-                lowerName.endsWith(MainConstant.FILE_TYPE_PDF))
+                lowerName.endsWith(MainConstant.FILE_TYPE_POTM))
     }
 
     fun isFileMarked(filePath: String?, fileList: List<File>?): Boolean {

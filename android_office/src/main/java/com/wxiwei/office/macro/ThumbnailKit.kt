@@ -57,25 +57,6 @@ class ThumbnailKit {
         return null
     }
 
-    /**
-     * @param filePath
-     * @param zoom (0 < thumbnail zoom value <= MAXZOOM_THUMBNAIL )
-     * @see Application#MAXZOOM_THUMBNAIL
-     */
-    fun getPDFThumbnail(filePath: String, zoom: Int): Bitmap? {
-        try {
-            val lowerCase = filePath.lowercase()
-            if (lowerCase.indexOf(".") > 0
-                && lowerCase.endsWith(MainConstant.FILE_TYPE_PDF)
-                && zoom > 0 && zoom <= Application.MAXZOOM_THUMBNAIL
-            ) {
-                return ReaderThumbnail.instance()
-                    .getThumbnailForPDF(filePath, zoom / MainConstant.STANDARD_RATE.toFloat())
-            }
-        } catch (e: Exception) {
-        }
-        return null
-    }
 
     companion object {
         private val kit = ThumbnailKit()

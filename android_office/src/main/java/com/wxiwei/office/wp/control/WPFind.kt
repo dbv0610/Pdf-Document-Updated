@@ -182,14 +182,9 @@ class WPFind(word: Word?) : IFind {
         var para = doc.getParagraph(0)
         var index = 0
         while (para != null) {
-            val text = fold(para.getText(doc) ?: "")
-            for (q in foldedQueries) {
-                var at = if (q.isEmpty()) -1 else text.indexOf(q)
-                while (at >= 0) {
-                    hits.add(para.getStartOffset() + at)
-                    result.accept(index++)
-                    at = text.indexOf(q, at + maxOf(q.length, 1))
-                }
+            for (at in matchesIn(fold(para.getText(doc) ?: ""))) {
+                hits.add(para.getStartOffset() + at)
+                result.accept(index++)
             }
             para = doc.getParagraph(para.getEndOffset())
         }
@@ -203,13 +198,8 @@ class WPFind(word: Word?) : IFind {
         var para = doc.getParagraph(0)
         var index = 0
         while (para != null) {
-            val text = fold(para.getText(doc) ?: "")
-            for (q in foldedQueries) {
-                var at = if (q.isEmpty()) -1 else text.indexOf(q)
-                while (at >= 0) {
-                    if (index++ == occurrenceIndex) return searchInParagraph(doc, para, at, true)
-                    at = text.indexOf(q, at + maxOf(q.length, 1))
-                }
+            for (at in matchesIn(fold(para.getText(doc) ?: ""))) {
+                if (index++ == occurrenceIndex) return searchInParagraph(doc, para, at, true)
             }
             para = doc.getParagraph(para.getEndOffset())
         }
@@ -223,18 +213,29 @@ class WPFind(word: Word?) : IFind {
         var para = doc.getParagraph(0)
         var index = 0
         while (para != null) {
-            val text = fold(para.getText(doc) ?: "")
-            for (q in foldedQueries) {
-                var at = if (q.isEmpty()) -1 else text.indexOf(q)
-                while (at >= 0) {
-                    if (para === current && at == matchIndex) return index
-                    index++
-                    at = text.indexOf(q, at + maxOf(q.length, 1))
-                }
+            for (at in matchesIn(fold(para.getText(doc) ?: ""))) {
+                if (para === current && at == matchIndex) return index
+                index++
             }
             para = doc.getParagraph(para.getEndOffset())
         }
         return -1
+    }
+
+    /**
+     * Start positions of the matches in a folded paragraph, in reading order.
+     * The NFC and NFD forms are merged so the occurrence index follows the text like findForward does.
+     */
+    private fun matchesIn(text: String): List<Int> {
+        val positions = sortedSetOf<Int>()
+        for (q in foldedQueries) {
+            var at = if (q.isEmpty()) -1 else text.indexOf(q)
+            while (at >= 0) {
+                positions.add(at)
+                at = text.indexOf(q, at + maxOf(q.length, 1))
+            }
+        }
+        return positions.toList()
     }
 
     override fun dispose() {

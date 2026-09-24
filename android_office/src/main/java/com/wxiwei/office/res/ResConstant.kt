@@ -23,7 +23,7 @@ object ResConstant {
     //
     const val DIALOG_SYSTEM_CRASH = "System crash, terminate running"
     //
-    const val DIALOG_FORMAT_ERROR = "Bad file"
+    const val DIALOG_FORMAT_ERROR = "This file is damaged or is not a valid document, so it can't be opened."
     //
     const val DIALOG_OLD_DOCUMENT = "The document is too old - Office 95 or older, which is not supported"
     //
@@ -31,7 +31,6 @@ object ResConstant {
     //
     const val DIALOG_RTF_FILE = "The document is really a RTF file, which is not supported"
     //
-    const val DIALOG_PDF_SEARCHING = "Searching..."
     //
     const val DIALOG_FIND_NOT_FOUND = "Content not found"
     //

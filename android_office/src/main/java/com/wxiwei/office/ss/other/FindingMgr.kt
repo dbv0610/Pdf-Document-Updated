@@ -33,6 +33,9 @@ class FindingMgr {
     //finded cell
     private var findedCell: Cell? = null
 
+    private fun isVisible(sheet: Sheet, row: Row, cell: Cell): Boolean =
+        !row.isZeroHeight() && !sheet.isColumnHidden(cell.getColNumber())
+
     /**
      * find cells which contain interesting contents
      * @param value
@@ -60,13 +63,13 @@ class FindingMgr {
                 var j = if (i == sheet.getActiveCellRow()) sheet.getActiveCellColumn() else row.getFirstCol()
                 while (j <= row.getLastCol()) {
                     findedCell = row.getCell(j)
-                    if (findedCell == null) {
+                    if (findedCell == null || !isVisible(sheet, row, findedCell!!)) {
                         j++
                         continue
                     }
 
                     cellContent = ModelUtil.instance().getFormatContents(sheet.getWorkbook()!!, findedCell!!)
-                    if (cellContent != null && cellContent.contains(value)) {
+                    if (cellContent != null && cellContent.contains(value, ignoreCase = true)) {
                         return findedCell
                     }
                     j++
@@ -86,13 +89,13 @@ class FindingMgr {
                 var j = row.getFirstCol()
                 while (j <= row.getLastCol()) {
                     findedCell = row.getCell(j)
-                    if (findedCell == null) {
+                    if (findedCell == null || !isVisible(sheet, row, findedCell!!)) {
                         j++
                         continue
                     }
 
                     cellContent = ModelUtil.instance().getFormatContents(sheet.getWorkbook()!!, findedCell!!)
-                    if (cellContent != null && cellContent.contains(value)) {
+                    if (cellContent != null && cellContent.contains(value, ignoreCase = true)) {
                         return findedCell
                     }
                     j++
@@ -126,13 +129,13 @@ class FindingMgr {
 
             while (j >= 0) {
                 cell = row.getCell(j)
-                if (cell == null) {
+                if (cell == null || !isVisible(sheet, row, cell)) {
                     j--
                     continue
                 }
 
                 cellContent = ModelUtil.instance().getFormatContents(sheet.getWorkbook()!!, cell)
-                if (cellContent != null && cellContent.contains(value)) {
+                if (cellContent != null && cellContent.contains(value, ignoreCase = true)) {
                     findedCell = cell
                     return findedCell
                 }
@@ -166,13 +169,13 @@ class FindingMgr {
 
             while (j <= row.getLastCol()) {
                 cell = row.getCell(j)
-                if (cell == null) {
+                if (cell == null || !isVisible(sheet, row, cell)) {
                     j++
                     continue
                 }
 
                 cellContent = ModelUtil.instance().getFormatContents(sheet.getWorkbook()!!, cell)
-                if (cellContent != null && cellContent.contains(value)) {
+                if (cellContent != null && cellContent.contains(value, ignoreCase = true)) {
                     findedCell = cell
                     return findedCell
                 }
@@ -199,14 +202,18 @@ class FindingMgr {
             val lastCol = row.getLastCol()
             for (c in firstCol..lastCol) {
                 val cell = row.getCell(c) ?: continue
+                if (!isVisible(sheet, row, cell)) continue
 
                 val text = ModelUtil.instance()
                     .getFormatContents(sheet.getWorkbook()!!, cell)
-                if (text != null && text.contains(value)) {
+                if (text != null && text.contains(value, ignoreCase = true)) {
                     results.add(cell)
                 }
             }
         }
+        this.sheet = sheet
+        this.value = value
+        findedCell = results.firstOrNull()
         return results
     }
 

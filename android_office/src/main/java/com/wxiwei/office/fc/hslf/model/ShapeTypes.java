@@ -17,10 +17,10 @@
 
 package com.wxiwei.office.fc.hslf.model;
 
+import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
+
 
 import java.util.HashMap;
-
-import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
 
 import java.lang.reflect.Field;
 

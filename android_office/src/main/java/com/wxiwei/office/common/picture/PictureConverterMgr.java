@@ -21,6 +21,7 @@ import com.wxiwei.office.thirdpart.emf.util.EMFUtil;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import kotlinx.coroutines.Job;
 
 /**
  * TODO: 文件注释
@@ -44,8 +45,8 @@ public class PictureConverterMgr
     public PictureConverterMgr(IControl control)
     {
         this.control = control;
-        convertingThread = new ArrayList<Thread>();
-        convertingPictPathMap = new HashMap<String, Thread>();
+        convertingThread = new ArrayList<PictureConversionTask>();
+        convertingPictPathMap = new HashMap<String, PictureConversionTask>();
         vectorgraphViews = new HashMap<String, List<Integer>>();
         viewVectorgraphs = new HashMap<Integer, List<String>>();
     }
@@ -266,7 +267,7 @@ public class PictureConverterMgr
     	{
     		if(convertingPictPathMap != null)
             {
-    			Thread thread = convertingPictPathMap.remove(path);
+                PictureConversionTask thread = convertingPictPathMap.remove(path);
     			convertingThread.remove(thread);    			
     			
             	List<Integer> updateViewList = null;
@@ -378,12 +379,12 @@ public class PictureConverterMgr
     {
     	if(convertingPictPathMap != null)
         {
-            Iterator<Thread> iter = convertingPictPathMap.values().iterator();
+            Iterator<PictureConversionTask> iter = convertingPictPathMap.values().iterator();
             while(iter.hasNext())
             {
                 try
                 {
-                    iter.next().interrupt();
+                    iter.next().cancel();
                 }
                 catch(Exception e)
                 {
@@ -399,9 +400,9 @@ public class PictureConverterMgr
     }
     private IControl control;
     //last-in，first-out
-    private List<Thread> convertingThread;
+    private List<PictureConversionTask> convertingThread;
     //
-    private Map<String, Thread> convertingPictPathMap;
+    private Map<String, PictureConversionTask> convertingPictPathMap;
     //vector graph path and view indexs which contains this vector graph
     private Map<String, List<Integer>> vectorgraphViews;
     //view index and vector graphs which is contained in this view

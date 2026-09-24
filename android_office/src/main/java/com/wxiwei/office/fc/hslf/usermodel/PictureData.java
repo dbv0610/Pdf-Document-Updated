@@ -17,10 +17,12 @@
 
 package com.wxiwei.office.fc.hslf.usermodel;
 
+import static com.wxiwei.office.common.picture.Picture.DIB;
+
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 import com.wxiwei.office.fc.hslf.blip.DIB;
 import com.wxiwei.office.fc.hslf.blip.EMF;
@@ -32,8 +34,6 @@ import com.wxiwei.office.fc.hslf.blip.WMF;
 import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
 import com.wxiwei.office.fc.hslf.model.Picture;
 import com.wxiwei.office.fc.util.LittleEndian;
-import com.wxiwei.office.fc.util.POILogFactory;
-import com.wxiwei.office.fc.util.POILogger;
 
 
 /**
@@ -155,7 +155,7 @@ public abstract class PictureData
         }
         catch(NoSuchAlgorithmException e)
         {
-            throw new HSLFException(e.getMessage());
+            throw new HSLFException(Objects.requireNonNull(e.getMessage()));
         }
         sha.update(data);
         return sha.digest();

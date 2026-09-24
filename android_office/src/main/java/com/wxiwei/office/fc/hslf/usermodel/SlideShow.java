@@ -17,6 +17,8 @@
 
 package com.wxiwei.office.fc.hslf.usermodel;
 
+import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -28,7 +30,6 @@ import java.util.Vector;
 import com.wxiwei.office.constant.MainConstant;
 import com.wxiwei.office.fc.ShapeKit;
 import com.wxiwei.office.fc.hslf.HSLFSlideShow;
-import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
 import com.wxiwei.office.fc.hslf.model.HeadersFooters;
 import com.wxiwei.office.fc.hslf.model.Hyperlink;
 import com.wxiwei.office.fc.hslf.model.MovieShape;

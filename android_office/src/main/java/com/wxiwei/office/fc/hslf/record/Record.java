@@ -17,6 +17,8 @@
 
 package com.wxiwei.office.fc.hslf.record;
 
+import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;

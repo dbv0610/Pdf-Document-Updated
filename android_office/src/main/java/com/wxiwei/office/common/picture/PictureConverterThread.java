@@ -1,6 +1,9 @@
 package com.wxiwei.office.common.picture;
 
-public class PictureConverterThread extends Thread
+import com.wxiwei.office.system.OfficeCoroutineExecutor;
+import kotlinx.coroutines.Job;
+
+public class PictureConverterThread implements PictureConversionTask
 {
 	public  PictureConverterThread(PictureConverterMgr converterMgr, String srcPath, String dstPath, String type )
     {
@@ -11,10 +14,25 @@ public class PictureConverterThread extends Thread
         this.destPath = dstPath;
     }
     
-    public void run() 
+    private Job job;
+
+    @Override public Job start()
     {
-    	converterMgr.convertPNG(sourPath, destPath, type,  false);
+        if (job != null && job.isActive()) return job;
+        job = OfficeCoroutineExecutor.launch(new Runnable()
+        {
+            @Override public void run()
+            {
+                converterMgr.convertPNG(sourPath, destPath, type, false);
+            }
+        });
+        return job;
     }   
+
+    @Override public void cancel()
+    {
+        if (job != null) job.cancel(null);
+    }
     
     
     private PictureConverterMgr converterMgr;

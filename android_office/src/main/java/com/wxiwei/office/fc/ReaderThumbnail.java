@@ -9,7 +9,6 @@ package com.wxiwei.office.fc;
 import java.io.File;
 import java.io.FileInputStream;
 
-import com.wxiwei.office.common.picture.PictureManage;
 import com.wxiwei.office.fc.fs.filesystem.CFBFileSystem;
 import com.wxiwei.office.fc.fs.filesystem.Property;
 import com.wxiwei.office.fc.fs.storage.LittleEndian;
@@ -23,7 +22,6 @@ import com.wxiwei.office.java.awt.Dimension;
 import com.wxiwei.office.pg.control.PGEditor;
 import com.wxiwei.office.pg.model.PGModel;
 import com.wxiwei.office.pg.view.SlideDrawKit;
-import com.wxiwei.office.system.MainControl;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;

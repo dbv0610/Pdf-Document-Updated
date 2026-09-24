@@ -17,9 +17,8 @@
 
 package com.wxiwei.office.fc.hslf;
 
-import java.io.FileNotFoundException;
-
 import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
+
 import com.wxiwei.office.fc.hslf.record.CurrentUserAtom;
 import com.wxiwei.office.fc.hslf.record.DocumentEncryptionAtom;
 import com.wxiwei.office.fc.hslf.record.PersistPtrHolder;

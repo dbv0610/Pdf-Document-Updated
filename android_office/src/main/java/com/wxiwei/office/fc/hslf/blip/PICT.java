@@ -17,13 +17,14 @@
 
 package com.wxiwei.office.fc.hslf.blip;
 
+import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.InflaterInputStream;
 
 import com.wxiwei.office.fc.ShapeKit;
-import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
 import com.wxiwei.office.fc.hslf.model.Picture;
 import com.wxiwei.office.java.awt.Dimension;
 import com.wxiwei.office.java.awt.Rectangle;

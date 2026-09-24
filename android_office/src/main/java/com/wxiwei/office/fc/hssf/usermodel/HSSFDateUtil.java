@@ -41,7 +41,5 @@ import com.wxiwei.office.ss.util.DateUtil;
  */
 
 public class HSSFDateUtil extends DateUtil {
-	protected static int absoluteDay(Calendar cal, boolean use1904windowing) {
-		return DateUtil.absoluteDay(cal, use1904windowing);
-	}
+	// absoluteDay(Calendar, boolean) is inherited from DateUtil (Kotlin @JvmStatic statics are final and cannot be hidden)
 }

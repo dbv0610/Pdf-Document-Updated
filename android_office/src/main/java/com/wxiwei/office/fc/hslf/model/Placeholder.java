@@ -18,11 +18,7 @@
 package com.wxiwei.office.fc.hslf.model;
 
 
-import java.io.ByteArrayOutputStream;
-
 import com.wxiwei.office.fc.ddf.*;
-import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
-import com.wxiwei.office.fc.hslf.record.OEPlaceholderAtom;
 
 /**
  * Represents a Placeholder in PowerPoint.

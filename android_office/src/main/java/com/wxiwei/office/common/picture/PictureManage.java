@@ -19,6 +19,7 @@ import java.util.zip.InflaterInputStream;
 import com.wxiwei.office.fc.hslf.usermodel.PictureData;
 import com.wxiwei.office.fc.openxml4j.opc.PackagePart;
 import com.wxiwei.office.system.IControl;
+import com.wxiwei.office.system.OfficeCoroutineExecutor;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
@@ -493,9 +494,9 @@ public class PictureManage
                 picConverterMgr.dispose();                
             }
             
-            new Thread()
+            OfficeCoroutineExecutor.INSTANCE.launch(new Runnable()
             {
-                public void run()
+                @Override public void run()
                 {
                     try
                     {
@@ -505,7 +506,7 @@ public class PictureManage
                     {
                     }
                 }
-            }.start();
+            });
         }
         catch (Exception e)
         {

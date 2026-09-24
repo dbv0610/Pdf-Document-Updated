@@ -17,10 +17,11 @@
 
 package com.wxiwei.office.fc.hslf.model;
 
+import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
+
 import java.io.ByteArrayOutputStream;
 
 import com.wxiwei.office.constant.AutoShapeConstant;
-import com.wxiwei.office.constant.MainConstant;
 import com.wxiwei.office.fc.ShapeKit;
 import com.wxiwei.office.fc.ddf.DefaultEscherRecordFactory;
 import com.wxiwei.office.fc.ddf.EscherChildAnchorRecord;
@@ -32,7 +33,6 @@ import com.wxiwei.office.fc.ddf.EscherProperties;
 import com.wxiwei.office.fc.ddf.EscherRecord;
 import com.wxiwei.office.fc.ddf.EscherSimpleProperty;
 import com.wxiwei.office.fc.ddf.EscherSpRecord;
-import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
 import com.wxiwei.office.fc.hslf.record.InteractiveInfo;
 import com.wxiwei.office.fc.hslf.record.InteractiveInfoAtom;
 import com.wxiwei.office.fc.hslf.record.Record;

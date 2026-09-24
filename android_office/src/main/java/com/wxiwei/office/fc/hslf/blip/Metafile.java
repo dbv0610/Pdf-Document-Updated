@@ -17,6 +17,8 @@
 
 package com.wxiwei.office.fc.hslf.blip;
 
+import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -26,7 +28,6 @@ import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
 import com.wxiwei.office.fc.hslf.usermodel.PictureData;
 import com.wxiwei.office.fc.util.LittleEndian;
 import com.wxiwei.office.java.awt.Dimension;

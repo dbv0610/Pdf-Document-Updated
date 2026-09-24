@@ -23,7 +23,10 @@ package com.wxiwei.office.common.picture;
  * <p>
  * <p>
  */
-public class VectorgraphConverterThread extends Thread
+import com.wxiwei.office.system.OfficeCoroutineExecutor;
+import kotlinx.coroutines.Job;
+
+public class VectorgraphConverterThread implements PictureConversionTask
 {
     public  VectorgraphConverterThread(PictureConverterMgr converterMgr, byte type , String srcPath, String dstPath, int width, int height)
     {
@@ -36,10 +39,25 @@ public class VectorgraphConverterThread extends Thread
         this.picHeight = height;
     }
     
-    public void run() 
+    private Job job;
+
+    @Override public Job start()
     {
-    	converterMgr.convertWMF_EMF(type, sourPath, destPath, picWidth, picHeight, false);
+        if (job != null && job.isActive()) return job;
+        job = OfficeCoroutineExecutor.INSTANCE.launch(new Runnable()
+        {
+            @Override public void run()
+            {
+                converterMgr.convertWMF_EMF(type, sourPath, destPath, picWidth, picHeight, false);
+            }
+        });
+        return job;
     }   
+
+    @Override public void cancel()
+    {
+        if (job != null) job.cancel(null);
+    }
     
     
     private PictureConverterMgr converterMgr;

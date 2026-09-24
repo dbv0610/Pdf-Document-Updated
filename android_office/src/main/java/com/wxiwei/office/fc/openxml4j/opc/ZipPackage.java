@@ -94,28 +94,49 @@ public class ZipPackage implements RelationshipSource, Closeable
         }
         catch (Exception e)
         {
+            if (zipArchive != null)
+            {
+                try
+                {
+                    zipArchive.close();
+                }
+                catch (IOException closeError)
+                {
+                    e.addSuppressed(closeError);
+                }
+                zipArchive = null;
+                throw new OpenXML4JRuntimeException("Format error: cannot read Open XML package", e);
+            }
             File file = new File(path);
             if (file.length() == 0)
             {
-                throw new EncryptedDocumentException("Format error");
+                throw new OpenXML4JRuntimeException("Format error: empty or unreadable Open XML file", e);
             }
-            try
+            try (FileInputStream in = new FileInputStream(file))
             {
-                FileInputStream in = new FileInputStream(file);
-                byte[] b = new byte[16];
-                in.read(b);
+                byte[] b = new byte[8];
+                int count = 0;
+                while (count < b.length)
+                {
+                    int read = in.read(b, count, b.length - count);
+                    if (read == -1) break;
+                    count += read;
+                }
                 // verify signature
                 long signature = LittleEndian.getLong(b, 0);    
-                if (signature == HeaderBlock._signature)
+                if (count == b.length && signature == HeaderBlock._signature)
                 {
-                    throw new EncryptedDocumentException("Cannot process encrypted office files!");
+                    EncryptedDocumentException encrypted = new EncryptedDocumentException(
+                        "Cannot process encrypted office files or legacy binary files with an Open XML extension");
+                    encrypted.initCause(e);
+                    throw encrypted;
                 }
             }
             catch (IOException ioe)
             {
+                e.addSuppressed(ioe);
             }
-            throw new EncryptedDocumentException("Invalid header signature");
-            //e.printStackTrace();
+            throw new OpenXML4JRuntimeException("Format error: not a valid Open XML ZIP package", e);
         }
     }
     

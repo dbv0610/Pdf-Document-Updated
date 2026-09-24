@@ -17,14 +17,9 @@
 
 package com.wxiwei.office.fc.hslf.record;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
-import com.wxiwei.office.fc.hslf.util.MutableByteArrayOutputStream;
 import com.wxiwei.office.fc.util.ArrayUtil;
-import com.wxiwei.office.fc.util.LittleEndian;
 
 
 /**

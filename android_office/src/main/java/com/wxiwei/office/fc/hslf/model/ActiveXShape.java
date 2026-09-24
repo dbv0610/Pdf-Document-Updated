@@ -17,6 +17,8 @@
 
 package com.wxiwei.office.fc.hslf.model;
 
+import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
@@ -27,7 +29,6 @@ import com.wxiwei.office.fc.ddf.EscherContainerRecord;
 import com.wxiwei.office.fc.ddf.EscherOptRecord;
 import com.wxiwei.office.fc.ddf.EscherProperties;
 import com.wxiwei.office.fc.ddf.EscherRecord;
-import com.wxiwei.office.fc.hslf.exceptions.HSLFException;
 import com.wxiwei.office.fc.hslf.record.Document;
 import com.wxiwei.office.fc.hslf.record.ExControl;
 import com.wxiwei.office.fc.hslf.record.ExObjList;

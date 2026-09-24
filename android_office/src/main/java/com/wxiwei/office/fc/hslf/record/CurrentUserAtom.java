@@ -20,13 +20,11 @@ package com.wxiwei.office.fc.hslf.record;
 import java.io.*;
 
 import com.wxiwei.office.fc.fs.filesystem.CFBFileSystem;
-import com.wxiwei.office.fc.hslf.exceptions.CorruptPowerPointFileException;
-import com.wxiwei.office.fc.hslf.exceptions.EncryptedPowerPointFileException;
-import com.wxiwei.office.fc.hslf.exceptions.OldPowerPointFormatException;
-import com.wxiwei.office.fc.hwpf.OldWordFileFormatException;
 import com.wxiwei.office.fc.poifs.filesystem.*;
 import com.wxiwei.office.fc.util.LittleEndian;
 import com.wxiwei.office.fc.util.StringUtil;
+import com.wxiwei.office.fc.hslf.exceptions.*;
+import com.wxiwei.office.fc.hwpf.OldWordFileFormatException;
 
 
 /**

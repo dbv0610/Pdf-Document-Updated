@@ -42,7 +42,8 @@ import android.graphics.RectF;
 /**
  * An abstract class to be implemented by the chart rendering classes.
  */
-public abstract class AbstractChart/* implements Serializable*/ 
+public abstract class
+AbstractChart/* implements Serializable*/
 {
     public final static short       CHART_AREA                  = 0;
     public final static short       CHART_BAR                   = 1;

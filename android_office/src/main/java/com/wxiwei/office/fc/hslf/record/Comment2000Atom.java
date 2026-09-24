@@ -17,11 +17,12 @@
 
 package com.wxiwei.office.fc.hslf.record;
 
+import com.wxiwei.office.fc.hslf.util.SystemTimeUtils;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 
-import com.wxiwei.office.fc.hslf.util.SystemTimeUtils;
 import com.wxiwei.office.fc.util.LittleEndian;
 
 

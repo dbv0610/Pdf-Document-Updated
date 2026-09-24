@@ -21,6 +21,8 @@ import com.wxiwei.office.system.AbortReaderError;
 import com.wxiwei.office.system.FileKit;
 import com.wxiwei.office.system.IControl;
 import com.wxiwei.office.system.IReader;
+import com.wxiwei.office.system.OfficeCoroutineExecutor;
+import kotlinx.coroutines.Job;
 
 
 /**
@@ -71,7 +73,7 @@ public class Search
             return;
         }
         searching = true;
-        new SearchThread(directory, key, searchType).start();
+        searchJob = new SearchJob(directory, key, searchType).start();
     }
     
     /**
@@ -85,15 +87,20 @@ public class Search
         }
         
         stopSearch = true;
+        if (searchJob != null)
+        {
+            searchJob.cancel(null);
+            searchJob = null;
+        }
     }
     
     /**
      * search thread
      */
-    class SearchThread extends Thread
+    class SearchJob
     {
         
-        public SearchThread(File directory, String key, byte searchType)
+        public SearchJob(File directory, String key, byte searchType)
         {
             this.directory = directory;
             this.key = key;
@@ -103,14 +110,21 @@ public class Search
         /**
          * 
          */
-        public void run()
+        public Job start()
         {
-            searchFiles(directory, key);
-            searching = false;
-            if (searchResult != null)
+            return OfficeCoroutineExecutor.INSTANCE.launch(new Runnable()
             {
-                searchResult.searchFinish();
-            }
+                @Override
+                public void run()
+                {
+                    searchFiles(directory, key);
+                    searching = false;
+                    if (searchResult != null)
+                    {
+                        searchResult.searchFinish();
+                    }
+                }
+            });
         }
         
         /**
@@ -261,6 +275,7 @@ public class Search
     private boolean stopSearch;
     //
     private boolean searching;
+    private Job searchJob;
     //
     private ISearchResult searchResult;
     //

@@ -12,6 +12,8 @@ val xlsColor = "#00733B".toColorInt()
 @ColorInt
 val pptColor = "#FF6A00".toColorInt()
 @ColorInt
+val txtColor = "#4E5969".toColorInt()
+@ColorInt
 val color_status_bar = "#E6FFFFFF".toColorInt()
 @ColorInt
 val primary_38 = "#61165DFF".toColorInt()

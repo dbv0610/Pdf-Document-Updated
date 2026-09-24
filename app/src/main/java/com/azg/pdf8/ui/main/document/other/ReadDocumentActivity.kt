@@ -46,6 +46,7 @@ import com.azg.pdf8.viewmodel.ConvertViewModel
 import com.azg.pdf8.viewmodel.StateLoadData
 import com.azg.pdf8.widget.docColor
 import com.azg.pdf8.widget.pptColor
+import com.azg.pdf8.widget.txtColor
 import com.azg.pdf8.widget.xlsColor
 import com.dong.baselib.api.parcelable
 import com.dong.baselib.base.PopupHelper
@@ -61,12 +62,9 @@ import com.wxiwei.office.constant.EventConstant
 import com.wxiwei.office.constant.MainConstant
 import com.wxiwei.office.constant.wp.WPViewConstant
 import com.wxiwei.office.officereader.AppFrame
-import com.wxiwei.office.pg.control.PGFind
 import com.wxiwei.office.pg.control.Presentation
 import com.wxiwei.office.res.ResKit
 import com.wxiwei.office.ss.control.ExcelView
-import com.wxiwei.office.ss.model.baseModel.Cell
-import com.wxiwei.office.ss.other.FindingMgr
 import com.wxiwei.office.ss.view.SheetView
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
@@ -78,7 +76,6 @@ import com.wxiwei.office.system.view
 import com.wxiwei.office.system.find
 import com.wxiwei.office.system.beans.CalloutView.drawingMode
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener
-import com.wxiwei.office.wp.control.WPFind
 import com.wxiwei.office.wp.control.Word
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,6 +86,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import com.wxiwei.office.system.search.DocumentSearch
 import org.koin.android.ext.android.inject
 import java.io.File
 
@@ -212,11 +211,13 @@ class ReadDocumentActivity :
         documentType = when (getData<String>(Constant.DOCUMENT_TYPE).toString()) {
             Constant.Doc -> DocumentType.Doc
             Constant.Xls -> DocumentType.Excel
+            Constant.Txt -> DocumentType.Txt
             else -> DocumentType.Ppt
         }
         val color = when (documentType) {
             DocumentType.Doc -> docColor
             DocumentType.Excel -> xlsColor
+            DocumentType.Txt -> txtColor
             else -> pptColor
         }
         binding.root.setBackgroundColor(color)
@@ -225,6 +226,7 @@ class ReadDocumentActivity :
             when (documentType) {
                 DocumentType.Doc -> R.string.doc
                 DocumentType.Excel -> R.string.xls
+                DocumentType.Txt -> R.string.txt
                 else -> R.string.pptx
             }
         )
@@ -397,23 +399,23 @@ class ReadDocumentActivity :
     private fun setupSearchCombiner() {
         combine(
             lifecycleOwner = this@ReadDocumentActivity,
-            liveData1 = listSearchData,
+            liveData1 = searchCount,
             liveData2 = currentIndexSearch
-        ) { list, index ->
-            val safeList = list ?: emptyList()
+        ) { count, index ->
+            val safeCount = count ?: 0
             val safeIndex = index ?: 0
 
             SearchUiState(
-                countText = if (safeList.isEmpty()) {
+                countText = if (safeCount == 0) {
                     getString(R.string.no_result_found)
                 } else {
                     // safeIndex is 0-based
-                    getString(R.string.result) + " ${safeIndex + 1}/${safeList.size}"
+                    getString(R.string.result) + " ${safeIndex + 1}/${safeCount}"
                 },
-                prevEnabled = safeList.isNotEmpty() && safeIndex > 0,
-                nextEnabled = safeList.isNotEmpty() && safeIndex < safeList.size - 1,
-                prevColor = if (safeList.isEmpty() || safeIndex <= 0) gray else Color.TRANSPARENT,
-                nextColor = if (safeList.isEmpty() || safeIndex >= safeList.size - 1) gray else Color.TRANSPARENT
+                prevEnabled = safeCount > 0 && safeIndex > 0,
+                nextEnabled = safeCount > 0 && safeIndex < safeCount - 1,
+                prevColor = if (safeCount == 0 || safeIndex <= 0) gray else Color.TRANSPARENT,
+                nextColor = if (safeCount == 0 || safeIndex >= safeCount - 1) gray else Color.TRANSPARENT
             )
         }.observe(this) { state ->
             binding.tvCountSearch.text = state.countText
@@ -424,10 +426,8 @@ class ReadDocumentActivity :
         }
     }
 
-    private var excelFinder: FindingMgr? = null
-    private var currentKeyword: String? = null
-    private var allHits = mutableListOf<Long>()
-    val listSearchData = MutableLiveData<List<Long>>(emptyList())
+    private var search: DocumentSearch? = null
+    val searchCount = MutableLiveData(0)
     val currentIndexSearch = MutableLiveData(0)
     private var adapter: PdfPreviewAdapter =
         PdfPreviewAdapter() {
@@ -438,98 +438,43 @@ class ReadDocumentActivity :
                 toastShort(getString(R.string.error_go_to_page))
             }
         }.attachLifecycle(this@ReadDocumentActivity)
-    private var wordFinder: WPFind? = null
-    private var pptFinder: PGFind? = null
-
-    /** An Excel match, with the index of the sheet that holds the cell */
-    private class ExcelHit(val sheetIndex: Int, val cell: Cell)
-
-    // Results of the last search, only the list of the searched document type is filled
-    private var pptResults: List<PGFind.SearchResult> = emptyList()
-    private var excelResults: List<ExcelHit> = emptyList()
-    private var excelView: ExcelView? = null
     private var searchJob: Job? = null
 
-    /**
-     * Search [keyword] in the open document off the main thread, then focus the first result.
-     * [currentIndexSearch] is the 0-based index of the focused result in [listSearchData].
-     */
+    /** Search off the main thread, then focus the first result. */
     fun performSearch(keyword: String) {
-        currentKeyword = keyword
         searchJob?.cancel()
         clearSearchResults()
-        val view = mainControl?.view ?: return
+        val s = DocumentSearch.of(mainControl?.view) ?: return
         processDialog.show()
         searchJob = lifecycleScope.launch {
-            try {
-                when (view) {
-                    is Word -> {
-                        val find = view.getFind()
-                        allHits = withContext(Dispatchers.Default) { find.findAll(keyword) {} }
-                        wordFinder = find
-                    }
-                    is ExcelView -> {
-                        excelResults = withContext(Dispatchers.Default) { findInAllSheets(view, keyword) }
-                        excelView = view
-                        allHits = MutableList(excelResults.size) { it.toLong() }
-                    }
-                    is Presentation -> {
-                        val find = view.getFind()
-                        pptResults = withContext(Dispatchers.Default) { find?.findAll(keyword).orEmpty() }
-                        pptFinder = find
-                        allHits = MutableList(pptResults.size) { it.toLong() }
-                    }
-                    else -> Unit
-                }
+            val count = try {
+                withContext(Dispatchers.Default) { s.search(keyword) { isActive } }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.d("ErrorNavigate", "Search error: ${e.message}")
                 toastShort(getString(R.string.search_error_occurred))
+                0
             } finally {
-                processDialog.dismiss()
+                if (searchJob === coroutineContext[Job]) processDialog.dismiss()
             }
             if (isFinishing || isDestroyed) return@launch
-            listSearchData.value = allHits.toList()
+            search = s
+            searchCount.value = count
             focusSearchResult(0)
             binding.lnResultSearch.visible()
         }
     }
 
-    /**
-     * Matches of every sheet, in sheet order. Sheets still being read only give the rows read so far.
-     */
-    private fun findInAllSheets(view: ExcelView, keyword: String): List<ExcelHit> {
-        val workbook = view.getSpreadsheet()?.getWorkbook() ?: return emptyList()
-        val hits = ArrayList<ExcelHit>()
-        for (sheetIndex in 0 until workbook.getSheetCount()) {
-            val sheet = workbook.getSheet(sheetIndex) ?: continue
-            FindingMgr().findAll(sheet, keyword).mapTo(hits) { ExcelHit(sheetIndex, it) }
-        }
-        return hits
-    }
-
-    /**
-     * Show and highlight the result at [index], the same way for every document type
-     */
+    /** Show and highlight the result at [index] for every document type. */
     private fun focusSearchResult(index: Int) {
-        val count = allHits.size
+        val count = searchCount.value ?: 0
         if (index !in 0 until count) {
             currentIndexSearch.value = 0
             return
         }
         try {
-            when {
-                wordFinder != null -> wordFinder?.focusBy(index)
-                pptFinder != null -> pptFinder?.focus(pptResults[index])
-                excelView != null -> {
-                    val hit = excelResults[index]
-                    val view = excelView!!
-                    // showSheet does nothing when the sheet is already shown
-                    view.showSheet(hit.sheetIndex)
-                    view.getSheetView()?.goToFindedCell(hit.cell)
-                }
-            }
+            search?.focus(index)
         } catch (e: Exception) {
             Log.d("ErrorNavigate", "Focus error: ${e.message}")
         }
@@ -537,20 +482,15 @@ class ReadDocumentActivity :
     }
 
     private fun clearSearchResults() {
-        wordFinder = null
-        pptFinder = null
-        excelFinder = null
-        excelView = null
-        pptResults = emptyList()
-        excelResults = emptyList()
-        allHits = mutableListOf()
-        listSearchData.value = emptyList()
+        search?.clear()
+        search = null
+        searchCount.value = 0
         currentIndexSearch.value = 0
     }
 
     fun goToNext() {
         val index = currentIndexSearch.value ?: 0
-        if (index < allHits.size - 1) focusSearchResult(index + 1)
+        if (index < (searchCount.value ?: 0) - 1) focusSearchResult(index + 1)
     }
 
     fun goToPrev() {

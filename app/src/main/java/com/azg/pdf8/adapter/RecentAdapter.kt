@@ -85,6 +85,7 @@ class RecentAdapter(
         DocumentType.Doc -> R.drawable.ic_app_docx
         DocumentType.Excel -> R.drawable.ic_app_xls
         DocumentType.Ppt -> R.drawable.ic_app_ppt
+        DocumentType.Txt -> R.drawable.ic_app_txt
         else -> R.drawable.ic_app_pdf
     }
 

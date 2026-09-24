@@ -15,6 +15,7 @@ import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.docColor
 import com.azg.pdf8.widget.pptColor
+import com.azg.pdf8.widget.txtColor
 import com.azg.pdf8.widget.xlsColor
 import com.dong.baselib.base.PopupDataHelper
 import com.dong.baselib.file.shareFileWithPath
@@ -64,6 +65,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
         documentType = when (docKey) {
             Constant.Doc -> DocumentType.Doc
             Constant.Xls -> DocumentType.Excel
+            Constant.Txt -> DocumentType.Txt
             else -> DocumentType.Ppt
         }
         viewModel.setSearchCriteria("", documentType)
@@ -71,6 +73,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
             when (documentType) {
                 DocumentType.Doc -> docColor
                 DocumentType.Excel -> xlsColor
+                DocumentType.Txt -> txtColor
                 else -> pptColor
             }
         )
@@ -78,6 +81,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
             when (documentType) {
                 DocumentType.Doc -> R.string.doc
                 DocumentType.Excel -> R.string.xls
+                DocumentType.Txt -> R.string.txt
                 else -> R.string.pptx
             }
         )

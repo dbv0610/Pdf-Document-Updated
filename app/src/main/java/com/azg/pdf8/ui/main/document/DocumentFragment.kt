@@ -76,6 +76,7 @@ class DocumentFragment :
                 val docKey = when (it.type) {
                     DocumentType.Doc -> Constant.Doc
                     DocumentType.Excel -> Constant.Xls
+                    DocumentType.Txt -> Constant.Txt
                     else -> Constant.Ppt
                 }
                 launchActivity<ReadDocumentActivity>(
@@ -95,7 +96,8 @@ class DocumentFragment :
             documentViewModel.repo.documentListDoc to countFileDocx,
             documentViewModel.repo.documentListPdf to countFilePdf,
             documentViewModel.repo.documentListPpt to countFilePpt,
-            documentViewModel.repo.documentListXls to countFileXls
+            documentViewModel.repo.documentListXls to countFileXls,
+            documentViewModel.repo.documentListTxt to countFileTxt
         )
         val filesLabel = getString(R.string.files)
         pairs.forEach { (flow, textView) ->
@@ -212,6 +214,15 @@ class DocumentFragment :
             if (isStorageAccess()) {
                    launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Ppt))
 
+            } else {
+                DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
+                    fragmentAttach?.fragmentAction("requestPermission")
+                }.show()
+            }
+        }
+        lnTxt.click {
+            if (isStorageAccess()) {
+                launchActivity<OtherFileActivity>(hashMapOf(Constant.DOCUMENT_TYPE to Constant.Txt))
             } else {
                 DialogPermission(appActivity).attachActivity(appActivity).onAllowAccess {
                     fragmentAttach?.fragmentAction("requestPermission")

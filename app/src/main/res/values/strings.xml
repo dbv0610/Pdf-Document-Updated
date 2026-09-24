@@ -54,6 +54,7 @@
     <string name="doc">DOC</string>
     <string name="ppt">PPT</string>
     <string name="xls">XLS</string>
+    <string name="txt" translatable="false">TXT</string>
     <string name="recents_files">Recents Files</string>
     <string name="show_all">Show All</string>
     <string name="favorite">Favorite</string>

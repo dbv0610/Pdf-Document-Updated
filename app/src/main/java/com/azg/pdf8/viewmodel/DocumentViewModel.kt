@@ -88,6 +88,7 @@ class DocumentViewModel(
             DocumentType.Ppt,
             DocumentType.Pdf,
             DocumentType.Excel,
+            DocumentType.Txt,
             DocumentType.Image
         )
     )
@@ -344,6 +345,9 @@ class DocumentViewModel(
                     .toMutableList()
             repo._listPpt.value =
                 allDocs.filter { it.type == DocumentType.Ppt }.toMutableList().reversed()
+                    .toMutableList()
+            repo._listTxt.value =
+                allDocs.filter { it.type == DocumentType.Txt }.toMutableList().reversed()
                     .toMutableList()
         }
     }

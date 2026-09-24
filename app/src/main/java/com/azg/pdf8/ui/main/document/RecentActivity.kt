@@ -46,6 +46,7 @@ class RecentActivity : BaseActivity<ActivityRecentBinding>(ActivityRecentBinding
                     val docKey = when (it.type) {
                         DocumentType.Doc -> Constant.Doc
                         DocumentType.Excel -> Constant.Xls
+                        DocumentType.Txt -> Constant.Txt
                         else -> Constant.Ppt
                     }
                     launchActivity<ReadDocumentActivity>(

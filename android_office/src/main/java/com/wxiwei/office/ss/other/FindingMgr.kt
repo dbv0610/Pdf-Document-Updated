@@ -10,6 +10,7 @@ import com.wxiwei.office.ss.model.baseModel.Cell
 import com.wxiwei.office.ss.model.baseModel.Row
 import com.wxiwei.office.ss.model.baseModel.Sheet
 import com.wxiwei.office.ss.util.ModelUtil
+import com.wxiwei.office.system.search.SearchText
 
 /**
  * TODO: find data which you're searching for
@@ -188,32 +189,39 @@ class FindingMgr {
     }
 
     fun findAll(sheet: Sheet?, value: String?): MutableList<Cell> {
+        val results = findAll(sheet, SearchText.queries(value))
+        this.sheet = sheet
+        this.value = value
+        findedCell = results.firstOrNull()
+        return results
+    }
+
+    fun findAll(sheet: Sheet?, queries: List<String>, isActive: () -> Boolean = { true }): MutableList<Cell> {
         val results: MutableList<Cell> = ArrayList()
-        if (sheet == null || value == null || value.isEmpty()) {
+        if (sheet == null || queries.isEmpty()) {
             return results
         }
 
         val firstRow = sheet.getFirstRowNum()
         val lastRow = sheet.getLastRowNum()
         for (r in firstRow..lastRow) {
+            if (!isActive()) return results
             val row = sheet.getRow(r) ?: continue
 
             val firstCol = row.getFirstCol()
             val lastCol = row.getLastCol()
             for (c in firstCol..lastCol) {
+                if (!isActive()) return results
                 val cell = row.getCell(c) ?: continue
                 if (!isVisible(sheet, row, cell)) continue
 
                 val text = ModelUtil.instance()
                     .getFormatContents(sheet.getWorkbook()!!, cell)
-                if (text != null && text.contains(value, ignoreCase = true)) {
+                if (text != null && SearchText.contains(text, queries)) {
                     results.add(cell)
                 }
             }
         }
-        this.sheet = sheet
-        this.value = value
-        findedCell = results.firstOrNull()
         return results
     }
 

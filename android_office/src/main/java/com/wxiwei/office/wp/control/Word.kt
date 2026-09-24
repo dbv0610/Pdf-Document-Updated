@@ -115,6 +115,9 @@ class Word : LinearLayout, IWord {
 
     private fun updateDefaultZoomByPageMode(pageRoot: PageRoot) {
         zoom = getDefaultZoom(pageRoot.getWidth())
+        // The first page was positioned at zoom 1; re-center it for the fit-width zoom, otherwise
+        // documents that finish layout without the background thread stay shifted to the right.
+        LayoutKit.instance().layoutAllPage(pageRoot, zoom)
     }
 
     fun init() {

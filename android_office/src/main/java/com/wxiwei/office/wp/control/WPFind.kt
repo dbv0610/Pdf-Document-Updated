@@ -3,7 +3,7 @@
  */
 package com.wxiwei.office.wp.control
 
-import java.text.Normalizer
+import com.wxiwei.office.system.search.SearchText
 import java.util.function.Consumer
 
 import com.wxiwei.office.constant.EventConstant
@@ -182,7 +182,7 @@ class WPFind(word: Word?) : IFind {
         var para = doc.getParagraph(0)
         var index = 0
         while (para != null) {
-            for (at in matchesIn(fold(para.getText(doc) ?: ""))) {
+            for (at in matchesIn(para.getText(doc) ?: "")) {
                 hits.add(para.getStartOffset() + at)
                 result.accept(index++)
             }
@@ -198,7 +198,7 @@ class WPFind(word: Word?) : IFind {
         var para = doc.getParagraph(0)
         var index = 0
         while (para != null) {
-            for (at in matchesIn(fold(para.getText(doc) ?: ""))) {
+            for (at in matchesIn(para.getText(doc) ?: "")) {
                 if (index++ == occurrenceIndex) return searchInParagraph(doc, para, at, true)
             }
             para = doc.getParagraph(para.getEndOffset())
@@ -213,7 +213,7 @@ class WPFind(word: Word?) : IFind {
         var para = doc.getParagraph(0)
         var index = 0
         while (para != null) {
-            for (at in matchesIn(fold(para.getText(doc) ?: ""))) {
+            for (at in matchesIn(para.getText(doc) ?: "")) {
                 if (para === current && at == matchIndex) return index
                 index++
             }
@@ -223,20 +223,10 @@ class WPFind(word: Word?) : IFind {
     }
 
     /**
-     * Start positions of the matches in a folded paragraph, in reading order.
+     * Start positions of the matches in a raw paragraph, in reading order.
      * The NFC and NFD forms are merged so the occurrence index follows the text like findForward does.
      */
-    private fun matchesIn(text: String): List<Int> {
-        val positions = sortedSetOf<Int>()
-        for (q in foldedQueries) {
-            var at = if (q.isEmpty()) -1 else text.indexOf(q)
-            while (at >= 0) {
-                positions.add(at)
-                at = text.indexOf(q, at + maxOf(q.length, 1))
-            }
-        }
-        return positions.toList()
-    }
+    private fun matchesIn(text: String): List<Int> = SearchText.matchesIn(text, foldedQueries)
 
     override fun dispose() {
         findElement = null
@@ -247,18 +237,20 @@ class WPFind(word: Word?) : IFind {
 
     // ===================== nội bộ =====================
 
-    private fun prepareQuery(value: String?): Boolean {
-        if (value.isNullOrEmpty()) {
-            query = null
-            foldedQueries = emptyList()
-            return false
-        }
-        query = value
-        val nfc = fold(Normalizer.normalize(value, Normalizer.Form.NFC))
-        val nfd = fold(Normalizer.normalize(value, Normalizer.Form.NFD))
-        foldedQueries = if (nfc == nfd) listOf(nfc) else listOf(nfc, nfd)
+    fun prepareQuery(value: String?): Boolean {
+        foldedQueries = SearchText.queries(value)
+        query = value?.takeIf { foldedQueries.isNotEmpty() }
         clearMatch()
-        return true
+        return foldedQueries.isNotEmpty()
+    }
+
+    /** Focus a cached paragraph position without scanning preceding paragraphs. */
+    fun focusAt(paraStart: Long, at: Int): Boolean {
+        if (query == null || at < 0) return false
+        val doc = word?.getDocument() ?: return false
+        val para = doc.getParagraph(paraStart) ?: return false
+        isSetPointToVisible = false
+        return searchInParagraph(doc, para, at, true)
     }
 
     private fun clearMatch() {
@@ -371,23 +363,6 @@ class WPFind(word: Word?) : IFind {
          * để vị trí tìm được trùng với offset trong tài liệu.
          */
         @JvmStatic
-        fun fold(s: String): String {
-            val out = CharArray(s.length)
-            for (i in s.indices) {
-                val c = s[i]
-                out[i] = when (c) {
-                    ' ', '\t', '\u000b', '\u000c', ' ', ' ' -> ' '
-                    '‘', '’' -> '\''
-                    '“', '”' -> '"'
-                    else -> {
-                        val lower = Character.toLowerCase(c)
-                        // chỉ nhận chữ thường 1-1; trường hợp đặc biệt giữ nguyên
-                        lower
-                    }
-                }
-            }
-            return String(out)
-        }
+        fun fold(s: String): String = SearchText.fold(s)
     }
 }
-

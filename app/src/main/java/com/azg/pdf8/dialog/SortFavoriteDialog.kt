@@ -26,7 +26,7 @@ class SortFavoriteDialog(context: Context) :
     private var listFileType = MutableLiveData(
         mutableListOf(
             DocumentType.Doc, DocumentType.Ppt, DocumentType.Pdf,
-            DocumentType.Excel
+            DocumentType.Excel, DocumentType.Txt
         )
     )
     private var lifecycleOwner: LifecycleOwner? = null
@@ -74,10 +74,12 @@ class SortFavoriteDialog(context: Context) :
                 val isFilterDoc = list.contains(DocumentType.Doc)
                 val isFilterXls = list.contains(DocumentType.Excel)
                 val isFilterPpt = list.contains(DocumentType.Ppt)
+                val isFilterTxt = list.contains(DocumentType.Txt)
                 binding.ivPdf.setImageResource(if (!isFilterPdf) R.drawable.ic_language_unselected else R.drawable.ic_language_selected)
                 binding.ivDocx.setImageResource(if (!isFilterDoc) R.drawable.ic_language_unselected else R.drawable.ic_language_selected)
                 binding.ivPpt.setImageResource(if (!isFilterPpt) R.drawable.ic_language_unselected else R.drawable.ic_language_selected)
                 binding.ivXlsx.setImageResource(if (!isFilterXls) R.drawable.ic_language_unselected else R.drawable.ic_language_selected)
+                binding.ivTxt.setImageResource(if (!isFilterTxt) R.drawable.ic_language_unselected else R.drawable.ic_language_selected)
             }
         }
         icClose.click {
@@ -157,6 +159,17 @@ class SortFavoriteDialog(context: Context) :
             } else {
                 val defList = listFileType.value
                 defList!!.add(DocumentType.Excel)
+                listFileType.value = defList
+            }
+        }
+        binding.ivTxt.click {
+            val isExit = listFileType.value!!.contains(DocumentType.Txt)
+            if (isExit) {
+                listFileType.value =
+                    listFileType.value!!.filter { it != DocumentType.Txt }.toMutableList()
+            } else {
+                val defList = listFileType.value
+                defList!!.add(DocumentType.Txt)
                 listFileType.value = defList
             }
         }

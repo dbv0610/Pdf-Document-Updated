@@ -33,6 +33,7 @@ object AppUtils {
     val excelExtensions = listOf("xls", "xlsx", "xlsm")
     val docExtensions = listOf("doc", "docx")
     val pptExtensions = listOf("ppt", "pptx")
+    val txtExtensions = listOf("txt")
     val documentPath: String
         get() {
             val filePath = File(
@@ -115,7 +116,7 @@ object AppUtils {
             context,
             fileFilter = { file ->
                 when (file.extension.lowercase()) {
-                    "pdf", "doc", "docx", "xls",
+                    "pdf", "doc", "docx", "xls", "txt",
                     "xlsx", "ppt", "pptx" -> true
                     else -> false
                 }
@@ -127,6 +128,7 @@ object AppUtils {
                     "doc", "docx" -> DocumentType.Doc
                     "xls", "xlsx" -> DocumentType.Excel
                     "ppt", "pptx" -> DocumentType.Ppt
+                    "txt" -> DocumentType.Txt
                     else -> DocumentType.Doc
                 }
                 RecentDocument(

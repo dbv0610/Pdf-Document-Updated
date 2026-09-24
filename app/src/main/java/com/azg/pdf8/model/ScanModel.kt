@@ -20,7 +20,7 @@ class Converters {
 }
 
 enum class DocumentType {
-    Doc, Pdf, Excel, Ppt, Image
+    Doc, Pdf, Excel, Ppt, Image, Txt
 }
 
 @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)

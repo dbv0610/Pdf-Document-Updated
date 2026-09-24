@@ -257,7 +257,7 @@ class ConvertViewModel : ViewModel() {
                     if (model.type != DocumentType.Excel && !exists()) createNewFile()
                 }
                 when (model.type) {
-                    DocumentType.Doc, DocumentType.Ppt -> {
+                    DocumentType.Doc, DocumentType.Ppt, DocumentType.Txt -> {
                         val bitmaps = listSlide.value.map { it.bitmap }
                         check(bitmaps.any { it != null }) { "No rendered pages to convert" }
                         createPdfFromBitmaps(bitmaps, outputFile)

@@ -3,7 +3,6 @@ package com.azg.pdf8.ui.onboarding
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import com.ads.control.admob.AppOpenManager
 import com.azg.pdf8.R
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseFragment
@@ -75,8 +74,7 @@ class OnboardingFragment :
 
     override fun onResume() {
         super.onResume()
-        if (remoteConfig.a001Config.enable) AppOpenManager.getInstance().enableAppResume()
-        viewModel.trackScreenView(
+         viewModel.trackScreenView(
             isFullScreen = false,
             position = position
         )

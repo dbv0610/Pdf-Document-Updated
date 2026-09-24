@@ -22,7 +22,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.transition.AutoTransition
 import androidx.transition.Transition
 import com.azg.pdf8.R
-import com.azg.pdf8.ads.ads.banner.BannerPlacement
+
 import com.azg.pdf8.databinding.ActivityCropImageBinding
 import com.azg.pdf8.model.CreatePdf
 import com.azg.pdf8.ui.main.create.CreateActivity.Companion.currentFlowBimap
@@ -124,9 +124,6 @@ class CropImageActivity :
         setupAspectRatioWidget()
         setupRotateWidget()
         setupScaleWidget()
-        binding.bannerAdView
-            .setBannerPlacement(this@CropImageActivity, BannerPlacement.BANNER_ALL)
-            .requestBanner()
     }
 
     private fun changeEditMode(editMode: EditMode) {

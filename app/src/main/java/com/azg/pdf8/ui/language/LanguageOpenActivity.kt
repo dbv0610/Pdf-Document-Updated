@@ -9,23 +9,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.azg.pdf8.ads.ads.splash.AdSplashCompleteListener
-import com.azg.pdf8.ads.ads.splash.AdSplashHelper
-import com.azg.pdf8.ads.ads.splash.AdState
-import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
-import com.dong.baselib.base.SystemUtil
 import com.azg.pdf8.databinding.ActivityLanguageOpenBinding
 import com.azg.pdf8.ui.main.MainActivity
-import com.azg.pdf8.ui.splash.NativeSplashActivity
-import com.azg.pdf8.utils.Constant
 import com.dong.baselib.api.parcelable
+import com.dong.baselib.base.SystemUtil
 import com.dong.baselib.lifecycle.set
 import com.dong.baselib.widget.invisible
 import com.dong.baselib.widget.moveItemToPosition
 import com.dong.baselib.widget.visible
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 abstract class LanguageOpenActivity :
@@ -82,34 +75,15 @@ abstract class LanguageOpenActivity :
                 currentLang.value?.let { languageAdapter.selectItem(it) }
                 binding.selectLanguage.visible()
                 binding.selectLanguage.setOnClickListener {
-                    if (AdSplashHelper.isLoadAdsFullDone && remoteConfig.newFlowApp) {
-                        AdSplashHelper.adManager?.showCurrentAd()
-                    }else{
+
                         languageAdapter.getSelectedLanguage()?.let {
                             navigateToNextScreen(it)
                         }
-                    }
                 }
             }
         }
         setupListLanguage()
         runCatching { startTutorial() }
-        preloadAndObserverAdsFullScreen()
-    }
-
-    private fun preloadAndObserverAdsFullScreen() {
-        if (remoteConfig.newFlowApp) {
-            AdSplashHelper.adManager?.bind(this)
-            lifecycleScope.launch {
-                AdSplashHelper.adManager?.adState?.collectLatest {
-                    when (it) {
-                        AdState.Idle -> Unit
-                        AdState.NavigateNext -> navigateToHome()
-                        AdState.NativeFullScr -> navigateToNativeFullScreen()
-                    }
-                }
-            }
-        }
     }
 
     private fun startTutorial() {
@@ -172,12 +146,6 @@ abstract class LanguageOpenActivity :
             }
         }
 
-    private fun navigateToNativeFullScreen() {
-        val intent = Intent(this, NativeSplashActivity::class.java).apply {
-            putExtra(Constant.SCREEN, Constant.LANGUAGE)
-        }
-        launcherResult.launch(intent)
-    }
 
     private fun navigateToHome() {
         val intent = Intent(this, MainActivity::class.java)

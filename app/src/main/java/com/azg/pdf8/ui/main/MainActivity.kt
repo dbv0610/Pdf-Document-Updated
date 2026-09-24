@@ -7,24 +7,15 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.ads.control.admob.AppOpenManager
-import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
-import com.az.inappupdate.AppUpdate
-import com.az.inappupdate.AppUpdateManager
-import com.azg.pdf8.ads.ads.banner.BannerPlacement
-import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
-import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.firstOpenApp
 import com.azg.pdf8.app.isUfo
 import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
-import com.azg.pdf8.database.RecentDao
 import com.azg.pdf8.databinding.ActivityMainBinding
 import com.azg.pdf8.dialog.DialogPermission
 import com.azg.pdf8.dialog.DialogRequestFullscreen
@@ -37,18 +28,15 @@ import com.azg.pdf8.ui.main.setting.SettingFragment
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.NavigationBar
 import com.dong.baselib.base.SystemUtil
-import com.dong.baselib.permission.Permission
 import com.dong.baselib.permission.getNotificationManager
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import kotlin.compareTo
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate, true) {
     companion object {
-         var isShowRateFirstView = MutableSharedFlow<Boolean>(1)
+        var isShowRateFirstView = MutableSharedFlow<Boolean>(1)
     }
 
     private var isShowRateClickBack = false
@@ -91,13 +79,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     private fun showFullScreenDialog() {
         DialogRequestFullscreen(this@MainActivity) {
-            AppOpenManager.getInstance().disableAdResumeByClickAction()
-            requestFullScreenIntent()
+                  requestFullScreenIntent()
         }.show()
     }
 
     private fun requestFullScreenIntent() {
-        AppOpenManager.getInstance().disableAdResumeByClickAction()
         val intent = Intent()
         intent.action = Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
         val uri = Uri.fromParts("package", packageName, null)
@@ -168,26 +154,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 requestRate()
             }.show()
         } else {
-            InterstitialAdManager.isCloseInterSplash.observe(this@MainActivity) {
-                if (it) {
+
                     if (!SystemUtil.isRatting(this@MainActivity) && firstOpenApp >= 2) {
                         requestRate()
                     } else {
                         checkPostNotification()
                     }
-                }
-            }
-        }
-        checkUpdate()
-        binding.bannerAdView
-            .setBannerPlacement(this@MainActivity, BannerPlacement.BANNER_ALL)
-            .requestBanner()
 
-        InterstitialAdManager.loadInterAll(this@MainActivity)
-        lifecycleScope.launch {
-            if (isShowRateFirstView.firstOrNull { it } == true) {
-                rattingDialog.show()
-            }
         }
     }
 
@@ -211,7 +184,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
     @SuppressLint("UseKtx")
     fun requestStoragePermission() {
-        AppOpenManager.getInstance().disableAdResumeByClickAction()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
@@ -252,54 +224,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 documentViewModel.loadDocuments(this@MainActivity)
             }
         } else {
-            NativeAdPreloadManager.preloadAd(
-                this@MainActivity,
-                NativePlacement.PERMISSION,
-                1,
-                false
-            )
+
         }
     }
-
-    private fun enableAdsResume() {
-        AppOpenManager.getInstance().enableAppResume()
-    }
-
-    private fun disableAdsResume() {
-        AppOpenManager.getInstance().disableAppResume()
-    }
-
     private var isCheckedUpdate = false
-    private fun checkUpdate() {
-        if (!isCheckedUpdate) {
-            isCheckedUpdate = true
-            AppUpdateManager.getInstance(this).checkUpdateApp(this) {
-                if (it) {
-                    disableAdsResume()
-                }
-            }
-        }
-    }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AppUpdate.REQ_CODE_VERSION_UPDATE) {
-            if (resultCode == Activity.RESULT_OK) {
-                disableAdsResume()
-            } else {
-                if (AppUpdateManager.getInstance(this)
-                        .getStyleUpdate() == AppUpdateManager.STYLE_FORCE_UPDATE
-                ) {
-                    disableAdsResume()
-                } else {
-                    enableAdsResume()
-                }
-            }
-            AppUpdateManager.getInstance(this).onCheckResultUpdate(requestCode, resultCode) {
-                if (it) {
-                    disableAdsResume()
-                }
-            }
-        }
-    }
 }

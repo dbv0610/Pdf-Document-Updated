@@ -5,13 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.ads.control.admob.AppOpenManager
 import com.azg.pdf8.R
 import com.azg.pdf8.app.rateApp
 import com.azg.pdf8.app.toastShort
+import com.azg.pdf8.databinding.DiallogRateAppBinding
 import com.dong.baselib.base.BaseDialog
 import com.dong.baselib.base.SystemUtil
-import com.azg.pdf8.databinding.DiallogRateAppBinding
 import com.dong.baselib.widget.RatingBar
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.visible
@@ -39,8 +38,6 @@ class RatingDialog(val activity: AppCompatActivity) :
                 SystemUtil.forceRated(activity)
             } else {
                 SystemUtil.forceRated(activity)
-
-                AppOpenManager.getInstance().disableAdResumeByClickAction()
                 composeEmail()
             }
         }

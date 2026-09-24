@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    alias(libs.plugins.azura.android.application)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.gmsGoogleServices)
     alias(libs.plugins.firebaseCrashlytics)
@@ -12,13 +12,13 @@ plugins {
 
 android {
     namespace = "com.azg.pdf8"
-    compileSdk = 35
+    compileSdk = 36
 
 
     defaultConfig {
         applicationId = "com.azg.pdf8"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = 26
+        targetSdk = 36
         versionCode = 3
         versionName = "1.0.2"
 
@@ -64,9 +64,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         viewBinding = true
         buildConfig = true
@@ -91,6 +88,12 @@ android {
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

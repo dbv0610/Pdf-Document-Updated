@@ -91,4 +91,5 @@
     <color name="color_default_crop_frame">#ffffff</color>
     <color name="color_E84749">#E84749</color>
     <color name="color_ba0508">#BA0508</color>
+    <color name="colorWhite">#FFFFFF</color>
 </resources>

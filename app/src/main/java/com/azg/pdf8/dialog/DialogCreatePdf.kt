@@ -2,9 +2,6 @@ package com.azg.pdf8.dialog
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
-import com.azg.pdf8.ads.ads.native.NativePlacement
-import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.databinding.CreatePdfDialogBinding
 import com.dong.baselib.base.BaseDialog
 import com.dong.baselib.widget.click
@@ -29,21 +26,8 @@ class DialogCreatePdf(context: Context, val eventHandle: CreateEventHandle) :
             dismiss()
         }
     }
-    val isSmallNative = remoteConfig.n110Config1.layout.contains("small")
-    fun attachActivity(activity: AppCompatActivity): DialogCreatePdf {
-        val nativeAdsWrapper by lazy {
-            NativeAdsWrapper(
-                activity = activity,
-                config = NativePlacement.PERMISSION,
-                lifecycleOwner = activity,
-                adContainer = { binding.flNativeAd },
-                shimmerView = { if (isSmallNative) binding.shimmerAdSmall.shimmerContainerNative else binding.shimmerAdMedium.shimmerContainerNative }
-            )
-        }
-        with(nativeAdsWrapper) {
-            setupNativeAd("native_permission")
-            requestAds()
-        }
+     fun attachActivity(activity: AppCompatActivity): DialogCreatePdf {
+
         return this@DialogCreatePdf
     }
 }

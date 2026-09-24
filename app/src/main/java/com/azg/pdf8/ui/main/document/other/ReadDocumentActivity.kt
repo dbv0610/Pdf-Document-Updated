@@ -24,8 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
-import com.azg.pdf8.ads.ads.banner.BannerPlacement
-import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
 import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
@@ -68,7 +66,11 @@ import com.wxiwei.office.ss.control.ExcelView
 import com.wxiwei.office.ss.other.FindingMgr
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
+import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.OnOpenFileListener
+import com.wxiwei.office.system.view
+import com.wxiwei.office.system.find
+import com.wxiwei.office.system.beans.CalloutView.drawingMode
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener
 import com.wxiwei.office.wp.control.WPFind
 import com.wxiwei.office.wp.control.Word
@@ -137,9 +139,6 @@ class ReadDocumentActivity :
             }
         )
         listDataSlideShow.value = mutableListOf()
-        binding.bannerAdView
-            .setBannerPlacement(this@ReadDocumentActivity, BannerPlacement.BANNER_ALL)
-            .requestBanner()
     }
 
     fun EditText.onActionSearch(actionSuccess: (query: String) -> Unit, actionFail: () -> Unit) {
@@ -238,14 +237,13 @@ class ReadDocumentActivity :
                                     viewModel.addToRecent(document.apply {
                                         lastTimeView = System.currentTimeMillis()
                                     })
-                                    InterstitialAdManager.showInterAll(this@ReadDocumentActivity) {
-                                        launchActivity<ReadPdfActivity>(
+                                      launchActivity<ReadPdfActivity>(
                                             hashMapOf(
                                                 Constant.ARG_MEDIA_MODEL to document,
                                                 Constant.RateWhenCreate to true
                                             )
                                         )
-                                    }
+
                                     finish()
                                 }
 
@@ -342,7 +340,7 @@ class ReadDocumentActivity :
         PdfPreviewAdapter() {
             try {
                 mainControl?.jumpToPage(it.index)
-                binding.txtNumberPage.text = "${it.index + 1}/${mainControl?.pageCount}"
+                binding.txtNumberPage.text = "${it.index + 1}/${mainControl?.getPageCount()}"
             } catch (e: Exception) {
                 toastShort(getString(R.string.error_go_to_page))
             }
@@ -356,7 +354,7 @@ class ReadDocumentActivity :
             when (view) {
                 is Word -> {
                     allHits.clear()
-                    view.find?.let { find ->
+                    view.getFind().let { find ->
                         wordFinder = find
                         processDialog.show()
                         try {
@@ -378,11 +376,11 @@ class ReadDocumentActivity :
                 is ExcelView -> {
                     allHits.clear()
                     view.let {
-                        val sheet = view.sheetView
+                        val sheet = view.getSheetView()
                         processDialog.show()
                         try {
-                            excelFinder = sheet.findingMgr
-                            sheet.findAll(keyword) {
+                            excelFinder = sheet?.getFindingMgr()
+                            sheet?.findAll(keyword) {
                                 it.forEachIndexed { index, cell ->
                                     allHits.add(index.toLong())
                                 }
@@ -400,7 +398,7 @@ class ReadDocumentActivity :
                 is Presentation -> {
                     allHits.clear()
                     view.let {
-                        pptFinder = view.find
+                        pptFinder = view.getFind()
                         processDialog.show()
                         try {
                             val listSearch = pptFinder?.findAll(keyword)
@@ -513,7 +511,7 @@ class ReadDocumentActivity :
         icViewPrev.click {
             currentIndexSearch.value =
                 ((currentIndexSearch.value ?: 0) - 1).coerceIn(0, listSearchData.value!!.size)
-            mainControl?.find?.findBackward()
+            mainControl?.getFind()?.findBackward()
         }
         icSearch.setOnClickListener {
             val key = edtSearch.text.toString().trim()
@@ -539,11 +537,16 @@ class ReadDocumentActivity :
     }
     @SuppressLint("ClickableViewAccessibility")
     private fun initReader(filePath: String, type: DocumentType) {
+        val start = android.os.SystemClock.uptimeMillis()
         val file = File(filePath)
+        OpenTrace.mark("activity.initReader.begin type=$type path=${file.absolutePath}")
+        OpenTrace.d("file clicked type=$type path=${file.absolutePath} exists=${file.exists()} isFile=${file.isFile} length=${file.length()}")
         mainControl = MainControl(this@ReadDocumentActivity)
         appFrame = AppFrame(applicationContext)
         appFrame?.post {
+            OpenTrace.d("starting MainControl.openFile path=${file.absolutePath}")
             mainControl?.openFile(file.absolutePath)
+            OpenTrace.mark("activity.initReader.openFile.return", start)
         }
         binding.officeViewer.addView(
             appFrame,
@@ -551,9 +554,13 @@ class ReadDocumentActivity :
             ViewGroup.LayoutParams.MATCH_PARENT
         )
         appFrame?.setOnTouchListener { _: View?, _: MotionEvent? -> false }
+        OpenTrace.d("reader host view added class=${appFrame?.javaClass?.name} size=${appFrame?.width}x${appFrame?.height}")
+        appFrame?.post {
+            OpenTrace.d("reader host view laid out size=${appFrame?.width}x${appFrame?.height}")
+        }
     }
 
-    override fun getActivity(): Activity? {
+    override fun getActivity(): Activity {
         return this@ReadDocumentActivity
     }
 
@@ -613,6 +620,8 @@ class ReadDocumentActivity :
     }
 
     override fun openFileFinish() {
+        val start = android.os.SystemClock.uptimeMillis()
+        OpenTrace.mark("activity.openFileFinish.begin")
         appFrame?.addView(
             mainControl?.view,
             LinearLayout.LayoutParams(
@@ -629,7 +638,7 @@ class ReadDocumentActivity :
             slideViewModel.listSlide.collectLatest {
                 adapter.submitList(it)
                 binding.txtNumberPage.text =
-                    "${(mainControl?.currentViewIndex ?: 0)}/${it.size}"
+                    "${mainControl?.getCurrentViewIndex() ?: 0}/${it.size}"
             }
         }
 
@@ -640,13 +649,14 @@ class ReadDocumentActivity :
 
             override fun onOpenFileFailure() = Unit
         })
+        OpenTrace.mark("activity.openFileFinish.end", start)
     }
 
     override fun updateToolsbarStatus() = Unit
     override fun setFindBackForwardState(state: Boolean) = Unit
     override fun getBottomBarHeight(): Int = 0
     override fun getTopBarHeight(): Int = 0
-    override fun getAppName(): String? = getString(R.string.app_name)
+    override fun getAppName(): String = getString(R.string.app_name)
     override fun getTemporaryDirectory(): File? {
         val file = getExternalFilesDir(null)
         return file ?: filesDir
@@ -672,15 +682,16 @@ class ReadDocumentActivity :
     override fun isTouchZoom(): Boolean = true
     override fun isZoomAfterLayoutForWord(): Boolean = true
     override fun getWordDefaultView(): Byte = WPViewConstant.PAGE_ROOT.toByte()
-    override fun getLocalString(resName: String?): String? =
+    override fun getLocalString(resName: String): String? =
         ResKit.instance().getLocalString(resName)
 
     override fun changeZoom() = Unit
     @SuppressLint("SetTextI18n")
     override fun changePage() {
+        OpenTrace.mark("activity.changePage.begin current=${mainControl?.getCurrentViewIndex()} count=${mainControl?.getPageCount()}")
         binding.txtNumberPage.text =
-            "${(mainControl?.currentViewIndex ?: 0)}/${mainControl?.pageCount}"
-        val page = (mainControl?.currentViewIndex ?: 0) - 1
+            "${mainControl?.getCurrentViewIndex() ?: 0}/${mainControl?.getPageCount() ?: 0}"
+        val page = (mainControl?.getCurrentViewIndex() ?: 0) - 1
         adapter.setCurrentPage(if (page <= 0) 0 else page)
         mainControl?.view?.let { view ->
             when (view) {
@@ -693,7 +704,9 @@ class ReadDocumentActivity :
                     }
                 }
                 is Presentation -> {
-                    if (lastRenderPptFile == 0 || lastRenderPptFile != mainControl?.pageCount) {
+                    OpenTrace.mark("activity.changePage.presentation")
+                    if (lastRenderPptFile == 0 || lastRenderPptFile != mainControl?.getPageCount()) {
+                        OpenTrace.mark("activity.changePage.startPptThumbnail count=${mainControl?.getPageCount()}")
                         lifecycleScope.launch(Dispatchers.IO) {
                             slideViewModel.initSlideShow(view) {
                                 lastRenderPptFile = it
@@ -722,14 +735,14 @@ class ReadDocumentActivity :
             }
 
             binding.txtNumberPage.text =
-                "${(mainControl?.currentViewIndex ?: 0)}/${mainControl?.pageCount}"
+                "${mainControl?.getCurrentViewIndex() ?: 0}/${mainControl?.getPageCount() ?: 0}"
         }
     }
 
     override fun error(errorCode: Int) = Unit
     override fun fullScreen(fullscreen: Boolean) = Unit
     override fun showProgressBar(visible: Boolean) = Unit
-    override fun updateViewImages(viewList: List<Int?>?) = Unit
+    override fun updateViewImages(viewList: List<Int?>) = Unit
     override fun isChangePage(): Boolean = true
     override fun setWriteLog(saveLog: Boolean) = Unit
     override fun isWriteLog(): Boolean = false

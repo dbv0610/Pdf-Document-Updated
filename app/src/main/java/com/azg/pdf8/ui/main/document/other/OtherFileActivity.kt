@@ -1,18 +1,8 @@
 package com.azg.pdf8.ui.main.document.other
 
-import android.content.res.ColorStateList
-import android.graphics.PorterDuff
-import android.view.View
-import android.widget.Button
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.RecentAdapter
-import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
-import com.azg.pdf8.ads.ads.native.LayoutSelector
-import com.azg.pdf8.ads.ads.native.NativeAdsWrapper
-import com.azg.pdf8.ads.ads.native.NativePlacement
-import com.azg.pdf8.app.remoteConfig
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityOtherBinding
 import com.azg.pdf8.databinding.PopupMenuActionBinding
@@ -24,9 +14,7 @@ import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.viewmodel.DocumentViewModel
 import com.azg.pdf8.widget.docColor
-import com.azg.pdf8.widget.pdfColor
 import com.azg.pdf8.widget.pptColor
-import com.azg.pdf8.widget.setBackgroundTintCompat
 import com.azg.pdf8.widget.xlsColor
 import com.dong.baselib.base.PopupDataHelper
 import com.dong.baselib.file.shareFileWithPath
@@ -58,37 +46,18 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
             currentPos = pos
         }) {
             viewModel.addToRecent(it.apply { it.lastTimeView = System.currentTimeMillis() })
-            InterstitialAdManager.showInterAll(this@OtherFileActivity) {
                 launchActivity<ReadDocumentActivity>(
                     hashMapOf(
                         Constant.DOCUMENT_TYPE to docKey,
                         Constant.ARG_MEDIA_MODEL to it
                     )
                 )
-            }
         }.attachLifecycle(this@OtherFileActivity)
     }
     var documentType = DocumentType.Doc
     var docKey = Constant.Doc
     var popupHerper: PopupDataHelper<PopupMenuActionBinding, RecentDocument>? = null
-    val nativeAdsWrapper by lazy {
-        NativeAdsWrapper(
-            activity = this@OtherFileActivity,
-            config = NativePlacement.NATIVE_DOC,
-            lifecycleOwner = this,
-            adContainer = { binding.flNativeAd },
-            shimmerView = { binding.shimmerNativeAd.shimmerContainerNative }
-        )
-    }
 
-    fun requestAds(color: Int) {
-        with(nativeAdsWrapper) {
-            setupNativeAd("native_document_file" ) {
-                findViewById<View>(R.id.ad_call_to_action)?.setBackgroundTintCompat(color)
-            }
-            requestAds()
-        }
-    }
 
     override fun initialize() {
         docKey = getData<String>(Constant.DOCUMENT_TYPE).toString()
@@ -155,7 +124,7 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                     rcvListData.gone()
                     lnNoData.visible()
                     binding.flNativeAd.gone()
-                    nativeAdsWrapper.cancelRequest()
+
                 } else {
                     rcvListData.visible()
                     lnNoData.gone()
@@ -169,13 +138,8 @@ class OtherFileActivity : BaseActivity<ActivityOtherBinding>(ActivityOtherBindin
                         }
                     }
                     binding.flNativeAd.visible()
-                    requestAds(
-                        when (documentType) {
-                            DocumentType.Doc -> docColor
-                            DocumentType.Excel -> xlsColor
-                            else -> pptColor
-                        }
-                    )
+
+
                 }
             }
         }

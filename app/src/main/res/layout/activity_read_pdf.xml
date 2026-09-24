@@ -130,7 +130,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lnHeader">
 
-        <com.github.barteksc.pdfviewer.PDFView
+        <FrameLayout
             android:id="@+id/pdfRead"
             android:layout_width="0dp"
             android:layout_height="0dp"

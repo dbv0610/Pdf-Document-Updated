@@ -4,12 +4,8 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.ag.sampleadsfirstflow.ads.native.NativeAdPreloadManager
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.CreatePdfAdapter
-import com.azg.pdf8.ads.ads.banner.BannerPlacement
-import com.azg.pdf8.ads.ads.interstitial.InterstitialAdManager
-import com.azg.pdf8.ads.ads.native.NativePlacement
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityCreateBinding
@@ -56,13 +52,8 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
     private val createDialog by lazy {
         DialogCreatePdf(this@CreateActivity, object : CreateEventHandle {
             override fun createImage() {
-                NativeAdPreloadManager.preloadAd(
-                    this@CreateActivity,
-                    NativePlacement.PERMISSION,
-                    2,
-                    false
-                )
-                InterstitialAdManager.showInterAll(this@CreateActivity) {
+
+
                     launcherForResult<ChooseImageActivity>(
                         hashMapOf(
                             Constant.KEY_ACTION to Constant.IMAGE_ADD_LIST
@@ -78,12 +69,11 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                 }
                             }
                     }
-                }
+
             }
 
             override fun scanDocument() {
                 if (permission.checkGrantedCamera) {
-                    InterstitialAdManager.showInterAll(this@CreateActivity) {
                         launcherForResult<CameraActivity>(hashMapOf(Constant.SCREEN_ACTION to Constant.CAPTURE_ADD)) {
                             it.getResultData<String>(Constant.CAPTURE_ADD)?.let { path ->
                                 val randomId = Random.nextInt()
@@ -95,7 +85,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                 binding.progressBar.gone()
                             }
                         }
-                    }
+
                 } else {
                     requestCameraLauncher.launch(permission.cameraRequest)
                 }
@@ -167,7 +157,6 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                 docViewModel.addToRecent(document.apply {
                                     lastTimeView = System.currentTimeMillis()
                                 })
-                                InterstitialAdManager.showInterAll(this@CreateActivity) {
                                     launchActivity<ReadPdfActivity>(
                                         hashMapOf(
                                             Constant.ARG_MEDIA_MODEL to document,
@@ -175,7 +164,7 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
                                         )
                                     )
                                     finish()
-                                }
+
                             }
                         }
 
@@ -247,9 +236,6 @@ class CreateActivity : BaseActivity<ActivityCreateBinding>(ActivityCreateBinding
         adapter.dragStartListener = { viewHolder ->
             touchHelper.startDrag(viewHolder)
         }
-        binding.bannerAdView
-            .setBannerPlacement(this@CreateActivity, BannerPlacement.BANNER_ALL)
-            .requestBanner()
     }
 
     override fun ActivityCreateBinding.setData() {

@@ -16,11 +16,14 @@ import com.dong.baselib.widget.pink
 import com.wxiwei.office.pg.control.Presentation
 import com.wxiwei.office.ss.control.ExcelView
 import com.wxiwei.office.ss.model.baseModel.Row
+import com.wxiwei.office.ss.model.baseModel.Sheet
+import com.wxiwei.office.ss.view.SheetView
 import com.wxiwei.office.wp.control.Word
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
@@ -41,8 +44,14 @@ class ConvertViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(StateLoadData.Loading)
     val uiState = _uiState.asStateFlow()
+    private var slideShowJob: Job? = null
 
     fun initSlideShow(presentation: Presentation,dataSize: (Int)-> Unit) {
+        // Rendering every PPT slide and the explicit GC/sleeps below are expensive.
+        // This method is called from a lifecycle coroutine, which runs on Main by
+        // default, so the whole thumbnail pipeline must be dispatched explicitly.
+        if (slideShowJob?.isActive == true) return
+        slideShowJob = viewModelScope.launch(Dispatchers.Default) {
         _uiState.value = StateLoadData.Loading
         val listSlide = mutableListOf<DocumentPage>()
         val runtime = Runtime.getRuntime()
@@ -51,8 +60,8 @@ class ConvertViewModel : ViewModel() {
         val initialMemory = runtime.totalMemory() - runtime.freeMemory()
         Log.e(TAG, "Initial memory usage: ${initialMemory / 1024 / 1024}MB")
 
-        val count = presentation.pgModel.slideCount
-        val realCount = presentation.pgModel.getRealSlideCount()
+        val count = presentation.getPGModel()!!.getSlideCount()
+        val realCount = presentation.getPGModel()!!.getRealSlideCount()
         Log.e(TAG, "SlideShowViewModel - initSlideShow: total slides: $count")
         Log.e(TAG, "SlideShowViewModel - initSlideShow: real slides: $realCount")
 
@@ -72,7 +81,7 @@ class ConvertViewModel : ViewModel() {
             for (i in batchStart until batchEnd) {
                 processedCount++
                 try {
-                    val pgSlide = presentation.pgModel.getSlide(i)
+                    val pgSlide = presentation.getPGModel()!!.getSlide(i)
                     if (pgSlide != null) {
                         Log.i(TAG, "Slide $i: pgSlide type: ${pgSlide.javaClass.name}")
 
@@ -125,6 +134,7 @@ class ConvertViewModel : ViewModel() {
         Log.e(TAG, "Total slides processed: $processedCount")
         Log.e(TAG, "Successfully created slides: $successfulCount")
         Log.e(TAG, "Final list size: ${listSlide.size}")
+        }
     }
 
 
@@ -138,7 +148,7 @@ class ConvertViewModel : ViewModel() {
             val runtime = Runtime.getRuntime()
             val initialMem = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024
             Log.e(TAG, "initDocSlide: Initial memory usage: ${initialMem}MB")
-            val totalPages = view.pageCount
+            val totalPages = view.getPageCount()
             if (totalPages <= 10) {
                 val accumulator = mutableListOf<DocumentPage>()
                 for (i in 0..totalPages) {
@@ -225,28 +235,29 @@ class ConvertViewModel : ViewModel() {
     fun initXlsPages(view: ExcelView, callback: (Bitmap?) -> Unit = {}) {
         viewModelScope.launch(Dispatchers.Default) {
             val thumbBmp = try {
-                val sheet = view.sheetView.spreadsheet.sheetView.currentSheet
-                val activeRow = sheet.physicalNumberOfRows
-                var activeColumn = 0
+                val sheetView = view.getSheetView() ?: return@launch
+                val sheet = sheetView.getCurrentSheet() ?: return@launch
+                val activeRow = sheet.getPhysicalNumberOfRows()
+                var activeColumn: Int? = 0
 
                 for (i in 0 .. activeRow-1){
-                    if( sheet.getRow(i).lastCol !=null){
-                        activeColumn= sheet.getRow(i).lastCol
+                    if( sheet.getRow(i)?.getLastCol() !=null){
+                        activeColumn= sheet.getRow(i)?.getLastCol()
                         break
                     }
                 }
 
                 var currentSheetWidth = 0f
                 var currentSheetHeight = 0f
-                for (i in 0..activeColumn + 1) {
+                for (i in 0..(activeColumn?:0) + 1) {
                     currentSheetWidth += sheet.getColumnPixelWidth(i)
                 }
                 for (i in 0..activeRow + 1) {
                     val row: Row = sheet.getRow(i) ?: continue
-                    val rowHeight: Float = row.rowPixelHeight
+                    val rowHeight: Float = row.getRowPixelHeight()
                     Log.d(
                         TAG,
-                        "Row info: ${row.toString()} --${row.rowPixelHeight}"
+                        "Row info: ${row.toString()} --${row.getRowPixelHeight()}"
                     )
                     currentSheetHeight += rowHeight
                 }
@@ -254,12 +265,7 @@ class ConvertViewModel : ViewModel() {
                     TAG,
                     "Data is active: $activeRow-$activeColumn"
                 )
-                val fullBitmap = view
-                    .sheetView
-                    .spreadsheet
-                    .sheetView
-                    .getThumbnail(sheet, currentSheetWidth.toInt(), currentSheetHeight.toInt(), 1f)
-                view.sheetView.spreadsheet.control.view
+                val fullBitmap = sheetView.getThumbnail(sheet, currentSheetWidth.toInt(), currentSheetHeight.toInt(), 1f)
                 fullBitmap
             } catch (t: Throwable) {
                 Log.e(TAG, "initXlsPage failed: ", t)

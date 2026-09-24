@@ -1,23 +1,25 @@
 package com.azg.pdf8.ui.main.document.pdf
 
-import android.animation.ValueAnimator
+import android.app.Activity
+import android.os.Bundle
+import android.view.MotionEvent
+import android.view.ViewGroup
+import androidx.core.view.doOnLayout
+import com.wxiwei.office.pdf.PDFView
+import com.wxiwei.office.system.IMainFrame
+import com.wxiwei.office.system.MainControl
+import com.wxiwei.office.system.OnOpenFileListener
+import com.wxiwei.office.res.ResKit
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.RectF
-import android.print.PrintManager
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.FrameLayout
-import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -25,7 +27,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.azg.pdf8.R
 import com.azg.pdf8.adapter.PdfPreviewAdapter
-import com.azg.pdf8.ads.ads.banner.BannerPlacement
 import com.azg.pdf8.app.isInternetAvailable
 import com.azg.pdf8.app.toastShort
 import com.azg.pdf8.base.BaseActivity
@@ -38,21 +39,15 @@ import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.utils.Constant.ARG_MEDIA_MODEL
 import com.azg.pdf8.utils.Constant.ARG_SEARCH_WITH_PAGE
 import com.azg.pdf8.viewmodel.DataResponse
-import com.azg.pdf8.widget.PdfHighlightView
 import com.dong.baselib.api.parcelable
 import com.dong.baselib.base.PopupHelper
 import com.dong.baselib.base.SystemUtil
 import com.dong.baselib.string.fileName
 import com.dong.baselib.widget.click
-import com.dong.baselib.widget.dimenSdp
-import com.dong.baselib.widget.doOnVisibilityChange
-import com.dong.baselib.widget.dpToPx
 import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.navigationBarHeight
 import com.dong.baselib.widget.paddingRight
 import com.dong.baselib.widget.visible
-import com.github.barteksc.pdfviewer.PDFView
-import com.shockwave.pdfium.util.SizeF
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -60,14 +55,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
 
-class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBinding::inflate) {
+class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBinding::inflate), IMainFrame {
     private val viewModel: ReadPdfViewModel by viewModel()
-    private var newContext: Context? = null
-    private var totalPage = 1
-    val pageSizes = mutableListOf<SizeF>()
-    private var pdfFile: File? = null
+    private var mainControl: MainControl? = null
+    private var pdfView: PDFView? = null
+    private var pendingPage: Int? = null
+    private var readerDisposed = false
     private val mediaModel by lazy {
         runCatching {
             intent.parcelable<RecentDocument>(ARG_MEDIA_MODEL)
@@ -85,16 +79,13 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             viewModel.setMediaModel(it)
             loadPdf()
             viewModel.stateFavoriteCurrent(viewModel.pdfPath)
-            val pdfUri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.provider",
-                File(it.path)
-            )
-            viewModel.renderPdf(this, pdfUri)
             binding.rcvFrameData.apply {
                 layoutManager = LinearLayoutManager(context, VERTICAL, false)
                 adapter = this@ReadPdfActivity.adapter
             }
+        } ?: run {
+            showReadError()
+            return
         }
 
         getData<Boolean?>(Constant.RateWhenCreate)?.let {
@@ -109,12 +100,8 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 binding.root.paddingRight(navigationBarHeight * 1.15)
             }
-            lifecycleScope.launch {
-                viewModel.pageViewState.collect {
-                    binding.lnThumbNail.isVisible = it != PageViewType.Thumbnail
-                    binding.lnPageByPage.isVisible = it != PageViewType.PageByPage
-                }
-            }
+            binding.lnThumbNail.isVisible = viewModel.pageViewState.value != PageViewType.Thumbnail
+            binding.lnPageByPage.isVisible = viewModel.pageViewState.value != PageViewType.PageByPage
             binding.lnToPdf.gone()
             binding.lnPageByPage.click {
                 viewModel.setPageState(PageViewType.PageByPage)
@@ -136,9 +123,7 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         viewModel.pagesState.observe(this) { pages ->
             adapter.submitList(pages)
         }
-        binding.bannerAdView
-            .setBannerPlacement(this@ReadPdfActivity, BannerPlacement.BANNER_ALL)
-            .requestBanner()
+
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -174,7 +159,10 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         }
         lifecycleScope.launch(Dispatchers.Main) {
             viewModel.searchQuery.collect { state ->
-                if (state is DataResponse.DataSuccess) {
+                if (state is DataResponse.DataError) {
+                    loadingDialog.dismiss()
+                    toastShort(getString(R.string.search_error_occurred))
+                } else if (state is DataResponse.DataSuccess) {
                     if (state.data.isNotEmpty()) {
                         loadingDialog.dismiss()
                         val intent = Intent(this@ReadPdfActivity, SearchResultActivity::class.java)
@@ -230,11 +218,6 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         })
     }
 
-    override fun attachBaseContext(newBase: Context?) {
-        super.attachBaseContext(newBase)
-        newContext = newBase
-    }
-
     fun EditText.onActionSearch(actionSuccess: (query: String) -> Unit, actionFail: () -> Unit) {
         setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -254,61 +237,138 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
         }
     }
 
-    private val jumpPending = AtomicInteger(-1)
-
-    private fun jumpToPageWhenReady(page: Int) {
-        if (binding.pdfRead.isLaidOut) {
-            adapter.setCurrentPage(page)
-            binding.pdfRead.jumpTo(page, true)
-        } else {
-            jumpPending.set(page)
-            binding.pdfRead.apply {
-                onLayoutReady {
-                    if (jumpPending.get() > -1) {
-                        adapter.setCurrentPage(jumpPending.get())
-                        jumpTo(jumpPending.get(), true)
-                        jumpPending.set(-1)
-                    }
-                }
-            }
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        savedInstanceState?.let { viewModel.setPage(it.getInt("pdf_page", 1)) }
+        super.onCreate(savedInstanceState)
     }
 
-    fun View.onLayoutReady(action: () -> Unit) {
-        viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                viewTreeObserver.removeOnGlobalLayoutListener(this)
-                action()
-            }
-        })
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("pdf_page", viewModel.page)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun jumpToPageWhenReady(page: Int) {
+        pendingPage = page
+        val view = pdfView ?: return
+        view.doOnLayout {
+            if (readerDisposed || pdfView !== view) return@doOnLayout
+            val target = pendingPage ?: return@doOnLayout
+            val count = view.getPageCount()
+            if (count <= 0) return@doOnLayout
+            pendingPage = null
+            val index = target.coerceIn(0, count - 1)
+            view.showPDFPageForIndex(index)
+            viewModel.setPage(index + 1)
+            adapter.setCurrentPage(index)
+            binding.txtNumberPage.text = "${index + 1}/$count"
+        }
     }
 
     private fun loadPdf() {
-        viewModel.pdfPath?.let {
-            pdfFile = File(it)
-            binding.pdfRead.fromFile(pdfFile)
-                .enableAnnotationRendering(true)
-                .defaultPage(viewModel.page - 1)
-                .spacing(8)
-                .pageFling(true)
-                .enableSwipe(true)
-                .swipeHorizontal(false)
-                .enableDoubletap(false)
-                .nightMode(viewModel.nightMode)
-                .onLoad { pageCount ->
-                    pageSizes.clear()
-                    for (i in 0 until pageCount) {
-                        pageSizes.add(binding.pdfRead.getPageSize(i))
-                    }
-                    totalPage = pageCount
-                    binding.txtNumberPage.text = "${viewModel.page}/$pageCount"
-                }
-                .onPageChange { page, pageCount ->
-                    val content = "${page + 1}/$pageCount"
-                    binding.txtNumberPage.text = content
-                }.load()
+        val file = viewModel.pdfPath?.let(::File)
+        if (file == null || !file.isFile || !file.canRead()) {
+            showReadError()
+            return
         }
+        mainControl = MainControl(this).also { control ->
+            control.setOpenFileListener(object : OnOpenFileListener {
+                override fun onOpenFileSuccess() = Unit
+                override fun onOpenFileFailure() = showReadError()
+            })
+            control.openFile(file.absolutePath)
+        }
+    }
+
+    private fun showReadError() {
+        if (isFinishing || readerDisposed) return
+        loadingDialog.dismiss()
+        toastShort(getString(R.string.some_errors_occurred_please_try_again))
+        finish()
+    }
+
+    override fun openFileFinish() {
+        if (isFinishing || readerDisposed) return
+        val view = mainControl?.getView() as? PDFView ?: return showReadError()
+        if (pdfView === view) return
+        pdfView = view
+        binding.pdfRead.addView(view, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        jumpToPageWhenReady(pendingPage ?: (viewModel.page - 1))
+        viewModel.pdfPath?.let { path ->
+            val uri = FileProvider.getUriForFile(this, "${packageName}.provider", File(path))
+            viewModel.renderPdf(applicationContext, uri)
+        }
+    }
+
+    override fun changePage() {
+        val view = pdfView ?: return
+        if (readerDisposed || pendingPage != null) return
+        val count = view.getPageCount()
+        if (count <= 0) return
+        val page = view.getCurrentPageNumber().coerceIn(1, count)
+        viewModel.setPage(page)
+        binding.txtNumberPage.text = "$page/$count"
+        // PDFView calls this while drawing; update the RecyclerView afterwards.
+        binding.rcvFrameData.post {
+            if (!readerDisposed) adapter.setCurrentPage(viewModel.page - 1)
+        }
+    }
+
+    override fun getActivity(): Activity = this
+    override fun doActionEvent(actionID: Int, obj: Any?): Boolean = false
+    override fun updateToolsbarStatus() = Unit
+    override fun setFindBackForwardState(state: Boolean) = Unit
+    override fun getBottomBarHeight(): Int = 0
+    override fun getTopBarHeight(): Int = 0
+    override fun getAppName(): String = getString(R.string.app_name)
+    override fun getTemporaryDirectory(): File = cacheDir
+    override fun onEventMethod(v: View?, e1: MotionEvent?, e2: MotionEvent?,
+        xValue: Float, yValue: Float, eventMethodType: Byte): Boolean = false
+    override fun isDrawPageNumber(): Boolean = false
+    override fun isShowZoomingMsg(): Boolean = false
+    override fun isPopUpErrorDlg(): Boolean = true
+    override fun isShowPasswordDlg(): Boolean = true
+    override fun isShowProgressBar(): Boolean = true
+    override fun isShowFindDlg(): Boolean = false
+    override fun isShowTXTEncodeDlg(): Boolean = false
+    override fun getTXTDefaultEncode(): String = "UTF-8"
+    override fun isTouchZoom(): Boolean = !viewModel.zoomLock
+    override fun isZoomAfterLayoutForWord(): Boolean = false
+    override fun getWordDefaultView(): Byte = 0
+    override fun getLocalString(resName: String): String? = ResKit.instance().getLocalString(resName)
+    override fun changeZoom() = Unit
+    override fun completeLayout() = Unit
+    override fun error(errorCode: Int) = showReadError()
+    override fun fullScreen(fullscreen: Boolean) = Unit
+    override fun showProgressBar(visible: Boolean) = Unit
+    override fun updateViewImages(viewList: List<Int?>) = Unit
+    override fun isChangePage(): Boolean = true
+    override fun setWriteLog(saveLog: Boolean) = Unit
+    override fun isWriteLog(): Boolean = false
+    override fun setThumbnail(isThumbnail: Boolean) = Unit
+    override fun isThumbnail(): Boolean = false
+    override fun getViewBackground(): Any = getColor(R.color.gray_bg)
+    override fun setIgnoreOriginalSize(ignoreOriginalSize: Boolean) = Unit
+    override fun isIgnoreOriginalSize(): Boolean = false
+    override fun getPageListViewMovingPosition(): Byte =
+        if (viewModel.isHorizontal) 0 else 1
+
+    override fun dispose() {
+        if (readerDisposed) return
+        readerDisposed = true
+        pendingPage = null
+        binding.pdfRead.removeAllViews()
+        pdfView = null
+        mainControl?.setOpenFileListener(null)
+        mainControl?.dispose()
+        mainControl = null
+    }
+
+    override fun onDestroy() {
+        loadingDialog.dismiss()
+        dispose()
+        super.onDestroy()
     }
 
     override fun backPressed() {

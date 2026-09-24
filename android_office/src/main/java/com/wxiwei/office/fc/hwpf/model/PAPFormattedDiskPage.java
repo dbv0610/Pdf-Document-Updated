@@ -55,6 +55,7 @@ public final class PAPFormattedDiskPage extends FormattedDiskPage {
     /**
      * @deprecated Use {@link #PAPFormattedDiskPage()} instead
      */
+    @Deprecated
     public PAPFormattedDiskPage( byte[] dataStream )
     {
         this();
@@ -71,6 +72,7 @@ public final class PAPFormattedDiskPage extends FormattedDiskPage {
      *             {@link #PAPFormattedDiskPage(byte[],byte[],int,int,TextPieceTable,boolean)}
      *             instead
      */
+    @Deprecated
     public PAPFormattedDiskPage( byte[] documentStream, byte[] dataStream,
             int offset, int fcMin, TextPieceTable tpt )
     {

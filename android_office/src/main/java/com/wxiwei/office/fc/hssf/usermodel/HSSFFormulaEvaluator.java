@@ -54,6 +54,7 @@ public class HSSFFormulaEvaluator implements FormulaEvaluator
     /**
      * @deprecated (Sep 2008) HSSFSheet parameter is ignored
      */
+    @Deprecated
     public HSSFFormulaEvaluator(ASheet sheet, AWorkbook workbook)
     {
         this(workbook);
@@ -123,6 +124,7 @@ public class HSSFFormulaEvaluator implements FormulaEvaluator
      * Does nothing
      * @deprecated (Aug 2008) - not needed, since the current row can be derived from the cell
      */
+    @Deprecated
     public void setCurrentRow(HSSFRow row)
     {
         // do nothing

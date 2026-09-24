@@ -27,6 +27,7 @@ public final class BlankEval implements ValueEval {
 	/**
 	 * @deprecated (Nov 2009) use {@link #instance}
 	 */
+	@Deprecated
 	public static final BlankEval INSTANCE = instance;
 
 	private BlankEval() {

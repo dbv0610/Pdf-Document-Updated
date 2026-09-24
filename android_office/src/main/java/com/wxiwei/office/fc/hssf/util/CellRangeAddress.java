@@ -27,6 +27,7 @@ import com.wxiwei.office.fc.hssf.record.SelectionRecord;
  * @deprecated use {@link com.wxiwei.office.fc.ss.util.HSSFCellRangeAddress}
  * @author Dragos Buleandra (dragos.buleandra@trade2b.ro)
  */
+@Deprecated
 public class CellRangeAddress extends com.wxiwei.office.fc.ss.util.HSSFCellRangeAddress {
 
 	public CellRangeAddress(int firstRow, int lastRow, int firstCol, int lastCol) {

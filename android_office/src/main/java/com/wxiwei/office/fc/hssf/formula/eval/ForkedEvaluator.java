@@ -63,6 +63,7 @@ public final class ForkedEvaluator {
 	/**
 	 * @deprecated (Sep 2009) (reduce overloading) use {@link #create(Workbook, IStabilityClassifier, UDFFinder)}
 	 */
+	@Deprecated
 	public static ForkedEvaluator create(Workbook wb, IStabilityClassifier stabilityClassifier) {
 		return create(wb, stabilityClassifier, null);
 	}

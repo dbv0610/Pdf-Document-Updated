@@ -460,6 +460,7 @@ public final class RowRecordsAggregate extends RecordAggregate {
 	/**
 	 * @deprecated use {@link #getCellValueIterator()} instead
 	 */
+	@Deprecated
 	public CellValueRecordInterface[] getValueRecords() {
 		return _valuesAgg.getValueRecords();
 	}

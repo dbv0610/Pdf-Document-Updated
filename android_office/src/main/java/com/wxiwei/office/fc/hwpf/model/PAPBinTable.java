@@ -60,6 +60,7 @@ public class PAPBinTable
      *             {@link #PAPBinTable(byte[],byte[],byte[],int,int,int,TextPieceTable,boolean)}
      *             instead
      */
+    @Deprecated
     @SuppressWarnings( "unused" )
     public PAPBinTable( byte[] documentStream, byte[] tableStream,
             byte[] dataStream, int offset, int size, int fcMin,

@@ -63,6 +63,7 @@ public class CHPBinTable
      *             {@link #CHPBinTable(byte[],byte[],int,int,TextPieceTable)}
      *             instead
      */
+    @Deprecated
     public CHPBinTable(byte[] documentStream, byte[] tableStream, int offset, int size, int fcMin,
         TextPieceTable tpt)
     {

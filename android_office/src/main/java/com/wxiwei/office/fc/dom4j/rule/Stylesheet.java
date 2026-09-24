@@ -217,6 +217,7 @@ public class Stylesheet
      * @throws Exception
      *             if something goes wrong
      */
+    @Deprecated
     public void applyTemplates(Object input) throws Exception
     {
         applyTemplates(input, this.modeName);

@@ -61,6 +61,7 @@ public final class CHPFormattedDiskPage extends FormattedDiskPage
      *             {@link #CHPFormattedDiskPage(byte[],int,TextPieceTable)}
      *             instead
      */
+    @Deprecated
     @ SuppressWarnings("unused")
     public CHPFormattedDiskPage(byte[] documentStream, int offset, int fcMin, TextPieceTable tpt)
     {

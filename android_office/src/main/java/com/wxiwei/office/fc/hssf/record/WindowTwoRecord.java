@@ -202,6 +202,7 @@ public final class WindowTwoRecord extends StandardRecord {
      * deprecated May 2008
      * @deprecated use setActive()
      */
+    @Deprecated
     public void setPaged(boolean p) {
     	setActive(p);
     }
@@ -400,6 +401,7 @@ public final class WindowTwoRecord extends StandardRecord {
      * deprecated May 2008
      * @deprecated use isActive()
      */
+    @Deprecated
     public boolean getPaged() {
         return isActive();
     }

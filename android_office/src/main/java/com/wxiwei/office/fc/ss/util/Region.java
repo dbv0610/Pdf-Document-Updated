@@ -26,6 +26,7 @@ package com.wxiwei.office.fc.ss.util;
  * @author  Andrew C. Oliver acoliver at apache dot org
  * @deprecated (Aug-2008) use {@link HSSFCellRangeAddress}
  */
+@Deprecated
 public class Region implements Comparable<Region> {
 	private int   _rowFrom;
 	private short _colFrom;

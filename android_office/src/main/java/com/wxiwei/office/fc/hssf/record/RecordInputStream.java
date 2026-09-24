@@ -387,6 +387,7 @@ public final class RecordInputStream implements LittleEndianInput {
    *  @deprecated Best to write a input stream that wraps this one where there is
    *  special sub record that may overlap continue records.
    */
+  @Deprecated
   public byte[] readAllContinuedRemainder() {
     //Using a ByteArrayOutputStream is just an easy way to get a
     //growable array of the data.

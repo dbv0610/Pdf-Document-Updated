@@ -101,6 +101,7 @@ public final class HSSFConditionalFormatting  implements ConditionalFormatting
 	/**
 	 * @deprecated (Aug-2008) use {@link HSSFConditionalFormatting#getFormattingRanges()}
 	 */
+	@Deprecated
 	public Region[] getFormattingRegions()
 	{
 		HSSFCellRangeAddress[] cellRanges = getFormattingRanges();

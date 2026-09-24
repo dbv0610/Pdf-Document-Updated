@@ -23,6 +23,7 @@ import com.wxiwei.office.fc.dom4j.Element;
  * 
  * @deprecated THIS CLASS WILL BE REMOVED IN dom4j-1.6 !!
  */
+@Deprecated
 public class ElementIterator extends FilterIterator
 {
     public ElementIterator(Iterator proxy)

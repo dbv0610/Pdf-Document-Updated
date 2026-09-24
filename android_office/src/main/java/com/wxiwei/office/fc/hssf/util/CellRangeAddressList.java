@@ -34,6 +34,7 @@ import com.wxiwei.office.fc.hssf.record.RecordInputStream;
  * 
  * @author Dragos Buleandra (dragos.buleandra@trade2b.ro)
  */
+@Deprecated
 public class CellRangeAddressList extends com.wxiwei.office.fc.ss.util.CellRangeAddressList {
 	public CellRangeAddressList(int firstRow, int lastRow, int firstCol, int lastCol) {
 		super(firstRow,lastRow,firstCol,lastCol);

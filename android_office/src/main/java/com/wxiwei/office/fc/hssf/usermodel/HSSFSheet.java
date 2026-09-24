@@ -430,6 +430,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #setColumnHidden(int, boolean)}
      */
+    @Deprecated
     public void setColumnHidden(short columnIndex, boolean hidden)
     {
         setColumnHidden(columnIndex & 0xFFFF, hidden);
@@ -438,6 +439,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #isColumnHidden(int)}
      */
+    @Deprecated
     public boolean isColumnHidden(short columnIndex)
     {
         return isColumnHidden(columnIndex & 0xFFFF);
@@ -446,6 +448,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #setColumnWidth(int, int)}
      */
+    @Deprecated
     public void setColumnWidth(short columnIndex, short width)
     {
         setColumnWidth(columnIndex & 0xFFFF, width & 0xFFFF);
@@ -454,6 +457,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #getColumnWidth(int)}
      */
+    @Deprecated
     public short getColumnWidth(short columnIndex)
     {
         return (short)getColumnWidth(columnIndex & 0xFFFF);
@@ -462,6 +466,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #setDefaultColumnWidth(int)}
      */
+    @Deprecated
     public void setDefaultColumnWidth(short width)
     {
         setDefaultColumnWidth(width & 0xFFFF);
@@ -675,6 +680,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Aug-2008) use <tt>CellRangeAddress</tt> instead of <tt>Region</tt>
      */
+    @Deprecated
     public int addMergedRegion(com.wxiwei.office.fc.ss.util.Region region)
     {
         return _sheet.addMergedRegion(region.getRowFrom(), region.getColumnFrom(),
@@ -784,6 +790,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
      * TODO: Boolean not needed, remove after next release
      * @deprecated (Mar-2008) use getVerticallyCenter() instead
      */
+    @Deprecated
     public boolean getVerticallyCenter(boolean value)
     {
         return getVerticallyCenter();
@@ -860,6 +867,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Aug-2008) use {@link HSSFSheet#getMergedRegion(int)}
      */
+    @Deprecated
     public Region getMergedRegionAt(int index)
     {
         HSSFCellRangeAddress cra = getMergedRegion(index);
@@ -1961,6 +1969,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #setColumnGroupCollapsed(int, boolean)}
      */
+    @Deprecated
     public void setColumnGroupCollapsed(short columnNumber, boolean collapsed)
     {
         setColumnGroupCollapsed(columnNumber & 0xFFFF, collapsed);
@@ -1969,6 +1978,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #groupColumn(int, int)}
      */
+    @Deprecated
     public void groupColumn(short fromColumn, short toColumn)
     {
         groupColumn(fromColumn & 0xFFFF, toColumn & 0xFFFF);
@@ -1977,6 +1987,7 @@ public final class HSSFSheet implements com.wxiwei.office.fc.ss.usermodel.Sheet
     /**
      * @deprecated (Sep 2008) use {@link #ungroupColumn(int, int)}
      */
+    @Deprecated
     public void ungroupColumn(short fromColumn, short toColumn)
     {
         ungroupColumn(fromColumn & 0xFFFF, toColumn & 0xFFFF);

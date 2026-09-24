@@ -84,6 +84,7 @@ public interface XPath extends NodeFilter
      * @deprecated please use evaluate(Object) instead. WILL BE REMOVED IN
      *             dom4j-1.6 !!
      */
+    @Deprecated
     Object selectObject(Object context);
 
     /**

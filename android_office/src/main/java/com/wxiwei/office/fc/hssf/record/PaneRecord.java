@@ -38,6 +38,7 @@ public final class PaneRecord extends StandardRecord {
     public final static short       ACTIVE_PANE_LOWER_LEFT         = 2;
     // TODO - remove obsolete field (it was deprecated May-2008 v3.1)
     /** @deprecated use ACTIVE_PANE_UPPER_LEFT */
+    @Deprecated
     public final static short       ACTIVE_PANE_UPER_LEFT          = 3;
     public final static short       ACTIVE_PANE_UPPER_LEFT         = 3;
 

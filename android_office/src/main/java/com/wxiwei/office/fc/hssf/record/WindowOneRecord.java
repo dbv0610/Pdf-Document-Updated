@@ -186,6 +186,7 @@ public final class WindowOneRecord extends StandardRecord {
      * deprecated May 2008
      * @deprecated - Misleading name - use setActiveSheetIndex() 
      */
+    @Deprecated
     public void setSelectedTab(short s)
     {
         setActiveSheetIndex(s);
@@ -204,6 +205,7 @@ public final class WindowOneRecord extends StandardRecord {
      * deprecated May 2008
      * @deprecated - Misleading name - use setFirstVisibleTab() 
      */
+    @Deprecated
     public void setDisplayedTab(short t) {
         setFirstVisibleTab(t);
     }
@@ -344,6 +346,7 @@ public final class WindowOneRecord extends StandardRecord {
      * deprecated May 2008
      * @deprecated - Misleading name - use getActiveSheetIndex() 
      */
+    @Deprecated
     public short getSelectedTab()
     {
         return (short) getActiveSheetIndex();
@@ -360,6 +363,7 @@ public final class WindowOneRecord extends StandardRecord {
      * deprecated May 2008
      * @deprecated - Misleading name - use getFirstVisibleTab() 
      */
+    @Deprecated
     public short getDisplayedTab()
     {
         return (short) getFirstVisibleTab();

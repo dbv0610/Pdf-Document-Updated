@@ -531,6 +531,7 @@ public class XYMultipleSeriesRenderer extends DefaultRenderer {
    * @param text the text label
    * @deprecated use addXTextLabel instead
    */
+  @Deprecated
   public void addTextLabel(double x, String text) {
     addXTextLabel(x, text);
   }
@@ -569,6 +570,7 @@ public class XYMultipleSeriesRenderer extends DefaultRenderer {
    * 
    * @deprecated use clearXTextLabels instead
    */
+  @Deprecated
   public void clearTextLabels() {
     clearXTextLabels();
   }
@@ -672,6 +674,7 @@ public class XYMultipleSeriesRenderer extends DefaultRenderer {
    * @param display if the chart point values should be displayed as text
    * @deprecated use SimpleSeriesRenderer.setDisplayChartValues() instead
    */
+  @Deprecated
   public void setDisplayChartValues(boolean display) {
     SimpleSeriesRenderer[] renderers = getSeriesRenderers();
     for (SimpleSeriesRenderer renderer : renderers) {
@@ -685,6 +688,7 @@ public class XYMultipleSeriesRenderer extends DefaultRenderer {
    * @param textSize the chart values text size
    * @deprecated use SimpleSeriesRenderer.setChartValuesTextSize() instead
    */
+  @Deprecated
   public void setChartValuesTextSize(float textSize) {
     SimpleSeriesRenderer[] renderers = getSeriesRenderers();
     for (SimpleSeriesRenderer renderer : renderers) {
@@ -774,6 +778,7 @@ public class XYMultipleSeriesRenderer extends DefaultRenderer {
    * @return the spacing between bars
    * @deprecated use getBarSpacing instead
    */
+  @Deprecated
   public double getBarsSpacing() {
     return getBarSpacing();
   }

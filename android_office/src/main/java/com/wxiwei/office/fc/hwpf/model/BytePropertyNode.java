@@ -39,6 +39,7 @@ public abstract class BytePropertyNode<T extends BytePropertyNode<T>> extends
 	 * @param fcEnd The end of the text for this property, in _bytes_
 	 * @deprecated
 	 */
+	@Deprecated
 	public BytePropertyNode(int fcStart, int fcEnd, CharIndexTranslator translator, Object buf) {
 		super(
 				translator.getCharIndex(fcStart),

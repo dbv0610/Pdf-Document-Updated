@@ -39,6 +39,7 @@ public final class DocumentProperties extends DOPAbstractType
     /**
      * @deprecated Use {@link #DocumentProperties(byte[],int,int)} instead
      */
+    @Deprecated
     public DocumentProperties( byte[] tableStream, int offset )
     {
         this( tableStream, offset, DOPAbstractType.getSize() );

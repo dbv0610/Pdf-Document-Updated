@@ -47,6 +47,7 @@ public class HSSFCellRangeAddress extends CellRangeAddressBase {
 	/**
 	 * @deprecated use {@link #serialize(LittleEndianOutput)}
 	 */
+	@Deprecated
 	public int serialize(int offset, byte[] data) {
 		serialize(new LittleEndianByteArrayOutputStream(data, offset, ENCODED_SIZE));
 		return ENCODED_SIZE;

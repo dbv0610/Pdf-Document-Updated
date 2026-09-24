@@ -47,6 +47,7 @@ public class TextPiece extends PropertyNode<TextPiece>
      * @deprecated Use {@link #TextPiece(int,int,byte[],PieceDescriptor)}
      *             instead
      */
+    @Deprecated
     public TextPiece(int start, int end, byte[] text, PieceDescriptor pd, int cpStart)
     {
         this(start, end, text, 0, text.length, pd);

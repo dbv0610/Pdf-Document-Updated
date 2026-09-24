@@ -154,6 +154,7 @@ public class SectionIDMap extends HashMap {
      * @deprecated Use {@link #get(byte[])} instead!
      * @return the property ID map
      */
+    @Deprecated
     public Object get(final Object sectionFormatID)
     {
         return get((byte[]) sectionFormatID);
@@ -189,6 +190,7 @@ public class SectionIDMap extends HashMap {
      * @return The return value remains undocumented since the method is
      * deprecated.
      */
+    @Deprecated
     public Object put(final Object key, final Object value)
     {
         return put((byte[]) key, (PropertyIDMap) value);

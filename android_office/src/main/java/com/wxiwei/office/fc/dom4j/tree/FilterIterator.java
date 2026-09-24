@@ -21,6 +21,7 @@ import java.util.NoSuchElementException;
  * 
  * @deprecated THIS CLASS WILL BE REMOVED IN dom4j-1.6 !!
  */
+@Deprecated
 public abstract class FilterIterator implements Iterator {
     protected Iterator proxy;
 

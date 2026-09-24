@@ -183,7 +183,7 @@ public class ProxyXmlStartTag //implements XmlStartTag
         return false;
     }
 
-    /**
+    /*
      * parameters modeled after SAX2 attribute approach
      * 
      * @param namespaceURI DOCUMENT ME!

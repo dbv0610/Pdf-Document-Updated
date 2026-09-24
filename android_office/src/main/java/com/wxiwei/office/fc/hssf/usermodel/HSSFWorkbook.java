@@ -492,6 +492,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * deprecated May 2008
      * @deprecated use setSelectedTab(int)
      */
+    @Deprecated
     public void setSelectedTab(short index)
     {
         setSelectedTab((int)index);
@@ -555,6 +556,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * deprecated May 2008
      * @deprecated - Misleading name - use getActiveSheetIndex()
      */
+    @Deprecated
     public short getSelectedTab()
     {
         return (short)getActiveSheetIndex();
@@ -574,6 +576,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * deprecated May 2008
      * @deprecated - Misleading name - use setFirstVisibleTab()
      */
+    @Deprecated
     public void setDisplayedTab(short index)
     {
         setFirstVisibleTab(index);
@@ -591,6 +594,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * deprecated May 2008
      * @deprecated - Misleading name - use getFirstVisibleTab()
      */
+    @Deprecated
     public short getDisplayedTab()
     {
         return (short)getFirstVisibleTab();
@@ -700,6 +704,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * @deprecated for POI internal use only (formula parsing).  This method is likely to
      * be removed in future versions of POI.
      */
+    @Deprecated
     public int getExternalSheetIndex(int internalSheetIndex)
     {
         return workbook.checkExternSheet(internalSheetIndex);
@@ -709,6 +714,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * @deprecated for POI internal use only (formula rendering).  This method is likely to
      * be removed in future versions of POI.
      */
+    @Deprecated
     public String findSheetNameFromExternSheet(int externSheetIndex)
     {
         // TODO - don't expose internal ugliness like externSheet indexes to the user model API
@@ -723,6 +729,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
      * @param definedNameIndex zero-based to DEFINEDNAME or EXTERNALNAME record
      * @return the string representation of the defined or external name
      */
+    @Deprecated
     public String resolveNameXText(int refIndex, int definedNameIndex)
     {
         // TODO - make this less cryptic / move elsewhere
@@ -1470,6 +1477,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
     /** @deprecated Do not call this method from your applications. Use the methods
      *  available in the HSSFRow to add string HSSFCells
      */
+    @Deprecated
     public int addSSTString(String string)
     {
         return workbook.addSSTString(new UnicodeString(string));
@@ -1487,6 +1495,7 @@ public final class HSSFWorkbook extends POIDocument implements com.wxiwei.office
     /** @deprecated Do not call this method from your applications. Use the methods
      *  available in the HSSFRow to get string HSSFCells
      */
+    @Deprecated
     public String getSSTString(int index)
     {
         return workbook.getSSTString(index).getString();

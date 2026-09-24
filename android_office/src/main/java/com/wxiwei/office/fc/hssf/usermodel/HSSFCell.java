@@ -250,6 +250,7 @@ public class HSSFCell implements ICell {
      * @param num  short the cell number
      * @deprecated (Jan 2008) Doesn't update the row's idea of what cell this is, use {@link HSSFRow#moveCell(HSSFCell, short)} instead
      */
+    @Deprecated
     public void setCellNum(short num)
     {
         _record.setColumn(num);
@@ -268,6 +269,7 @@ public class HSSFCell implements ICell {
     /**
      * @deprecated (Oct 2008) use {@link #getColumnIndex()}
      */
+    @Deprecated
     public short getCellNum() {
         return (short) getColumnIndex();
     }

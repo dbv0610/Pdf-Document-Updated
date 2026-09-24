@@ -105,12 +105,14 @@ public final class HSSFRow implements IRow {
     /**
      * @deprecated (Aug 2008) use {@link HSSFRow#createCell(int) }
      */
+    @Deprecated
     public HSSFCell createCell(short columnIndex) {
         return createCell((int)columnIndex);
     }
     /**
      * @deprecated (Aug 2008) use {@link HSSFRow#createCell(int, int) }
      */
+    @Deprecated
     public HSSFCell createCell(short columnIndex, int type) {
         return createCell((int)columnIndex, type);
     }
@@ -351,6 +353,7 @@ public final class HSSFRow implements IRow {
     /**
      * @deprecated (Aug 2008) use {@link #getCell(int)}
      */
+    @Deprecated
     public HSSFCell getCell(short cellnum) {
         int ushortCellNum = cellnum & 0x0000FFFF; // avoid sign extension
         return getCell(ushortCellNum);

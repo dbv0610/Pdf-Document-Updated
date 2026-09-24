@@ -629,6 +629,7 @@ public interface Element extends Branch {
      *             #addAttribute(String,String)} instead. WILL BE REMOVED IN
      *             dom4j-1.6 !!
      */
+    @Deprecated
     void setAttributeValue(String name, String value);
 
     /**
@@ -646,6 +647,7 @@ public interface Element extends Branch {
      *             #addAttribute(QName,String)} instead. WILL BE REMOVED IN
      *             dom4j-1.6 !!
      */
+    @Deprecated
     void setAttributeValue(QName qName, String value);
 
     // Content methods

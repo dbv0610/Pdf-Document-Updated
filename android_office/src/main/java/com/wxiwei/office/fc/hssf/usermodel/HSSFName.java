@@ -171,6 +171,7 @@ public final class HSSFName implements Name {
      *
      * @deprecated (Nov 2008) Misleading name. Use {@link #getRefersToFormula()} instead.
      */
+    @Deprecated
     public String getReference() {
         return getRefersToFormula();
     }
@@ -180,6 +181,7 @@ public final class HSSFName implements Name {
      *
      * @deprecated (Nov 2008) Misleading name. Use {@link #setRefersToFormula(String)} instead.
      */
+    @Deprecated
     public void setReference(String ref){
         setRefersToFormula(ref);
     }

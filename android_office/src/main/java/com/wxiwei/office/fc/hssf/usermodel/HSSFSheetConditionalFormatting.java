@@ -127,6 +127,7 @@ public final class HSSFSheetConditionalFormatting implements SheetConditionalFor
 	/**
 	 * @deprecated use <tt>CellRangeAddress</tt> instead of <tt>Region</tt>
 	 */
+	@Deprecated
 	public int addConditionalFormatting(Region[] regions, HSSFConditionalFormattingRule[] cfRules) {
 		return addConditionalFormatting(Region.convertRegionsToCellRanges(regions), cfRules);
 	}

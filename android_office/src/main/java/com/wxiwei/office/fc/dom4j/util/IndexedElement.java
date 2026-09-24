@@ -137,6 +137,7 @@ public class IndexedElement extends DefaultElement
      * 
      * @deprecated WILL BE REMOVED IN dom4j-1.6 !!
      */
+    @Deprecated
     protected Iterator asElementIterator(Object object)
     {
         return asElementList(object).iterator();

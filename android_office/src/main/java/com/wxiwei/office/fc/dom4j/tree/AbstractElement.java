@@ -705,6 +705,7 @@ public abstract class AbstractElement extends AbstractBranch implements Element
      *             #addAttribute(String,String)} instead. WILL BE REMOVED IN
      *             dom4j-1.6 !!
      */
+    @Deprecated
     public void setAttributeValue(String name, String value)
     {
         addAttribute(name, value);
@@ -722,6 +723,7 @@ public abstract class AbstractElement extends AbstractBranch implements Element
      *             #addAttribute(String,String)} instead. WILL BE REMOVED IN
      *             dom4j-1.6 !!
      */
+    @Deprecated
     public void setAttributeValue(QName qName, String value)
     {
         addAttribute(qName, value);

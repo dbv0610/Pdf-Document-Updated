@@ -21,16 +21,19 @@ package com.wxiwei.office.fc.hssf.record;
 /**
  * @deprecated Use {@link com.wxiwei.office.fc.hssf.record.common.UnicodeString} instead
  */
+@Deprecated
 public final class UnicodeString extends com.wxiwei.office.fc.hssf.record.common.UnicodeString {
    /**
     * @deprecated Use {@link com.wxiwei.office.fc.hssf.record.common.UnicodeString} instead
     */
+   @Deprecated
    public UnicodeString(RecordInputStream in) {
       super(in);
    }
    /**
     * @deprecated Use {@link com.wxiwei.office.fc.hssf.record.common.UnicodeString} instead
     */
+   @Deprecated
    public UnicodeString(String str) {
       super(str);
    }

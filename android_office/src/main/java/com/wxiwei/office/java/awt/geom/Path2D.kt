@@ -410,7 +410,7 @@ abstract class Path2D : Shape, Cloneable {
         /**
          * Creates a new object of the same class as this object.
          */
-        final override fun clone(): Any {
+        public final override fun clone(): Any {
             // Note: It would be nice to have this return Path2D
             // but one of our subclasses (GeneralPath) needs to
             // offer "public Object clone()" for backwards
@@ -771,7 +771,7 @@ abstract class Path2D : Shape, Cloneable {
         /**
          * Creates a new object of the same class as this object.
          */
-        final override fun clone(): Any {
+        public final override fun clone(): Any {
             // Note: It would be nice to have this return Path2D
             // but one of our subclasses (GeneralPath) needs to
             // offer "public Object clone()" for backwards

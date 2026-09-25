@@ -180,15 +180,15 @@ class VMLPathParser private constructor() {
             end = arrow(autoshape, lineWidth, command, parameters, false)
         }
         if (start != null) {
-            startArrowPath = start.getArrowPath()
+            startArrowPath = start.arrowPath
             path.reset()
-            val position = LineArrowPathBuilder.getReferencedPosition(nextNode.x, nextNode.y, start.getArrowTailCenter().x, start.getArrowTailCenter().y, autoshape!!.getStartArrowType())
+            val position = LineArrowPathBuilder.getReferencedPosition(nextNode.x, nextNode.y, start.arrowTailCenter!!.x, start.arrowTailCenter!!.y, autoshape!!.getStartArrowType())
             path.moveTo(position.x, position.y)
         }
         if (end != null) {
-            endArrowPath = end.getArrowPath()
+            endArrowPath = end.arrowPath
             val count = parameters.size
-            val position = LineArrowPathBuilder.getReferencedPosition(parameters[count - 2].toFloat(), parameters[count - 1].toFloat(), end.getArrowTailCenter().x, end.getArrowTailCenter().y, autoshape!!.getEndArrowType())
+            val position = LineArrowPathBuilder.getReferencedPosition(parameters[count - 2].toFloat(), parameters[count - 1].toFloat(), end.arrowTailCenter!!.x, end.arrowTailCenter!!.y, autoshape!!.getEndArrowType())
             parameters[count - 2] = position.x.toInt()
             parameters[count - 1] = position.y.toInt()
         }

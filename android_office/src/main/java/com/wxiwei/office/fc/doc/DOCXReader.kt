@@ -2429,7 +2429,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                         val m = Matrix()
                         m.postScale(rect.width / width, rect.height / height)
                         for (path in autoShape.paths) {
-                            path.path.transform(m)
+                            path.path!!.transform(m)
                         }
                     }
                 }
@@ -2552,19 +2552,19 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
         // extendPath
         val pathExtend = ExtendPath()
         pathExtend.setArrowFlag(true)
-        pathExtend.setPath(arrowPath)
+        pathExtend.path = arrowPath
         if (border) {
             if (arrowType != Arrow.Arrow_Arrow) {
                 if (line != null) {
-                    pathExtend.setBackgroundAndFill(line.backgroundAndFill)
+                    pathExtend.backgroundAndFill = line.backgroundAndFill
                 } else if (fill != null) {
-                    pathExtend.setBackgroundAndFill(fill)
+                    pathExtend.backgroundAndFill = fill
                 }
             } else {
                 pathExtend.setLine(line)
             }
         } else if (fill != null) {
-            pathExtend.setBackgroundAndFill(fill)
+            pathExtend.backgroundAndFill = fill
         }
         return pathExtend
     }
@@ -2625,9 +2625,9 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
             if (pathWithArrow != null) {
                 pathWithArrow.getPolygonPath()?.forEach { p ->
                     val pathExtend = ExtendPath()
-                    pathExtend.setPath(p)
+                    pathExtend.path = p
                     if (line != null) pathExtend.setLine(line)
-                    if (fill != null) pathExtend.setBackgroundAndFill(fill)
+                    if (fill != null) pathExtend.backgroundAndFill = fill
                     s.appendPath(pathExtend)
                 }
                 pathWithArrow.getStartArrow()?.let {
@@ -2738,9 +2738,9 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                 }
             }
             val pathExtend = ExtendPath()
-            pathExtend.setPath(path)
+            pathExtend.path = path
             if (line != null) pathExtend.setLine(line)
-            if (fill != null) pathExtend.setBackgroundAndFill(fill)
+            if (fill != null) pathExtend.backgroundAndFill = fill
             s.appendPath(pathExtend)
             if (startArrowPath != null) {
                 s.appendPath(getArrowExtendPath(startArrowPath, fill, line, border, s.startArrow.type))

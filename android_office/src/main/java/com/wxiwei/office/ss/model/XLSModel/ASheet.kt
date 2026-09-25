@@ -767,11 +767,11 @@ open class ASheet
                 val startArrowType = shape.getStartArrowType()
                 if (startArrowType > 0) {
                     val arrowPathAndTail = shape.getStartArrowPath(rect)
-                    if (arrowPathAndTail != null && arrowPathAndTail.getArrowPath() != null) {
-                        startArrowTailCenter = arrowPathAndTail.getArrowTailCenter()
+                    if (arrowPathAndTail != null && arrowPathAndTail.arrowPath != null) {
+                        startArrowTailCenter = arrowPathAndTail.arrowTailCenter
 
                         val pathExtend = ExtendPath()
-                        pathExtend.setPath(arrowPathAndTail.getArrowPath())
+                        pathExtend.path = arrowPathAndTail.arrowPath
                         pathExtend.setArrowFlag(true)
                         if (startArrowType != Arrow.Arrow_Arrow.toInt()) {
                             var fill: BackgroundAndFill? = null
@@ -782,7 +782,7 @@ open class ASheet
                             } else if (line != null) {
                                 fill = line.getBackgroundAndFill()
                             }
-                            pathExtend.setBackgroundAndFill(fill)
+                            pathExtend.backgroundAndFill = fill
                         } else {
                             pathExtend.setLine(line)
                         }
@@ -793,11 +793,11 @@ open class ASheet
                 val endArrowType = shape.getEndArrowType()
                 if (endArrowType > 0) {
                     val arrowPathAndTail = shape.getEndArrowPath(rect)
-                    if (arrowPathAndTail != null && arrowPathAndTail.getArrowPath() != null) {
-                        endArrowTailCenter = arrowPathAndTail.getArrowTailCenter()
+                    if (arrowPathAndTail != null && arrowPathAndTail.arrowPath != null) {
+                        endArrowTailCenter = arrowPathAndTail.arrowTailCenter
 
                         val pathExtend = ExtendPath()
-                        pathExtend.setPath(arrowPathAndTail.getArrowPath())
+                        pathExtend.path = arrowPathAndTail.arrowPath
                         pathExtend.setArrowFlag(true)
                         if (endArrowType != Arrow.Arrow_Arrow.toInt()) {
                             var fill: BackgroundAndFill? = null
@@ -808,7 +808,7 @@ open class ASheet
                             } else if (line != null) {
                                 fill = line.getBackgroundAndFill()
                             }
-                            pathExtend.setBackgroundAndFill(fill)
+                            pathExtend.backgroundAndFill = fill
                         } else {
                             pathExtend.setLine(line)
                         }
@@ -822,12 +822,12 @@ open class ASheet
                 )
                 for (i in paths.indices) {
                     val pathExtend = ExtendPath()
-                    pathExtend.setPath(paths[i])
+                    pathExtend.path = paths[i]
                     if (!shape.isNoBorder()) {
                         pathExtend.setLine(line)
                     }
                     if (!shape.isNoFill()) {
-                        pathExtend.setBackgroundAndFill(converFill(shape, control))
+                        pathExtend.backgroundAndFill = converFill(shape, control)
                     }
                     arbitraryPolygonShape.appendPath(pathExtend)
                 }

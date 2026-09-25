@@ -1381,19 +1381,19 @@ class DOCReader(control: IControl?, filePath: String?) : AbstractReader() {
                     val startArrowType = shape.getStartArrowType()
                     if (startArrowType > 0) {
                         val arrowPathAndTail: ArrowPathAndTail? = shape.getStartArrowPath(rect)
-                        if (arrowPathAndTail != null && arrowPathAndTail.getArrowPath() != null) {
-                            startArrowTailCenter = arrowPathAndTail.getArrowTailCenter()
+                        if (arrowPathAndTail != null && arrowPathAndTail.arrowPath != null) {
+                            startArrowTailCenter = arrowPathAndTail.arrowTailCenter
                             val pathExtend = ExtendPath()
-                            pathExtend.setPath(arrowPathAndTail.getArrowPath())
+                            pathExtend.path = arrowPathAndTail.arrowPath
                             pathExtend.setArrowFlag(true)
                             if (startArrowType != Arrow.Arrow_Arrow.toInt()) {
                                 if ((line == null || line.getBackgroundAndFill() == null) && poiShape.getLineColor() != null) {
                                     val arrowFill = BackgroundAndFill()
                                     arrowFill.setFillType(BackgroundAndFill.FILL_SOLID)
                                     arrowFill.setForegroundColor(poiShape.getLineColor().getRGB())
-                                    pathExtend.setBackgroundAndFill(arrowFill)
+                                    pathExtend.backgroundAndFill = arrowFill
                                 } else {
-                                    pathExtend.setBackgroundAndFill(line!!.getBackgroundAndFill())
+                                    pathExtend.backgroundAndFill = line!!.getBackgroundAndFill()
                                 }
                             } else {
                                 pathExtend.setLine(line)
@@ -1406,10 +1406,10 @@ class DOCReader(control: IControl?, filePath: String?) : AbstractReader() {
                     val endArrowType = shape.getEndArrowType()
                     if (endArrowType > 0) {
                         val arrowPathAndTail: ArrowPathAndTail? = shape.getEndArrowPath(rect)
-                        if (arrowPathAndTail != null && arrowPathAndTail.getArrowPath() != null) {
-                            endArrowTailCenter = arrowPathAndTail.getArrowTailCenter()
+                        if (arrowPathAndTail != null && arrowPathAndTail.arrowPath != null) {
+                            endArrowTailCenter = arrowPathAndTail.arrowTailCenter
                             val pathExtend = ExtendPath()
-                            pathExtend.setPath(arrowPathAndTail.getArrowPath())
+                            pathExtend.path = arrowPathAndTail.arrowPath
 
                             pathExtend.setArrowFlag(true)
                             if (endArrowType != Arrow.Arrow_Arrow.toInt()) {
@@ -1417,9 +1417,9 @@ class DOCReader(control: IControl?, filePath: String?) : AbstractReader() {
                                     val arrowFill = BackgroundAndFill()
                                     arrowFill.setFillType(BackgroundAndFill.FILL_SOLID)
                                     arrowFill.setForegroundColor(poiShape.getLineColor().getRGB())
-                                    pathExtend.setBackgroundAndFill(arrowFill)
+                                    pathExtend.backgroundAndFill = arrowFill
                                 } else {
-                                    pathExtend.setBackgroundAndFill(line!!.getBackgroundAndFill())
+                                    pathExtend.backgroundAndFill = line!!.getBackgroundAndFill()
                                 }
                             } else {
                                 pathExtend.setLine(line)
@@ -1433,12 +1433,12 @@ class DOCReader(control: IControl?, filePath: String?) : AbstractReader() {
                         startArrowTailCenter, startArrowType.toByte(), endArrowTailCenter, endArrowType.toByte())
                     for (i in paths.indices) {
                         val pathExtend = ExtendPath()
-                        pathExtend.setPath(paths[i])
+                        pathExtend.path = paths[i]
                         if (line != null) {
                             pathExtend.setLine(line)
                         }
                         if (fill != null) {
-                            pathExtend.setBackgroundAndFill(fill)
+                            pathExtend.backgroundAndFill = fill
                         }
                         autoShape.appendPath(pathExtend)
                     }

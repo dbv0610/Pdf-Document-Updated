@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="com.azg.pdf8.editlab.EditLabActivity"
+            android:exported="true" android:theme="@style/Theme.VideoRecorder" />
+        <activity android:name="com.azg.pdf8.editlab.DocxEditLabActivity"
+            android:exported="true" android:theme="@style/Theme.VideoRecorder" />
+        <activity android:name="com.azg.pdf8.editlab.XlsxEditLabActivity"
+            android:exported="true" android:theme="@style/Theme.VideoRecorder"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name="com.azg.pdf8.editlab.PptxEditLabActivity"
+            android:exported="true" android:theme="@style/Theme.VideoRecorder" />
+    </application>
+</manifest>

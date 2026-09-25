@@ -8,6 +8,9 @@
 
 package com.wxiwei.office.fc.doc
 
+import com.wxiwei.office.editor.docx.DocxSourceMap
+import java.util.IdentityHashMap
+
 import java.io.File
 import java.io.InputStream
 import java.text.Normalizer
@@ -134,6 +137,21 @@ internal fun parseHexColor(value: String?, default: Int): Int {
  * 日期:            2012-1-19
  */
 class DOCXReader(control: IControl?, private var filePath: String?) : AbstractReader() {
+
+    // Source identities exist only for the current SAX body subtree.
+    private val editMap = DocxSourceMap.begin(filePath ?: "")
+    private val editRuns = IdentityHashMap<Element, Int>()
+    private val editParas = IdentityHashMap<Element, Int>()
+    private var editRunBase = 0
+    private var editParaBase = 0
+    private var editObjectRun: Element? = null
+    private fun editMain() = offset >= WPModelConstant.MAIN && offset < WPModelConstant.HEADER
+    private fun recordEdit(start: Long, text: String, run: Element?, kind: DocxSourceMap.Kind) {
+        if (editMain() && start >= 0 && editParas.isNotEmpty()) {
+            val id = run?.let { editRuns[it] }
+            editMap.addLeaf(start, start + text.length, if (id == null) intArrayOf() else intArrayOf(id), text, kind)
+        }
+    }
 
     // picture高度、宽度转换到磅单位的一个值，我也知道是什么意思，只是是通过大量文档分得出来的值
     //private val PICTURE_CONVERSION_VALUE = 0x7F * 100
@@ -999,6 +1017,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
         processRun(para, paraElem, true)
 
         paraElem.setEndOffset(offset)
+        if (editMain()) editParas[para]?.let { editMap.addParagraph(it, t, offset) }
         if (offset > t) {
             document.appendParagraph(paraElem, offset)
         }
@@ -1275,6 +1294,8 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
         // TỐI ƯU: StringBuilder thay cho String "+=" trong vòng lặp
         val fieldCode = StringBuilder()
         val fieldText = StringBuilder()
+        var editFieldRuns = IntArray(0)
+        var editFieldCount = 0
         var hasField = false
         var pageBreak = false
         for (runElem in para.childElements()) {
@@ -1328,6 +1349,13 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                     hasLeaf = processRun(run, paraElem, false)
                 }
                 "r" -> {
+                    if (editMain()) editObjectRun = run
+                    if (editMain() && (hasField || run.element("fldChar") != null)) {
+                        editRuns[run]?.let {
+                            if (editFieldCount == editFieldRuns.size) editFieldRuns = editFieldRuns.copyOf(maxOf(8, editFieldCount * 2))
+                            editFieldRuns[editFieldCount++] = it
+                        }
+                    }
                     // field
                     val fld = run.element("fldChar")
                     if (fld != null) {
@@ -1380,6 +1408,8 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
 
                                 if (str.isNotEmpty()) {
                                     hasLeaf = true
+                                    if (editMain() && editParas.isNotEmpty()) editMap.addLeaf(offset, offset + str.length,
+                                        editFieldRuns.copyOf(editFieldCount), str, DocxSourceMap.Kind.FIELD)
                                     val l = LeafElement(str)
                                     leaf = l
                                     // 属性
@@ -1396,6 +1426,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                                     }
                                     paraElem.appendLeaf(l)
                                 }
+                                editFieldCount = 0
                                 fieldCode.setLength(0)
                                 fieldText.setLength(0)
                                 continue
@@ -1463,6 +1494,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                     val len = str.length
                     if (len > 0) {
                         hasLeaf = true
+                        recordEdit(offset, str, run, if (para.name == "fldSimple") DocxSourceMap.Kind.FIELD else DocxSourceMap.Kind.TEXT)
                         val l = LeafElement(str)
                         leaf = l
                         // 属性
@@ -1506,6 +1538,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
         }
         // 如果没有 r 元素，说明只有一个回车符的段落
         if (!hasLeaf) {
+            recordEdit(offset, "\n", null, DocxSourceMap.Kind.PARA_END)
             val l = LeafElement("\n")
             para.element("pPr")?.element("rPr")?.let { processRunAttribute(it, l.getAttribute()!!) }
             l.setStartOffset(offset)
@@ -1515,6 +1548,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
             return hasLeaf
         }
         if (addBreakPage && !pageBreak) {
+            recordEdit(offset, "\n", null, DocxSourceMap.Kind.PARA_END)
             val last = leaf
             if (last != null) {
                 last.setText(last.getText(wpdoc) + "\n")
@@ -1583,6 +1617,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
             // FIX search/highlight: lấy đủ text của run
             val str = getRunText(run)
             if (str.isEmpty()) {
+                if (editMain()) editObjectRun = run
                 val drawing = run.element("drawing")
                 if (drawing != null) {
                     processPictureAndDiagram(drawing, paraElem)
@@ -1590,6 +1625,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                 }
                 continue
             }
+            recordEdit(offset, str, run, DocxSourceMap.Kind.TEXT)
             val l = LeafElement(str)
             leaf = l
             val attr = l.getAttribute()!!
@@ -1616,6 +1652,7 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
 
     private fun addShape(shape: AbstractShape?, paraElem: ParagraphElement?) {
         if (shape != null && paraElem != null) {
+            recordEdit(offset, "1", editObjectRun, DocxSourceMap.Kind.OBJECT)
             val leaf = LeafElement(1.toString())
             leaf.setStartOffset(offset)
             offset++
@@ -3533,6 +3570,20 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                 throw AbortReaderError("abort Reader")
             }
             val elem = elementPath.current
+            val recording = editMain() && (elem.name == "p" || elem.name == "tbl" || elem.name == "sdt")
+            var runCount = 0
+            var paraCount = 0
+            if (recording) {
+                fun index(node: Element) {
+                    if (node.namespaceURI == "http://schemas.openxmlformats.org/wordprocessingml/2006/main") {
+                        if (node.name == "r") editRuns[node] = editRunBase + runCount++
+                        if (node.name == "p") editParas[node] = editParaBase + paraCount++
+                    }
+                    val children = node.elementIterator()
+                    while (children.hasNext()) index(children.next() as Element)
+                }
+                index(elem)
+            }
             when (elem.name) {
                 "p" -> processParagraph(elem, 0)
                 // FIX: dùng biến riêng, không gán đè elem (tránh NPE và detach nhầm phần tử)
@@ -3548,6 +3599,10 @@ class DOCXReader(control: IControl?, private var filePath: String?) : AbstractRe
                         document.appendParagraph(paraElem, offset)
                     }
                 }
+            }
+            if (recording) {
+                editRunBase += runCount; editParaBase += paraCount
+                editRuns.clear(); editParas.clear(); editObjectRun = null
             }
             elem.detach()
         }

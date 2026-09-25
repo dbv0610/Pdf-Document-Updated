@@ -95,7 +95,7 @@ class PdfiumCore(ctx: Context) {
     private external fun nativeTextGetCharBox(textPagePtr: Long, index: Int): RectF?
 
     private external fun nativeAddTextMarkupAnnot(
-        pagePtr: Long, subtype: Int, quads: FloatArray, r: Int, g: Int, b: Int, a: Int
+        pagePtr: Long, subtype: Int, quads: FloatArray, r: Int, g: Int, b: Int, a: Int, name: String
     ): Boolean
 
     private external fun nativeAddInkAnnot(pagePtr: Long, points: FloatArray, width: Float,
@@ -103,6 +103,16 @@ class PdfiumCore(ctx: Context) {
     private external fun nativeRemoveAnnotByName(pagePtr: Long, name: String): Boolean
     private external fun nativeDeviceToPageCoords(pagePtr: Long, startX: Int, startY: Int,
         sizeX: Int, sizeY: Int, rotate: Int, deviceX: Int, deviceY: Int): android.graphics.PointF?
+
+    private external fun nativeAddFreeTextAnnot(docPtr: Long, pagePtr: Long, text: String, fontPath: String?,
+        fontSize: Float, x: Float, y: Float, r: Int, g: Int, b: Int, a: Int, name: String): FloatArray?
+    private external fun nativeAddImageAnnot(docPtr: Long, pagePtr: Long, bitmap: Bitmap,
+        left: Float, top: Float, right: Float, bottom: Float, name: String): Boolean
+    private external fun nativeGetAnnots(pagePtr: Long): Array<String?>
+    private external fun nativeRemoveAnnotAt(pagePtr: Long, index: Int): Boolean
+
+    private external fun nativeEditSnapshot(docPtr: Long): ByteArray?
+    private external fun nativeOpenEditSnapshot(snapshot: ByteArray): Long
 
     private external fun nativeSaveAsCopy(docPtr: Long, path: String): Boolean
 
@@ -313,12 +323,12 @@ class PdfiumCore(ctx: Context) {
      * Add a text markup annotation (underline, strikeout...) to an opened page.
      * [quads] holds 8 values per quad in page coordinates: top left, top right, bottom left, bottom right.
      */
-    fun addTextMarkupAnnot(doc: PdfDocument, pageIndex: Int, subtype: Int, quads: FloatArray, @ColorInt color: Int): Boolean {
+    fun addTextMarkupAnnot(doc: PdfDocument, pageIndex: Int, subtype: Int, quads: FloatArray, @ColorInt color: Int, name: String): Boolean {
         synchronized(lock) {
             val pagePtr = doc.mNativePagesPtr[pageIndex] ?: return false
             return nativeAddTextMarkupAnnot(
                 pagePtr, subtype, quads,
-                Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color)
+                Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color), name
             )
         }
     }
@@ -346,6 +356,66 @@ class PdfiumCore(ctx: Context) {
             val page = doc.mNativePagesPtr[pageIndex] ?: return null
             return nativeDeviceToPageCoords(page, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY)
         }
+    }
+
+    /** Add text objects with an embedded font and return PDF bounds. */
+    fun addFreeText(doc: PdfDocument, page: Int, text: String, fontPath: String?, size: Float,
+        x: Float, y: Float, color: Int, name: String): RectF? = synchronized(lock) {
+        val ptr = doc.mNativePagesPtr[page] ?: return@synchronized null
+        nativeAddFreeTextAnnot(doc.mNativeDocPtr, ptr, text, fontPath, size, x, y,
+            Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color), name)
+            ?.let { RectF(it[0], it[1], it[2], it[3]) }
+    }
+
+    /** Add an image stamp in PDF coordinates. */
+    fun addImage(doc: PdfDocument, page: Int, rect: RectF, bitmap: Bitmap, name: String): Boolean = synchronized(lock) {
+        val ptr = doc.mNativePagesPtr[page] ?: return@synchronized false
+        nativeAddImageAnnot(doc.mNativeDocPtr, ptr, bitmap, rect.left, rect.top, rect.right, rect.bottom, name)
+    }
+
+    /** Read annotation metadata from an opened document page. */
+    fun getAnnotations(doc: PdfDocument, page: Int): List<com.reader.pdfviewer.model.PdfAnnotationInfo> = synchronized(lock) {
+        val ptr = doc.mNativePagesPtr[page] ?: return@synchronized emptyList()
+        nativeGetAnnots(ptr).toList().chunked(2).mapNotNull { row ->
+            val v = row[0]?.split(' ') ?: return@mapNotNull null
+            com.reader.pdfviewer.model.PdfAnnotationInfo(page, v[0].toInt(), v[1].toInt(),
+                RectF(v[2].toFloat(), v[3].toFloat(), v[4].toFloat(), v[5].toFloat()), row[1]?.takeIf { it.isNotEmpty() })
+        }
+    }
+
+    /** Remove an annotation by its current index. */
+    fun removeAnnotAt(doc: PdfDocument, page: Int, index: Int): Boolean = synchronized(lock) {
+        val ptr = doc.mNativePagesPtr[page] ?: return@synchronized false
+        nativeRemoveAnnotAt(ptr, index)
+    }
+
+    /** Preserve arbitrary imported annotation dictionaries for deletion undo. */
+    internal fun editSnapshot(doc: PdfDocument): ByteArray? = synchronized(lock) {
+        if (doc.mNativeDocPtr == 0L) null else nativeEditSnapshot(doc.mNativeDocPtr)
+    }
+
+    /** Replace the in-memory document atomically, preserving the set of opened pages. */
+    internal fun restoreEditSnapshot(doc: PdfDocument, snapshot: ByteArray): Boolean = synchronized(lock) {
+        val replacement = nativeOpenEditSnapshot(snapshot)
+        if (replacement == 0L) return@synchronized false
+        val pages = HashMap<Int, Long>()
+        try {
+            for (page in doc.mNativePagesPtr.keys.filterNotNull()) {
+                pages[page] = nativeLoadPage(replacement, page)
+            }
+        } catch (e: Exception) {
+            pages.values.forEach { nativeClosePage(it) }
+            nativeCloseDocument(replacement)
+            return@synchronized false
+        }
+        doc.mNativeTextPagesPtr.values.forEach { nativeCloseTextPage(it!!) }
+        doc.mNativeTextPagesPtr.clear()
+        doc.mNativePagesPtr.values.forEach { nativeClosePage(it!!) }
+        doc.mNativePagesPtr.clear()
+        nativeCloseDocument(doc.mNativeDocPtr)
+        doc.mNativeDocPtr = replacement
+        doc.mNativePagesPtr.putAll(pages)
+        true
     }
 
     /** Write the document with its in memory changes to [path]  */

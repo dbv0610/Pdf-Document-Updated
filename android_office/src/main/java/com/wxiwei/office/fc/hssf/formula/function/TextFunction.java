@@ -295,6 +295,9 @@ public abstract class TextFunction implements Function {
 	 * <b>Syntax<b>:<br/> <b>TEXT</b>(<b>value</b>, <b>format_text</b>)<br/>
 	 *
 	 */
+	private static final com.wxiwei.office.fc.ss.usermodel.DataFormatter EXCEL_FORMATTER =
+			new com.wxiwei.office.fc.ss.usermodel.DataFormatter(java.util.Locale.US);
+
 	public static final Function TEXT = new Fixed2ArgFunction() {
 
 		public ValueEval evaluate(int srcRowIndex, int srcColumnIndex, ValueEval arg0, ValueEval arg1) {
@@ -305,6 +308,12 @@ public abstract class TextFunction implements Function {
 				s1 = evaluateStringArg(arg1, srcRowIndex, srcColumnIndex);
 			} catch (EvaluationException e) {
 				return e.getErrorEval();
+			}
+			// Excel format rules (like newer POI): "mm" after "yyyy" is a month, not minutes,
+			// and number formats follow Excel, not DecimalFormat. Old code below is the fallback.
+			try {
+				return new StringEval(EXCEL_FORMATTER.formatRawCellContents(s0, -1, s1));
+			} catch (Exception ignored) {
 			}
 			if (s1.matches("[\\d,\\#,\\.,\\$,\\,]+")) {
 			NumberFormat formatter = new DecimalFormat(s1);

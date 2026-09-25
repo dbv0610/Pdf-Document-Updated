@@ -46,6 +46,19 @@ class PGSlide {
         if (!hasTable) hasTable = shape.getType() == AbstractShape.SHAPE_TABLE
         shapes?.add(shape)
     }
+    /** Live editing: remove a top-level shape; returns its z-order index or -1. */
+    fun removeShape(shape: IShape): Int {
+        val index = shapes?.indexOf(shape) ?: -1
+        if (index >= 0) { shapes?.removeAt(index); shapesForFind = null; shapeCountForFind = -1 }
+        return index
+    }
+    /** Live editing: put a shape back at a z-order index (undo of [removeShape]). */
+    fun insertShape(index: Int, shape: IShape) {
+        val list = shapes ?: return
+        list.add(index.coerceIn(0, list.size), shape)
+        if (!hasTable) hasTable = shape.getType() == AbstractShape.SHAPE_TABLE
+        shapesForFind = null; shapeCountForFind = -1
+    }
     fun getShapes(): Array<IShape> = shapes?.toTypedArray() ?: emptyArray()
     fun getShapeCount(): Int = shapes?.size ?: 0
     fun getShapeCountForFind(): Int {

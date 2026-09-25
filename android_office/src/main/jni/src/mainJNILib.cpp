@@ -19,6 +19,9 @@ using namespace android;
 #include <fpdf_text.h>
 #include <fpdf_annot.h>
 #include <fpdf_save.h>
+#include <fpdf_edit.h>
+#include <map>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -58,12 +61,17 @@ class DocumentFile {
     public:
     FPDF_DOCUMENT pdfDocument = NULL;
     size_t fileSize;
+    std::vector<unsigned char> editSnapshotBytes;
+    std::map<std::string, FPDF_FONT> editFonts;
+    std::map<std::string, std::vector<unsigned char>> editFontBytes;
 
     DocumentFile() { initLibraryIfNeed(); }
     ~DocumentFile();
 };
 DocumentFile::~DocumentFile(){
     if(pdfDocument != NULL){
+        for (auto& entry : editFonts) FPDFFont_Close(entry.second);
+        editFonts.clear();
         FPDF_CloseDocument(pdfDocument);
     }
 
@@ -738,8 +746,10 @@ JNI_FUNC(jobject, PdfiumCore, nativeTextGetCharBox)(JNI_ARGS, jlong textPagePtr,
  * quads holds 8 floats per quad in page coordinates: x1,y1 (top left), x2,y2 (top right),
  * x3,y3 (bottom left), x4,y4 (bottom right).
  */
+static std::vector<unsigned short> annotName(JNIEnv* env, jstring name);
+
 JNI_FUNC(jboolean, PdfiumCore, nativeAddTextMarkupAnnot)(JNI_ARGS, jlong pagePtr, jint subtype, jfloatArray quads,
-                                                jint r, jint g, jint b, jint a) {
+                                                jint r, jint g, jint b, jint a, jstring name) {
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     jsize count = quads == NULL ? 0 : env->GetArrayLength(quads);
     if (page == NULL || count < 8 || count % 8 != 0) {
@@ -752,7 +762,8 @@ JNI_FUNC(jboolean, PdfiumCore, nativeAddTextMarkupAnnot)(JNI_ARGS, jlong pagePtr
     if (annot == NULL) {
         return JNI_FALSE;
     }
-    bool ok = FPDFAnnot_SetColor(annot, FPDFANNOT_COLORTYPE_Color, r, g, b, a);
+    auto nm = annotName(env, name);
+    bool ok = FPDFAnnot_SetStringValue(annot, "NM", nm.data()) && FPDFAnnot_SetColor(annot, FPDFANNOT_COLORTYPE_Color, r, g, b, a);
     FS_RECTF rect = {values[0], values[1], values[0], values[1]};
     for (jsize i = 0; ok && i < count; i += 8) {
         FS_QUADPOINTSF quad = {values[i], values[i + 1], values[i + 2], values[i + 3],
@@ -856,6 +867,223 @@ JNI_FUNC(jobject, PdfiumCore, nativeDeviceToPageCoords)(JNI_ARGS, jlong pagePtr,
     jclass clazz = env->FindClass("android/graphics/PointF");
     jmethodID constructor = env->GetMethodID(clazz, "<init>", "(FF)V");
     return env->NewObject(clazz, constructor, static_cast<jfloat>(x), static_cast<jfloat>(y));
+}
+
+// Font handles and backing bytes stay alive until the owning document closes.
+static FPDF_FONT editFont(DocumentFile* doc, JNIEnv* env, jstring path) {
+    std::string key;
+    if (path) {
+        const char* chars = env->GetStringUTFChars(path, NULL);
+        key = chars;
+        env->ReleaseStringUTFChars(path, chars);
+    }
+    auto found = doc->editFonts.find(key);
+    if (found != doc->editFonts.end()) return found->second;
+    FPDF_FONT font = NULL;
+    if (!key.empty()) {
+        FILE* file = fopen(key.c_str(), "rb");
+        if (file) {
+            if (fseek(file, 0, SEEK_END) == 0) {
+                long size = ftell(file);
+                if (size > 0 && size <= 64 * 1024 * 1024 && fseek(file, 0, SEEK_SET) == 0) {
+                    auto& bytes = doc->editFontBytes[key];
+                    bytes.resize(size);
+                    if (fread(bytes.data(), 1, size, file) == static_cast<size_t>(size))
+                        font = FPDFText_LoadFont(doc->pdfDocument, bytes.data(), bytes.size(), FPDF_FONT_TRUETYPE, true);
+                }
+            }
+            fclose(file);
+        }
+    }
+    if (!font) font = FPDFText_LoadStandardFont(doc->pdfDocument, "Helvetica");
+    if (font) doc->editFonts[key] = font;
+    return font;
+}
+
+static bool finishObjectAnnot(JNIEnv* env, FPDF_PAGE page, FPDF_ANNOTATION annot,
+                              const FS_RECTF& rect, jstring name, jstring contents,
+                              std::vector<FPDF_PAGEOBJECT>& objects) {
+    auto nm = annotName(env, name);
+    bool ok = FPDFAnnot_SetRect(annot, &rect) && FPDFAnnot_SetFlags(annot, FPDF_ANNOT_FLAG_PRINT)
+        && FPDFAnnot_SetStringValue(annot, "NM", nm.data());
+    if (contents) {
+        auto text = annotName(env, contents);
+        ok = ok && FPDFAnnot_SetStringValue(annot, "Contents", text.data());
+    }
+    for (auto obj : objects) {
+        if (ok && FPDFAnnot_AppendObject(annot, obj)) continue;
+        ok = false;
+        FPDFPageObj_Destroy(obj);
+    }
+    int index = ok ? -1 : FPDFPage_GetAnnotIndex(page, annot);
+    FPDFPage_CloseAnnot(annot);
+    if (!ok && index >= 0) FPDFPage_RemoveAnnot(page, index);
+    return ok;
+}
+
+JNI_FUNC(jfloatArray, PdfiumCore, nativeAddFreeTextAnnot)(JNI_ARGS, jlong docPtr, jlong pagePtr,
+        jstring text, jstring fontPath, jfloat fontSize, jfloat x, jfloat y,
+        jint r, jint g, jint b, jint a, jstring name) {
+    auto doc = reinterpret_cast<DocumentFile*>(docPtr);
+    auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    if (!doc || !page || !text || !name || !std::isfinite(fontSize) || fontSize <= 0 ||
+        !std::isfinite(x) || !std::isfinite(y)) return NULL;
+    FPDF_FONT font = editFont(doc, env, fontPath);
+    if (!font) return NULL;
+    auto chars = annotName(env, text);
+    std::vector<FPDF_PAGEOBJECT> objects;
+    FS_RECTF bounds = {};
+    bool ok = true;
+    size_t start = 0;
+    int line = 0;
+    for (size_t i = 0; i < chars.size(); ++i) {
+        if (chars[i] != '\n' && chars[i] != 0) continue;
+        if (i > start) {
+            std::vector<unsigned short> value(chars.begin() + start, chars.begin() + i);
+            if (!value.empty() && value.back() == '\r') value.pop_back();
+            value.push_back(0);
+            auto obj = FPDFPageObj_CreateTextObj(doc->pdfDocument, font, fontSize);
+            if (!obj) { ok = false; break; }
+            objects.push_back(obj);
+            if (!FPDFText_SetText(obj, value.data()) || !FPDFPageObj_SetFillColor(obj, r, g, b, a)) {
+                ok = false; break;
+            }
+            FPDFPageObj_Transform(obj, 1, 0, 0, 1, x, y - fontSize * (line + 1) * 1.2f + fontSize * .2f);
+            FS_RECTF box;
+            if (!FPDFPageObj_GetBounds(obj, &box.left, &box.bottom, &box.right, &box.top)) { ok = false; break; }
+            if (objects.size() == 1) bounds = box;
+            else {
+                bounds.left = std::min(bounds.left, box.left); bounds.right = std::max(bounds.right, box.right);
+                bounds.top = std::max(bounds.top, box.top); bounds.bottom = std::min(bounds.bottom, box.bottom);
+            }
+        }
+        start = i + 1;
+        ++line;
+    }
+    if (!ok || objects.empty()) {
+        for (auto obj : objects) FPDFPageObj_Destroy(obj);
+        return NULL;
+    }
+    bounds.left -= 2; bounds.right += 2; bounds.top += 2; bounds.bottom -= 2;
+    // chromium/8066 fpdf_annot.h explicitly supports AppendObject only for INK/STAMP.
+    // Use STAMP for the text appearance; FREETEXT cannot accept these objects.
+    auto annot = FPDFPage_CreateAnnot(page, FPDF_ANNOT_STAMP);
+    if (!annot) { for (auto obj : objects) FPDFPageObj_Destroy(obj); return NULL; }
+    if (!finishObjectAnnot(env, page, annot, bounds, name, text, objects)) return NULL;
+    jfloat values[] = {bounds.left, bounds.top, bounds.right, bounds.bottom};
+    auto result = env->NewFloatArray(4);
+    env->SetFloatArrayRegion(result, 0, 4, values);
+    return result;
+}
+
+JNI_FUNC(jboolean, PdfiumCore, nativeAddImageAnnot)(JNI_ARGS, jlong docPtr, jlong pagePtr,
+        jobject bitmap, jfloat left, jfloat top, jfloat right, jfloat bottom, jstring name) {
+    auto doc = reinterpret_cast<DocumentFile*>(docPtr);
+    auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    if (!doc || !page || !bitmap || !name || !std::isfinite(left) || !std::isfinite(top) ||
+        !std::isfinite(right) || !std::isfinite(bottom) || right <= left || top <= bottom) return JNI_FALSE;
+    AndroidBitmapInfo info;
+    void* pixels = NULL;
+    if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+        info.format != ANDROID_BITMAP_FORMAT_RGBA_8888 || !info.width || !info.height) return JNI_FALSE;
+    std::vector<unsigned char> bgra(static_cast<size_t>(info.width) * info.height * 4);
+    if (AndroidBitmap_lockPixels(env, bitmap, &pixels) != ANDROID_BITMAP_RESULT_SUCCESS) return JNI_FALSE;
+    for (uint32_t y = 0; y < info.height; ++y) {
+        auto src = static_cast<unsigned char*>(pixels) + y * info.stride;
+        auto dst = bgra.data() + static_cast<size_t>(y) * info.width * 4;
+        for (uint32_t x = 0; x < info.width; ++x) {
+            // Android's bitmap is premultiplied; PDFium BGRA expects straight alpha.
+            unsigned alpha = src[4*x+3];
+            bool premul = (info.flags & ANDROID_BITMAP_FLAGS_ALPHA_MASK) == ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
+            for (int c = 0; c < 3; ++c) {
+                unsigned value = src[4*x+2-c];
+                dst[4*x+c] = premul && alpha ? std::min(255u, (value * 255u + alpha/2) / alpha) : value;
+            }
+            dst[4*x+3] = alpha;
+        }
+    }
+    AndroidBitmap_unlockPixels(env, bitmap);
+    auto bmp = FPDFBitmap_CreateEx(info.width, info.height, FPDFBitmap_BGRA, bgra.data(), info.width * 4);
+    if (!bmp) return JNI_FALSE;
+    auto obj = FPDFPageObj_NewImageObj(doc->pdfDocument);
+    bool ok = obj && FPDFImageObj_SetBitmap(NULL, 0, obj, bmp) &&
+        FPDFImageObj_SetMatrix(obj, right-left, 0, 0, top-bottom, left, bottom);
+    FPDFBitmap_Destroy(bmp);
+    if (!ok) { if (obj) FPDFPageObj_Destroy(obj); return JNI_FALSE; }
+    auto annot = FPDFPage_CreateAnnot(page, FPDF_ANNOT_STAMP);
+    if (!annot) { FPDFPageObj_Destroy(obj); return JNI_FALSE; }
+    FS_RECTF rect = {left, top, right, bottom};
+    std::vector<FPDF_PAGEOBJECT> objects = {obj};
+    return finishObjectAnnot(env, page, annot, rect, name, NULL, objects) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNI_FUNC(jobjectArray, PdfiumCore, nativeGetAnnots)(JNI_ARGS, jlong pagePtr) {
+    auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    int count = page ? FPDFPage_GetAnnotCount(page) : 0;
+    auto cls = env->FindClass("java/lang/String");
+    auto result = env->NewObjectArray(std::max(0, count) * 2, cls, NULL);
+    for (int i = 0; i < count; ++i) {
+        auto annot = FPDFPage_GetAnnot(page, i);
+        if (!annot) continue;
+        FS_RECTF rect;
+        if (FPDFAnnot_GetRect(annot, &rect)) {
+            char values[256];
+            snprintf(values, sizeof(values), "%d %d %.9g %.9g %.9g %.9g", i,
+                FPDFAnnot_GetSubtype(annot), rect.left, rect.top, rect.right, rect.bottom);
+            auto metadata = env->NewStringUTF(values);
+            env->SetObjectArrayElement(result, i * 2, metadata);
+            env->DeleteLocalRef(metadata);
+            unsigned long bytes = FPDFAnnot_GetStringValue(annot, "NM", NULL, 0);
+            std::vector<unsigned short> name(std::max(1ul, (bytes+1)/2), 0);
+            if (bytes) FPDFAnnot_GetStringValue(annot, "NM", name.data(), bytes);
+            auto nm = env->NewString(reinterpret_cast<const jchar*>(name.data()), bytes >= 2 ? bytes/2-1 : 0);
+            env->SetObjectArrayElement(result, i * 2 + 1, nm);
+            env->DeleteLocalRef(nm);
+        }
+        FPDFPage_CloseAnnot(annot);
+    }
+    return result;
+}
+
+JNI_FUNC(jboolean, PdfiumCore, nativeRemoveAnnotAt)(JNI_ARGS, jlong pagePtr, jint index) {
+    auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    return page && index >= 0 && index < FPDFPage_GetAnnotCount(page) && FPDFPage_RemoveAnnot(page, index);
+}
+
+// Imported annotations can contain arbitrary dictionaries and appearance streams.
+// Preserve the document for their undo instead of rebuilding a lossy approximation.
+struct EditSnapshotWriter : FPDF_FILEWRITE {
+    std::vector<unsigned char> bytes;
+};
+
+static int writeEditSnapshot(FPDF_FILEWRITE* self, const void* data, unsigned long size) {
+    auto writer = static_cast<EditSnapshotWriter*>(self);
+    if (size > static_cast<size_t>(INT32_MAX) - writer->bytes.size()) return 0;
+    auto start = static_cast<const unsigned char*>(data);
+    writer->bytes.insert(writer->bytes.end(), start, start + size);
+    return 1;
+}
+
+JNI_FUNC(jbyteArray, PdfiumCore, nativeEditSnapshot)(JNI_ARGS, jlong docPtr) {
+    auto doc = reinterpret_cast<DocumentFile*>(docPtr);
+    if (!doc || !doc->pdfDocument) return NULL;
+    EditSnapshotWriter writer;
+    writer.version = 1;
+    writer.WriteBlock = writeEditSnapshot;
+    if (!FPDF_SaveAsCopy(doc->pdfDocument, &writer, FPDF_NO_INCREMENTAL | FPDF_REMOVE_SECURITY)) return NULL;
+    auto result = env->NewByteArray(writer.bytes.size());
+    if (result) env->SetByteArrayRegion(result, 0, writer.bytes.size(), reinterpret_cast<const jbyte*>(writer.bytes.data()));
+    return result;
+}
+
+JNI_FUNC(jlong, PdfiumCore, nativeOpenEditSnapshot)(JNI_ARGS, jbyteArray snapshot) {
+    if (!snapshot || !env->GetArrayLength(snapshot)) return 0;
+    auto doc = new DocumentFile();
+    doc->editSnapshotBytes.resize(env->GetArrayLength(snapshot));
+    env->GetByteArrayRegion(snapshot, 0, doc->editSnapshotBytes.size(), reinterpret_cast<jbyte*>(doc->editSnapshotBytes.data()));
+    doc->pdfDocument = FPDF_LoadMemDocument(doc->editSnapshotBytes.data(), doc->editSnapshotBytes.size(), NULL);
+    if (!doc->pdfDocument) { delete doc; return 0; }
+    return reinterpret_cast<jlong>(doc);
 }
 
 struct FileWriter : FPDF_FILEWRITE {

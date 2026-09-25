@@ -57,6 +57,9 @@ open class Cell
     @JvmField
     protected var value: Any? = null
 
+    /** OOXML formula without =; cell type/value remain the cached display result. */
+    var formula: String? = null
+
     private var prop: CellProperty? = CellProperty()
 
     /**

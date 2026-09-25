@@ -27,6 +27,7 @@ import com.reader.pdfviewer.exception.PageRenderingException
 import com.reader.pdfviewer.link.DefaultLinkHandler
 import com.reader.pdfviewer.link.LinkHandler
 import com.reader.pdfviewer.listener.*
+import com.reader.pdfviewer.model.PdfAnnotationInfo
 import com.reader.pdfviewer.model.PagePart
 import com.reader.pdfviewer.scroll.ScrollHandle
 import com.reader.pdfviewer.source.*
@@ -258,6 +259,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
      */
     var isTextMarkupEnabled: Boolean = false
         private set
+    private var highlightColor = 0x80FFEB3B.toInt()
     private var underlineColor = DEFAULT_UNDERLINE_COLOR
     private var strikethroughColor = DEFAULT_STRIKETHROUGH_COLOR
 
@@ -612,8 +614,10 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
 
     fun recycle() {
         cancelInkStroke()
-        inkUndo.clear()
-        inkRedo.clear()
+        editUndo.clear()
+        editRedo.clear()
+        sessionAnnotations.clear()
+        sessionInk.clear()
         pendingInk.clear()
         inkRevisions.clear()
         pageWidthPoints.clear()
@@ -1878,8 +1882,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
     private var inkWidth: Float = 2f
     private data class InkStroke(val page: Int, val points: FloatArray, val normalized: List<PointF>,
         val color: Int, val width: Float, val name: String, val revision: Long)
-    private val inkUndo = ArrayList<InkStroke>()
-    private val inkRedo = ArrayList<InkStroke>()
+    private val sessionInk = HashMap<String, InkStroke>()
     private val pendingInk = ArrayList<InkStroke>()
     private val inkRevisions = HashMap<Int, Long>()
     // Page widths in PDF points, cached so onDraw never waits for the pdfium lock
@@ -1925,43 +1928,218 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         callbacks.onInkChangeListener = listener
     }
 
-    /** Whether a stroke created in this document session can be undone. */
-    fun canUndoInk(): Boolean = inkUndo.isNotEmpty()
+    /** Compatibility alias for [canUndoEdit]. */
+    fun canUndoInk(): Boolean = canUndoEdit()
 
-    /** Whether an undone stroke can be restored. */
-    fun canRedoInk(): Boolean = inkRedo.isNotEmpty()
+    /** Compatibility alias for [canRedoEdit]. */
+    fun canRedoInk(): Boolean = canRedoEdit()
 
-    /** Remove the last stroke from the document in memory; returns false on failure. */
-    fun undoInk(): Boolean {
-        val stroke = inkUndo.lastOrNull() ?: return false
-        if (pdfFile?.removeAnnotByName(stroke.page, stroke.name) != true) return false
-        cancelInkStroke()
-        inkUndo.removeAt(inkUndo.lastIndex)
-        inkRedo.add(stroke)
-        pendingInk.removeAll { it.name == stroke.name }
-        inkRevisions[stroke.page] = (inkRevisions[stroke.page] ?: 0) + 1
-        inkChanged(stroke.page)
+    /** Compatibility alias for [undoEdit]. */
+    fun undoInk(): Boolean = undoEdit()
+
+    /** Compatibility alias for [redoEdit]. */
+    fun redoInk(): Boolean = redoEdit()
+
+    private data class EditRecord(val page: Int, val name: String, val apply: () -> Boolean, val revert: () -> Boolean)
+    private val editUndo = ArrayList<EditRecord>()
+    private val editRedo = ArrayList<EditRecord>()
+    private val sessionAnnotations = HashMap<String, EditRecord>()
+
+    private fun recordAddition(page: Int, name: String, apply: () -> Boolean) {
+        val record = EditRecord(page, name, apply) { pdfFile?.removeAnnotByName(page, name) == true }
+        sessionAnnotations[name] = record
+        editUndo.add(record)
+        editRedo.clear()
+    }
+
+    private fun requireEditThread() {
+        check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) { "PDF edits require the main thread" }
+    }
+
+    /** Receive unified edit history availability on the main thread. */
+    fun setOnEditChangeListener(listener: OnEditChangeListener?) {
+        requireEditThread()
+        callbacks.onEditChangeListener = listener
+    }
+
+    /** Whether the latest recorded edit can be undone. Call on the main thread. */
+    fun canUndoEdit(): Boolean = editUndo.isNotEmpty()
+
+    /** Whether an undone edit can be reapplied. Call on the main thread. */
+    fun canRedoEdit(): Boolean = editRedo.isNotEmpty()
+
+    /** Undo the latest recorded edit. Saving does not clear this history. */
+    fun undoEdit(): Boolean {
+        requireEditThread()
+        val record = editUndo.lastOrNull() ?: return false
+        if (!record.revert()) return false
+        editUndo.removeAt(editUndo.lastIndex)
+        editRedo.add(record)
+        finishHistoryChange(record)
         return true
     }
 
-    /** Restore the last undone stroke in memory; returns false on failure. */
-    fun redoInk(): Boolean {
-        val stroke = inkRedo.lastOrNull() ?: return false
-        if (pdfFile?.addInk(stroke.page, stroke.points, stroke.width, stroke.color, stroke.name) != true) return false
+    /** Reapply the latest undone edit. Call on the main thread. */
+    fun redoEdit(): Boolean {
+        requireEditThread()
+        val record = editRedo.lastOrNull() ?: return false
+        if (!record.apply()) return false
+        editRedo.removeAt(editRedo.lastIndex)
+        editUndo.add(record)
+        finishHistoryChange(record)
+        return true
+    }
+
+    private fun finishHistoryChange(record: EditRecord) {
         cancelInkStroke()
-        inkRedo.removeAt(inkRedo.lastIndex)
-        val restored = stroke.copy(revision = (inkRevisions[stroke.page] ?: 0) + 1)
-        inkRevisions[stroke.page] = restored.revision
-        inkUndo.add(restored)
-        pendingInk.add(restored)
-        inkChanged(stroke.page)
+        pendingInk.removeAll { it.name == record.name }
+        val revision = (inkRevisions[record.page] ?: 0) + 1
+        inkRevisions[record.page] = revision
+        sessionInk[record.name]?.let { stroke ->
+            if (getAnnotations(record.page).any { it.name == record.name }) {
+                pendingInk.add(stroke.copy(revision = revision))
+            }
+        }
+        inkChanged(record.page)
+    }
+
+    /** Map a view point to a viewer page and PDF coordinates, or null in page gaps. Main thread only. */
+    fun viewToPagePoint(viewX: Float, viewY: Float): Pair<Int, PointF>? {
+        requireEditThread()
+        val file = pdfFile ?: return null
+        if (state != State.SHOWN || file.pagesCount == 0 || !viewX.isFinite() || !viewY.isFinite()) return null
+        val page = file.getPageAtOffset(if (isSwipeVertical) viewY - currentYOffset else viewX - currentXOffset, zoom)
+        val size = file.getScaledPageSize(page, zoom)
+        val offset = computePageOffsets(page)
+        val x = viewX - currentXOffset - offset.x
+        val y = viewY - currentYOffset - offset.y
+        if (size.width <= 0 || size.height <= 0 || x < 0 || y < 0 || x > size.width || y > size.height) return null
+        val w = 16384
+        val h = max(1, (w * size.height / size.width).toInt())
+        return file.deviceToPageCoords(page, w, h, kotlin.math.round(x / size.width * w).toInt(),
+            kotlin.math.round(y / size.height * h).toInt())?.let { page to it }
+    }
+
+    /** Map PDF bounds (top > bottom) to normalized view bounds, respecting rotation and zoom. */
+    fun pageRectToView(page: Int, pageRect: RectF): RectF? {
+        requireEditThread()
+        val file = pdfFile ?: return null
+        if (page !in 0 until file.pagesCount) return null
+        try { file.openPage(page) } catch (ignored: PageRenderingException) { return null }
+        val size = file.getScaledPageSize(page, zoom)
+        if (size.width <= 0 || size.height <= 0) return null
+        val offset = computePageOffsets(page)
+        val mapped = file.mapRectToDevice(page, 0, 0, size.width.toInt(), size.height.toInt(), pageRect) ?: return null
+        mapped.sort()
+        mapped.offset(currentXOffset + offset.x, currentYOffset + offset.y)
+        return mapped
+    }
+
+    /** Add multiline text at a PDF top-left point. Returns its NM name, or null on failure.
+     * Uses a system Unicode font by default; call on the main thread.
+     */
+    @JvmOverloads
+    fun addText(page: Int, pageX: Float, pageY: Float, text: String, sizePt: Float = 14f,
+        @ColorInt color: Int = Color.BLACK, fontPath: String? = null): String? {
+        requireEditThread()
+        val file = pdfFile ?: return null
+        if (text.isBlank() || !sizePt.isFinite() || sizePt <= 0 || !pageX.isFinite() || !pageY.isFinite()) return null
+        val font = fontPath ?: listOf("/system/fonts/Roboto-Regular.ttf", "/system/fonts/NotoSans-Regular.ttf",
+            "/system/fonts/DroidSans.ttf").firstOrNull { File(it).canRead() }
+        val name = "pdfview-text-" + java.util.UUID.randomUUID()
+        val apply = { file.addFreeText(page, text, font, sizePt, pageX, pageY, color, name) != null }
+        if (!apply()) return null
+        recordAddition(page, name, apply)
+        inkChanged(page)
+        return name
+    }
+
+    /** Add an image in PDF bounds (right > left, top > bottom). Retains a private bitmap for redo. */
+    fun addImage(page: Int, pageRect: RectF, bitmap: Bitmap): String? {
+        requireEditThread()
+        val file = pdfFile ?: return null
+        if (bitmap.isRecycled || !listOf(pageRect.left, pageRect.top, pageRect.right, pageRect.bottom).all { it.isFinite() }
+            || pageRect.right <= pageRect.left || pageRect.top <= pageRect.bottom) return null
+        val copy = bitmap.copy(Bitmap.Config.ARGB_8888, false) ?: return null
+        val rect = RectF(pageRect)
+        val name = "pdfview-image-" + java.util.UUID.randomUUID()
+        val apply = { file.addImage(page, rect, copy, name) }
+        if (!apply()) { copy.recycle(); return null }
+        recordAddition(page, name, apply)
+        inkChanged(page)
+        return name
+    }
+
+    /** List annotation metadata in stacking order. Call on the main thread. */
+    fun getAnnotations(page: Int): List<PdfAnnotationInfo> {
+        requireEditThread()
+        return pdfFile?.getAnnotations(page) ?: emptyList()
+    }
+
+    /** Find the topmost annotation; small bounds get a minimum 16dp touch target. */
+    fun findAnnotationAt(viewX: Float, viewY: Float): PdfAnnotationInfo? {
+        val (page, _) = viewToPagePoint(viewX, viewY) ?: return null
+        val slop = 8f * resources.displayMetrics.density
+        return getAnnotations(page).asReversed().firstOrNull {
+            val rect = pageRectToView(page, it.rect) ?: return@firstOrNull false
+            rect.inset(-max(0f, slop - rect.width() / 2), -max(0f, slop - rect.height() / 2))
+            rect.contains(viewX, viewY)
+        }
+    }
+
+    /** Delete an annotation on the main thread. Named imported annotations use a document
+     * snapshot for undo, which can take time and memory proportional to document size.
+     * Deleting an imported unnamed annotation cannot be undone and starts a new history.
+     * Refresh metadata after edits: indices of unnamed annotations can change.
+     */
+    fun removeAnnotation(info: PdfAnnotationInfo): Boolean {
+        requireEditThread()
+        val file = pdfFile ?: return false
+        val current = getAnnotations(info.page).firstOrNull {
+            if (!info.name.isNullOrEmpty()) it.name == info.name
+            else it.index == info.index && it.subtype == info.subtype && it.rect == info.rect
+        } ?: return false
+        val original = sessionAnnotations[current.name]
+        val snapshot = if (original == null && !current.name.isNullOrEmpty())
+            try { file.editSnapshot() } catch (e: OutOfMemoryError) { null } else null // null: delete without undo
+        val removed = if (!current.name.isNullOrEmpty()) file.removeAnnotByName(info.page, current.name)
+            else file.removeAnnotAt(info.page, current.index)
+        if (!removed) return false
+        if (original != null) {
+            editUndo.add(EditRecord(info.page, original.name, original.revert, original.apply))
+        } else if (snapshot != null) {
+            val name = current.name!!
+            editUndo.add(EditRecord(info.page, name,
+                { file.removeAnnotByName(info.page, name) },
+                {
+                    if (!file.restoreEditSnapshot(snapshot)) false else {
+                        clearTextSelection()
+                        pendingInk.clear()
+                        pageRenderer?.cancelAllTasks()
+                        for (page in 0 until pageCount) {
+                            inkRevisions[page] = (inkRevisions[page] ?: 0) + 1
+                            cacheManager.markPageStale(page, zoom)
+                        }
+                        true
+                    }
+                }))
+        } else {
+            // An unrecorded deletion is a history boundary so an older snapshot cannot resurrect it.
+            editUndo.clear()
+        }
+        editRedo.clear()
+        pendingInk.removeAll { it.name == current.name }
+        inkRevisions[info.page] = (inkRevisions[info.page] ?: 0) + 1
+        inkChanged(info.page)
         return true
     }
 
     private fun inkChanged(page: Int) {
         hasUnsavedChanges = true
+        if (!isAnnotationRendering) enableAnnotationRendering(true)
         reloadPage(page)
         invalidate()
+        callbacks.onEditChangeListener?.onEditChanged(canUndoEdit(), canRedoEdit())
         callbacks.onInkChangeListener?.onInkChanged(canUndoInk(), canRedoInk())
     }
 
@@ -2027,8 +2205,8 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         cancelInkStroke()
         if (!file.addInk(page, points, stroke.width, stroke.color, stroke.name)) return
         inkRevisions[page] = stroke.revision
-        inkUndo.add(stroke)
-        inkRedo.clear()
+        sessionInk[stroke.name] = stroke
+        recordAddition(page, stroke.name) { file.addInk(page, points, stroke.width, stroke.color, stroke.name) }
         pendingInk.add(stroke)
         inkChanged(page)
     }
@@ -2167,6 +2345,10 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         isTextMarkupEnabled = enabled
     }
 
+    /** Set the color for subsequent highlights; defaults to translucent yellow. */
+    fun setHighlightColor(@ColorInt color: Int) { highlightColor = color }
+
+    /** Set the color for underline annotations. */
     fun setUnderlineColor(@ColorInt color: Int) {
         underlineColor = color
     }
@@ -2176,7 +2358,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
     }
 
     /**
-     * Add an underline or strikethrough annotation over the selected text, in the document in memory.
+     * Add a highlight, underline, or strikethrough annotation over the selected text, in the document in memory.
      * Call [saveDocument] to write it to a file.
      *
      * @param color annotation color, the configured color of [type] by default
@@ -2184,6 +2366,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
      */
     @JvmOverloads
     fun addTextMarkupToSelection(type: TextMarkupType, @ColorInt color: Int? = null): Boolean {
+        requireEditThread()
         val file = pdfFile ?: return false
         if (!hasTextSelection()) {
             return false
@@ -2193,14 +2376,19 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         if (quads.isEmpty()) {
             return false
         }
-        val markupColor = color ?: if (type == TextMarkupType.UNDERLINE) underlineColor else strikethroughColor
-        if (!file.addTextMarkup(page, type.annotSubtype, quads, markupColor)) {
+        val markupColor = color ?: when (type) {
+            TextMarkupType.HIGHLIGHT -> highlightColor
+            TextMarkupType.UNDERLINE -> underlineColor
+            TextMarkupType.STRIKETHROUGH -> strikethroughColor
+        }
+        val name = "pdfview-markup-" + java.util.UUID.randomUUID()
+        if (!file.addTextMarkup(page, type.annotSubtype, quads, markupColor, name)) {
             Log.e(TAG, "Cannot add $type on page $page")
             return false
         }
-        hasUnsavedChanges = true
+        recordAddition(page, name) { file.addTextMarkup(page, type.annotSubtype, quads, markupColor, name) }
         clearTextSelection()
-        reloadPage(page)
+        inkChanged(page)
         callbacks.callOnTextMarkupAdded(page, type)
         return true
     }
@@ -3071,6 +3259,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         private var drawingMode = false
         private var inkColor = Color.BLACK
         private var inkWidth = 2f
+        private var onEditChangeListener: OnEditChangeListener? = null
         private var onInkChangeListener: OnInkChangeListener? = null
 
         /** Enable one-finger drawing and annotation rendering. */
@@ -3086,7 +3275,10 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
             return this
         }
 
-        /** Receive ink undo/redo availability changes. */
+        /** Receive availability of undo and redo for all annotation edits. */
+        fun onEditChange(listener: OnEditChangeListener?): Configurator { onEditChangeListener = listener; return this }
+
+        /** Compatibility listener for unified undo/redo availability. */
         fun onInkChange(listener: OnInkChangeListener?): Configurator { onInkChangeListener = listener; return this }
 
         private var pageNumbers: IntArray? = null
@@ -3164,6 +3356,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         private var tintSelectionHandleDrawables = false
         private var magnifierEnabled = false
         private var textMarkupEnabled = false
+        private var highlightColor: Int? = null
         private var underlineColor: Int? = null
         private var strikethroughColor: Int? = null
         private var onTextMarkupListener: OnTextMarkupListener? = null
@@ -3405,6 +3598,9 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
             return this
         }
 
+        /** Set the color for highlight annotations. */
+        fun highlightColor(@ColorInt color: Int): Configurator { highlightColor = color; return this }
+
         fun underlineColor(@ColorInt color: Int): Configurator {
             this.underlineColor = color
             return this
@@ -3562,6 +3758,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
             }
             this@PDFView.enableMagnifier(magnifierEnabled)
             this@PDFView.enableTextMarkup(textMarkupEnabled)
+            if (highlightColor != null) this@PDFView.setHighlightColor(highlightColor!!)
             if (underlineColor != null) this@PDFView.setUnderlineColor(underlineColor!!)
             if (strikethroughColor != null) this@PDFView.setStrikethroughColor(strikethroughColor!!)
             this@PDFView.callbacks.onTextMarkupListener = onTextMarkupListener
@@ -3579,6 +3776,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
             this@PDFView.setInkColor(inkColor)
             this@PDFView.setInkWidth(inkWidth)
             this@PDFView.setOnInkChangeListener(onInkChangeListener)
+            this@PDFView.setOnEditChangeListener(onEditChangeListener)
             this@PDFView.setDrawingMode(drawingMode)
             this@PDFView.scrollHandle = scrollHandle
             this@PDFView.enableAntialiasing(antialiasing)

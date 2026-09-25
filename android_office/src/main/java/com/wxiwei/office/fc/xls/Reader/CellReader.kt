@@ -30,7 +30,7 @@ class CellReader private constructor() {
     private var leaf: LeafElement? = null
 
     private fun isValidateCell(sheet: Sheet, cellElement: Element): Boolean {
-        if (cellElement.attributeValue("t") != null || cellElement.element("v") != null) return true
+        if (cellElement.attributeValue("t") != null || cellElement.element("v") != null || cellElement.element("f") != null) return true
         val book = sheet.getWorkbook() ?: return false
         val style = cellElement.attributeValue("s")
         if (style != null) return Workbook.isValidateStyle(book.getCellStyle(style.toInt()))
@@ -86,6 +86,8 @@ class CellReader private constructor() {
                 else -> cell.setCellValue(value)
             }
         }
+        cell.formula = SheetReader.instance().resolveFormula(sheet, cell, cellElement.element("f"))
+        if (!cell.hasValidValue()) cell.setCellType(Cell.CELL_TYPE_BLANK)
         return cell
     }
 

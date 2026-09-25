@@ -212,9 +212,11 @@ class Callbacks {
         }
     }
 
+    var onEditChangeListener: OnEditChangeListener? = null
     var onInkChangeListener: OnInkChangeListener? = null
 
     fun clear() {
+        onEditChangeListener = null
         onInkChangeListener = null
         // Not clearing onAttach and onDetach listeners because those are called before view initialization
         onLoadCompleteListener = null

@@ -126,6 +126,9 @@ class SheetReader private constructor() {
         var cellType: String? = null
         var cellStyle = 0
         var cellText: StringBuilder? = null
+        var formulaText: StringBuilder? = null
+        var formulaSi: String? = null
+        var captureFormula = false
         var captureValue = false
         var rowHasMetadata = false
         var rowsRead = 0
@@ -185,14 +188,18 @@ class SheetReader private constructor() {
                             val col = ReferenceUtil.instance().getColumnIndex(cellRef ?: "A1")
                             cellStyle = parser.attr("s")?.toIntOrNull() ?: target.getColumnStyle(col)
                             cellText = StringBuilder()
+                            formulaText = null
+                            formulaSi = null
                         }
+                        "f" -> { formulaText = StringBuilder(); formulaSi = parser.attr("si"); captureFormula = true }
                         "v", "t" -> if (cellText != null) captureValue = true
                         "mergeCell" -> parser.attr("ref")?.let { addMergeRange(target, it) }
                     }
                     XmlPullParser.TEXT, XmlPullParser.CDSECT -> if (captureValue) {
                         cellText?.append(parser.text)
-                    }
+                    } else if (captureFormula) { formulaText?.append(parser.text) }
                     XmlPullParser.END_TAG -> when (parser.name) {
+                        "f" -> captureFormula = false
                         "v", "t" -> captureValue = false
                         "c" -> {
                             val ref = cellRef
@@ -219,6 +226,7 @@ class SheetReader private constructor() {
                                         }
                                     }
                                 }
+                                cell.formula = formulaText?.let { resolveFormula(target, cell, it.toString(), formulaSi) }
                                 row!!.addCell(cell)
                             }
                             cellRef = null
@@ -516,6 +524,24 @@ class SheetReader private constructor() {
         sheet = null
         iReader = null
         key = null
+    }
+
+    private data class Master(val text: String, val row: Int, val col: Int)
+    private val sharedFormulas = java.util.WeakHashMap<Sheet, MutableMap<String, Master>>()
+    fun resolveFormula(sheet: Sheet, cell: Cell, element: Element?): String? {
+        if (element == null) return null
+        return resolveFormula(sheet, cell, element.text, element.attributeValue("si"))
+    }
+    private fun resolveFormula(sheet: Sheet, cell: Cell, text: String, si: String?): String {
+        if (si == null) return text
+        val masters = sharedFormulas.getOrPut(sheet) { HashMap() }
+        if (text.isNotEmpty()) {
+            masters[si] = Master(text, cell.getRowNumber(), cell.getColNumber())
+            return text
+        }
+        val master = masters[si] ?: return "#REF!"
+        return com.wxiwei.office.editor.xlsx.A1FormulaShifter.shift(master.text,
+            cell.getRowNumber() - master.row, cell.getColNumber() - master.col)
     }
 
     private var sheet: Sheet? = null

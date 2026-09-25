@@ -337,6 +337,12 @@ public final class WorkbookEvaluator {
 			} 
 			catch(Exception e)
             {
+			    // Other models (XLSX live editing) store results themselves
+			    if (!(srcCell.getIdentityKey() instanceof ACell))
+			    {
+			        // Let the caller keep the saved value instead of showing a made-up #N/A
+			        throw new RuntimeException(e);
+			    }
 			    ACell cell = (ACell)srcCell.getIdentityKey();
 			    cell.setCellType(Cell.CELL_TYPE_ERROR, false);
 	            cell.setCellErrorValue((byte)ErrorEval.NA.getErrorCode());
@@ -366,6 +372,10 @@ public final class WorkbookEvaluator {
 		// When circular references are detected, the cache entry is only updated for
 		// the top evaluation frame
 		
+		if (!(srcCell.getIdentityKey() instanceof ACell))
+		{
+		    return result;
+		}
 		ACell cell = (ACell)srcCell.getIdentityKey();
 		if (result instanceof NumberEval) 
         {

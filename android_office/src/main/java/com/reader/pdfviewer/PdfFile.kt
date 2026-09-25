@@ -390,7 +390,7 @@ class PdfFile(
         return pdfiumCore!!.getCharBox(pdfDocument, docPage, charIndex)
     }
 
-    fun addTextMarkup(pageIndex: Int, subtype: Int, quads: FloatArray, color: Int): Boolean {
+    fun addTextMarkup(pageIndex: Int, subtype: Int, quads: FloatArray, color: Int, name: String): Boolean {
         val docPage = documentPage(pageIndex)
         if (docPage < 0) {
             return false
@@ -400,7 +400,7 @@ class PdfFile(
         } catch (ignored: PageRenderingException) {
             return false
         }
-        return pdfiumCore!!.addTextMarkupAnnot(pdfDocument, docPage, subtype, quads, color)
+        return pdfiumCore!!.addTextMarkupAnnot(pdfDocument, docPage, subtype, quads, color, name)
     }
 
     /** Add an ink stroke, [points] being x,y pairs in page coordinates and [width] in points. */
@@ -438,6 +438,45 @@ class PdfFile(
         }
         return pdfiumCore!!.deviceToPageCoords(pdfDocument, docPage, 0, 0, sizeX, sizeY, 0, x, y)
     }
+
+    /** addFreeText: map the viewer page to its document page before accessing annotations. */
+    fun addFreeText(pageIndex: Int, text: String, fontPath: String?, size: Float, x: Float, y: Float, color: Int, name: String): android.graphics.RectF? {
+        val docPage = documentPage(pageIndex)
+        if (docPage < 0) return null
+        try { openPage(pageIndex) } catch (ignored: PageRenderingException) { return null }
+        return pdfiumCore!!.addFreeText(pdfDocument, docPage, text, fontPath, size, x, y, color, name)
+    }
+
+    /** addImage: map the viewer page to its document page before accessing annotations. */
+    fun addImage(pageIndex: Int, rect: android.graphics.RectF, bitmap: android.graphics.Bitmap, name: String): Boolean {
+        val docPage = documentPage(pageIndex)
+        if (docPage < 0) return false
+        try { openPage(pageIndex) } catch (ignored: PageRenderingException) { return false }
+        return pdfiumCore!!.addImage(pdfDocument, docPage, rect, bitmap, name)
+    }
+
+    /** getAnnotations: map the viewer page to its document page before accessing annotations. */
+    fun getAnnotations(pageIndex: Int): List<com.reader.pdfviewer.model.PdfAnnotationInfo> {
+        val docPage = documentPage(pageIndex)
+        if (docPage < 0) return emptyList()
+        try { openPage(pageIndex) } catch (ignored: PageRenderingException) { return emptyList() }
+        return pdfiumCore!!.getAnnotations(pdfDocument, docPage).map { it.copy(page = pageIndex) }
+    }
+
+    /** removeAnnotAt: map the viewer page to its document page before accessing annotations. */
+    fun removeAnnotAt(pageIndex: Int, index: Int): Boolean {
+        val docPage = documentPage(pageIndex)
+        if (docPage < 0) return false
+        try { openPage(pageIndex) } catch (ignored: PageRenderingException) { return false }
+        return pdfiumCore!!.removeAnnotAt(pdfDocument, docPage, index)
+    }
+
+    /** Snapshot only for undoing deletion of an imported named annotation. */
+    internal fun editSnapshot(): ByteArray? = pdfiumCore?.editSnapshot(pdfDocument)
+
+    /** Restore a snapshot without changing page geometry or viewer page mappings. */
+    internal fun restoreEditSnapshot(snapshot: ByteArray): Boolean =
+        pdfiumCore?.restoreEditSnapshot(pdfDocument, snapshot) == true
 
     /** Page width in PDF points. */
     fun getPageWidthPoint(pageIndex: Int): Int {

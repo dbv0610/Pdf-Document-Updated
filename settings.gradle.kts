@@ -2,12 +2,7 @@ pluginManagement {
  val mavenUser: String by settings
     val mavenPassword: String by settings
     repositories {
-        maven(url = "https://maven.pkg.github.com/azuraglobal/plugin") {
-            credentials {
-                username = mavenUser
-                password = mavenPassword
-            }
-        }
+
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -30,12 +25,7 @@ dependencyResolutionManagement {
         maven(url = "https://artifact.bytedance.com/repository/pangle/")
         maven(url = "https://repository.aspose.com/repo/")
         maven(url = "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea")
-        maven(url = "https://maven.pkg.github.com/azuraglobal/AzModuleAds") {
-            credentials {
-                username = mavenUser
-                password = mavenPassword
-            }
-        }
+
     }
 }
 
@@ -45,3 +35,4 @@ include(":lib")
 include(":android_office")
 
 include(":ucrop")
+include(":android_office")

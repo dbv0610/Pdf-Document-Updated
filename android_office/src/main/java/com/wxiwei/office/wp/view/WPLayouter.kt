@@ -18,6 +18,7 @@ import com.wxiwei.office.simpletext.view.IView
 import com.wxiwei.office.simpletext.view.PageAttr
 import com.wxiwei.office.simpletext.view.ParaAttr
 import com.wxiwei.office.simpletext.view.ViewKit
+import com.wxiwei.office.wp.control.Word
 import com.wxiwei.office.wp.model.WPDocument
 
 /**
@@ -434,6 +435,13 @@ class WPLayouter(root: PageRoot) {
                 "thread=${Thread.currentThread().name}"
         )
         val pv = ViewFactory.createView(root!!.getControl()!!, section, null, WPViewConstant.PAGE_VIEW.toInt()) as PageView
+        // The UI thread draws the page as soon as it is linked, while it is still being filled
+        // below; at its default (0, 0) that drew it over the first page until layoutAllPage
+        // moved it. Place it under the last page first.
+        root!!.getLastView()?.let { last ->
+            val space = (root!!.getContainer() as? Word)?.getPageSpacing() ?: WPViewConstant.PAGE_SPACE.toInt()
+            pv.setLocation(last.getX(), last.getY() + last.getHeight() + space)
+        }
         root!!.appendChlidView(pv)
         layoutPage(pv)
         Log.d(

@@ -14,7 +14,7 @@ class AnimationManager(private var control: IControl?) : ITimerListener {
     private var actionIndex = 0
     fun setAnimation(animation: IAnimation?) { if (this.animation != null && timer?.isRunning == true) { timer?.stop(); this.animation?.stop() }; this.animation = animation }
     fun beginAnimation(delay: Int) {
-        if (timer == null) timer = ATimer(delay, this)
+        if (timer == null) timer = ATimer(delay, this, control)
         animation?.let { actionIndex = 0; it.start(); timer?.start(); control?.officeToPicture?.setModeType(IOfficeToPicture.VIEW_CHANGING) }
     }
     fun restartAnimationTimer() { timer?.restart() }

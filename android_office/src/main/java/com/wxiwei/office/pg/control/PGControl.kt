@@ -21,7 +21,7 @@ import com.wxiwei.office.java.awt.Rectangle
 import com.wxiwei.office.pg.model.PGModel
 import com.wxiwei.office.system.AbstractControl
 import com.wxiwei.office.system.IControl
-import com.wxiwei.office.system.OfficeCoroutineExecutor
+import com.wxiwei.office.system.DocumentCoroutines
 import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.IFind
 import com.wxiwei.office.system.IMainFrame
@@ -58,7 +58,7 @@ class PGControl(mainControl: IControl, pgModel: PGModel, filePath: String?) : Ab
                 @Suppress("UNCHECKED_CAST")
                 val images = obj as List<Int>
                 val update = { if (!isDispose) mainControl?.getMainFrame()?.updateViewImages(images) }
-                if (view.parent != null) view.post(update) else OfficeCoroutineExecutor.launch(update)
+                if (view.parent != null) view.post(update) else DocumentCoroutines.launch(mainControl) { update() }
             }
             EventConstant.SYS_INIT_ID -> {
                 val start = android.os.SystemClock.uptimeMillis()

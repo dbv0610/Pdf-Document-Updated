@@ -40,6 +40,11 @@ interface RecentDao {
 
     @Query("UPDATE RecentDocument SET path = :newPath WHERE mediaId = :id")
     suspend fun updatePath(id: Int, newPath: String)
+    @Query("UPDATE RecentDocument SET mediaId = :newId WHERE mediaId = :oldId")
+    suspend fun updateId(oldId: Int, newId: Int)
+
+    @Query("DELETE FROM RecentDocument WHERE mediaId = :id")
+    suspend fun deleteById(id: Int)
 
 }
 @Dao
@@ -93,5 +98,11 @@ interface FavoriteDao {
   """
     )
     suspend fun updateName(documentId: Int, newPath: String)
+
+    @Query("UPDATE RecentDocument SET mediaId = :newId WHERE mediaId = :oldId")
+    suspend fun updateId(oldId: Int, newId: Int)
+
+    @Query("DELETE FROM RecentDocument WHERE mediaId = :id")
+    suspend fun deleteById(id: Int)
 
 }

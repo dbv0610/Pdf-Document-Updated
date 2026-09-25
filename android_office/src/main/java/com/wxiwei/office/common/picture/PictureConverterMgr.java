@@ -53,6 +53,12 @@ public class PictureConverterMgr
     public void setControl(IControl control)
     {
         this.control = control;
+    }
+
+    /** The document this converter works for; its coroutine scope runs the conversions. */
+    public IControl getControl()
+    {
+        return control;
     }    
     
     public synchronized void addConvertPicture(int viewIndex, byte type , String srcPath, String dstPath, int width, int height, boolean singleThread)
@@ -62,6 +68,10 @@ public class PictureConverterMgr
         if(singleThread)
         {
         	convertWMF_EMF(type, srcPath, dstPath, width, height, true);
+            if(isIdle())
+            {
+                control.actionEvent(EventConstant.SYS_SET_PROGRESS_BAR_ID, false);
+            }
         }
         else
         {
@@ -107,7 +117,7 @@ public class PictureConverterMgr
             	 sBitmap = EMFUtil.convert(sourPath, destPath, picWidth, picHeight);
              }
              
-             if(control != null && (convertingPictPathMap.get(destPath) == null || control.getView() == null))
+             if(control != null && ((!thumbnail && !isConversionActive(destPath)) || control.getView() == null))
              {
             	 //has disposed
             	 return;
@@ -116,7 +126,7 @@ public class PictureConverterMgr
              if(sBitmap != null)
              {
             	 control.getSysKit().getPictureManage().addBitmap(destPath, sBitmap);
-                 remove(destPath);
+                 finishConversion(destPath, thumbnail);
                  
                  if(!thumbnail)
                  {
@@ -125,7 +135,7 @@ public class PictureConverterMgr
              }
              else
              {
-            	 remove(destPath);
+            	 finishConversion(destPath, thumbnail);
              }
          }
     	 catch(OutOfMemoryError e)
@@ -138,19 +148,19 @@ public class PictureConverterMgr
     		 else
     		 {
     			 control.getSysKit().getErrorKit().writerLog(e);
-    			 remove(destPath);
+    			 finishConversion(destPath, thumbnail);
     		 }
     	 }
          catch(Exception e)
          {
-        	 if(control != null && (convertingPictPathMap.get(destPath) == null || control.getView() == null))
+        	 if(control != null && ((!thumbnail && !isConversionActive(destPath)) || control.getView() == null))
              {
             	 //has disposed
             	 return;
              }
         	 
         	 control.getSysKit().getErrorKit().writerLog(e);
-             remove(destPath);
+             finishConversion(destPath, thumbnail);
          }
     }
     
@@ -162,6 +172,10 @@ public class PictureConverterMgr
         if(singleThread)
         {
         	convertPNG(srcPath, dstPath, picType, true);
+            if(isIdle())
+            {
+                control.actionEvent(EventConstant.SYS_SET_PROGRESS_BAR_ID, false);
+            }
         }
         else
         {
@@ -200,7 +214,7 @@ public class PictureConverterMgr
     		 // the native PNG converter shipped with the removed PDF module
     		 boolean ret = false;
              
-             if(control != null && (convertingPictPathMap.get(destPath) == null || control.getView() == null))
+             if(control != null && ((!thumbnail && !isConversionActive(destPath)) || control.getView() == null))
              {
             	 //has disposed
             	 return;
@@ -213,7 +227,7 @@ public class PictureConverterMgr
             	 if(sBitmap != null)
             	 {
             		 control.getSysKit().getPictureManage().addBitmap(destPath, sBitmap);
-                     remove(destPath);
+                     finishConversion(destPath, thumbnail);
                      
                      if(!thumbnail)
                      {
@@ -222,12 +236,12 @@ public class PictureConverterMgr
             	 }
             	 else
             	 {
-            		 remove(destPath);
+            		 finishConversion(destPath, thumbnail);
             	 }
              }
              else
              {
-            	 remove(destPath);
+            	 finishConversion(destPath, thumbnail);
              }
          }
     	 catch(OutOfMemoryError e)
@@ -240,19 +254,19 @@ public class PictureConverterMgr
     		 else
     		 {
     			 control.getSysKit().getErrorKit().writerLog(e);
-    			 remove(destPath);
+    			 finishConversion(destPath, thumbnail);
     		 }
     	 }
          catch(Exception e)
          {
-        	 if(control != null && (convertingPictPathMap.get(destPath) == null || control.getView() == null))
+        	 if(control != null && ((!thumbnail && !isConversionActive(destPath)) || control.getView() == null))
              {
             	 //has disposed
             	 return;
              }
         	 
         	 control.getSysKit().getErrorKit().writerLog(e);
-             remove(destPath);
+             finishConversion(destPath, thumbnail);
          }
     }
     
@@ -262,118 +276,154 @@ public class PictureConverterMgr
      */
     public void remove(String path)
     {
-    	synchronized(control)
-    	{
-    		if(convertingPictPathMap != null)
+        List<Integer> updateViewList = null;
+        boolean allConverted;
+        // Read before locking: it walks the view tree, which has locks of its own. The document
+        // may be disposed by now (PGControl's view is then gone), which must not kill this thread.
+        int currentViewIndex;
+        try
+        {
+            currentViewIndex = control.getCurrentViewIndex();
+        }
+        catch(Exception e)
+        {
+            currentViewIndex = -1;
+        }
+        // Collected under the lock, sent after it: the events reach the views (exportImage draws),
+        // and a drawing thread holds PictureKit's lock while it asks isPictureConverting.
+        synchronized(this)
+        {
+            if(convertingPictPathMap == null)
             {
-                PictureConversionTask thread = convertingPictPathMap.remove(path);
-    			convertingThread.remove(thread);    			
-    			
-            	List<Integer> updateViewList = null;
-            	List<Integer> viewList = vectorgraphViews.remove(path);
-            	for(int i = 0; i < viewList.size(); i++)
-            	{
-            		int viewIndex = viewList.get(i);
-            		List<String> vectorgraphs = viewVectorgraphs.get(viewIndex);
-            		vectorgraphs.remove(path);
-            		if(vectorgraphs.size() == 0)
-            		{
-            			//all vector graphs contained in this view have been converted
-            			//so notify to update this view
-            			viewVectorgraphs.remove(viewIndex);
-            			
-            			if(updateViewList == null)
-            			{
-            				updateViewList = new ArrayList<Integer>();
-            			}
-            			
-            			updateViewList.add(viewIndex);
-            		}
-            	}
-            	
-            	if(convertingThread.size() > 0)
-    			{
-            		//check current view vector graphs
-            		List<String> vectorgraphs = viewVectorgraphs.get(control.getCurrentViewIndex());
-            		if(vectorgraphs != null && vectorgraphs.size() > 0)
-            		{
-            			//start current view vector graph converting thread
-            			convertingPictPathMap.get(vectorgraphs.get(0)).start();
-            		}
-            		else
-            		{
-            			//start the last vector graph converting thread
-        				convertingThread.get(convertingThread.size() - 1).start();
-            		}    				
-    			}
-            	
-            	if(updateViewList != null && updateViewList.size() > 0)
-            	{
-            		if(updateViewList.contains(control.getCurrentViewIndex()))
-            		{
-            			control.actionEvent(EventConstant.APP_GENERATED_PICTURE_ID, null);
-            		}            		
-            		
-                    control.actionEvent(EventConstant.SYS_VECTORGRAPH_PROGRESS, updateViewList);
-            	}
-            	
-                if(convertingPictPathMap.size() == 0)
+                return;
+            }
+            PictureConversionTask thread = convertingPictPathMap.remove(path);
+            convertingThread.remove(thread);
+
+            List<Integer> viewList = vectorgraphViews.remove(path);
+            if(viewList != null)
+            {
+                for(int i = 0; i < viewList.size(); i++)
                 {
-                    control.actionEvent(EventConstant.SYS_SET_PROGRESS_BAR_ID, false);                
+                    int viewIndex = viewList.get(i);
+                    List<String> vectorgraphs = viewVectorgraphs.get(viewIndex);
+                    if(vectorgraphs == null)
+                    {
+                        continue;
+                    }
+                    vectorgraphs.remove(path);
+                    if(vectorgraphs.size() == 0)
+                    {
+                        //all vector graphs contained in this view have been converted
+                        //so notify to update this view
+                        viewVectorgraphs.remove(viewIndex);
+
+                        if(updateViewList == null)
+                        {
+                            updateViewList = new ArrayList<Integer>();
+                        }
+
+                        updateViewList.add(viewIndex);
+                    }
                 }
             }
-    	}        
+
+            if(convertingThread.size() > 0)
+            {
+                //check current view vector graphs
+                List<String> vectorgraphs = viewVectorgraphs.get(currentViewIndex);
+                PictureConversionTask next = vectorgraphs != null && vectorgraphs.size() > 0
+                    ? convertingPictPathMap.get(vectorgraphs.get(0)) : null;
+                if(next == null)
+                {
+                    //start the last vector graph converting thread
+                    next = convertingThread.get(convertingThread.size() - 1);
+                }
+                next.start();
+            }
+            allConverted = convertingPictPathMap.size() == 0;
+        }
+
+        if(updateViewList != null && updateViewList.size() > 0)
+        {
+            if(updateViewList.contains(currentViewIndex))
+            {
+                control.actionEvent(EventConstant.APP_GENERATED_PICTURE_ID, null);
+            }
+
+            control.actionEvent(EventConstant.SYS_VECTORGRAPH_PROGRESS, updateViewList);
+        }
+
+        if(allConverted)
+        {
+            control.actionEvent(EventConstant.SYS_SET_PROGRESS_BAR_ID, false);
+        }
     }
-    
-    public boolean hasConvertingVectorgraph(int viewIndex)
+
+    /**
+     * Ends a conversion. [sync] ones (singleThread, the "thumbnail" flag of convertWMF_EMF and
+     * convertPNG) ran inside addConvertPicture and were never queued, so there is nothing to remove.
+     */
+    private void finishConversion(String destPath, boolean sync)
     {
-    	synchronized(control)
-    	{
-    		return viewVectorgraphs.containsKey(viewIndex);
-    	}    	
+        if(!sync)
+        {
+            remove(destPath);
+        }
     }
-    
+
+    private synchronized boolean isIdle()
+    {
+        return convertingPictPathMap == null || convertingPictPathMap.isEmpty();
+    }
+
+    /** False once dispose() or remove() dropped the conversion to [destPath]. */
+    private synchronized boolean isConversionActive(String destPath)
+    {
+        return convertingPictPathMap != null && convertingPictPathMap.get(destPath) != null;
+    }
+
+    public synchronized boolean hasConvertingVectorgraph(int viewIndex)
+    {
+        return viewVectorgraphs.containsKey(viewIndex);
+    }
+
     /**
      * 
      * @param path
      * @return
      */
-    public boolean isPictureConverting(String path)
+    public synchronized boolean isPictureConverting(String path)
     {
-    	synchronized(control)
-    	{
-    		return vectorgraphViews.containsKey(path);
-    	}
+        return vectorgraphViews.containsKey(path);
     }
-    
+
     /**
      * call when vector graph has been converted, but with different view index
      * eg. different pages has same vector graph
      * @param path
      * @param viewIndex
      */
-    public void appendViewIndex(String path, int viewIndex)
+    public synchronized void appendViewIndex(String path, int viewIndex)
     {
-    	synchronized(control)
-    	{
-    		if(isPictureConverting(path))
-        	{
-        		vectorgraphViews.get(path).add(viewIndex);
-        		
-        		if(viewVectorgraphs.get(viewIndex) == null)
-                {
-                	List<String> listPath = new ArrayList<String>();
-                	listPath.add(path);
-                    viewVectorgraphs.put(viewIndex, listPath);
-                }
-                else
-                {
-                	viewVectorgraphs.get(viewIndex).add(path);
-                }
-        	}
-    	}    	
+        List<Integer> views = vectorgraphViews.get(path);
+        if(views != null)
+        {
+            views.add(viewIndex);
+
+            if(viewVectorgraphs.get(viewIndex) == null)
+            {
+                List<String> listPath = new ArrayList<String>();
+                listPath.add(path);
+                viewVectorgraphs.put(viewIndex, listPath);
+            }
+            else
+            {
+                viewVectorgraphs.get(viewIndex).add(path);
+            }
+        }
     }
-    
+
     public synchronized void dispose()
     {
     	if(convertingPictPathMap != null)

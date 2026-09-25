@@ -98,7 +98,7 @@ class SSEventManage(spreadsheet: Spreadsheet, control: IControl) : AEventManage(
     private var newHeaderArea: FocusCell? = null
     private var actionDown = false
     private var scrolling = false
-    private var timer: ATimer? = ATimer(1000, this)
+    private var timer: ATimer? = ATimer(1000, this, control)
     private var moveCount = 0
     private var gestureStart = 0L
 

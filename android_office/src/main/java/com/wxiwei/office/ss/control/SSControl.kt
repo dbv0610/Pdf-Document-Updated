@@ -17,7 +17,7 @@ import com.wxiwei.office.ss.model.baseModel.Workbook
 import com.wxiwei.office.ss.util.ReferenceUtil
 import com.wxiwei.office.system.AbstractControl
 import com.wxiwei.office.system.IControl
-import com.wxiwei.office.system.OfficeCoroutineExecutor
+import com.wxiwei.office.system.DocumentCoroutines
 import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.IFind
 import com.wxiwei.office.system.IMainFrame
@@ -57,9 +57,8 @@ class SSControl(mainControl: IControl?, book: Workbook?, filepath: String?) : Ab
                 }
             }
             EventConstant.SYS_VECTORGRAPH_PROGRESS -> {
-                // TODO(coroutine): preserve background image-progress delivery; use Dispatchers.Default plus Main for the callback.
                 val update = Runnable { if (!isDispose) mainControl!!.mainFrame.updateViewImages(obj as List<Int>) }
-                if (sheet.parent != null) sheet.post(update) else OfficeCoroutineExecutor.launch(update)
+                if (sheet.parent != null) sheet.post(update) else DocumentCoroutines.launch(mainControl, update)
             }
             EventConstant.SYS_INIT_ID -> excelView!!.init()
             EventConstant.SS_SHOW_SHEET -> excelView!!.showSheet(obj as Int)

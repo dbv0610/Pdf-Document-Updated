@@ -253,7 +253,7 @@ class LineView : AbstractView {
      * draw underline
      */
     private fun drawUnderline(canvas: Canvas, originX: Int, originY: Int, zoom: Float) {
-        val paint = Paint()
+        var underlinePaint: Paint? = null
         var dX = (x * zoom).toInt() + originX
         val dY = (y * zoom + originY + getTopIndent() * zoom).toInt()
         var leaf = getChildView() as LeafView?
@@ -270,6 +270,7 @@ class LineView : AbstractView {
                 // difference color
                 if (color != Integer.MAX_VALUE && color != charAttr.underlineColor) {
                     //draw last underline
+                    val paint = underlinePaint ?: Paint().also { underlinePaint = it }
                     paint.color = color
                     canvas.drawRect(dX.toFloat(), (dY + baseline + 1).toFloat(), (dX + w).toFloat(), (dY + baseline + 2).toFloat(), paint)
                     dX += w
@@ -286,6 +287,7 @@ class LineView : AbstractView {
             } else {
                 if (color != Integer.MAX_VALUE) {
                     //draw last underline
+                    val paint = underlinePaint ?: Paint().also { underlinePaint = it }
                     paint.color = color
                     canvas.drawRect(dX.toFloat(), (dY + baseline + 1).toFloat(), (dX + w).toFloat(), (dY + baseline + 2).toFloat(), paint)
 
@@ -299,6 +301,7 @@ class LineView : AbstractView {
             leaf = leaf.getNextView() as LeafView?
         }
         if (color != Integer.MAX_VALUE) {
+            val paint = underlinePaint ?: Paint()
             paint.color = color
             canvas.drawRect(dX.toFloat(), (dY + baseline + 1).toFloat(), (dX + w).toFloat(), (dY + baseline + 2).toFloat(), paint)
         }

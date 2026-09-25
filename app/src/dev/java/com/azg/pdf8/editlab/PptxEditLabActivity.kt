@@ -24,6 +24,7 @@ import com.wxiwei.office.editor.pptx.*
 import com.wxiwei.office.editor.slide.SlideGeometry
 import com.wxiwei.office.pg.control.Presentation
 import com.wxiwei.office.res.ResKit
+import com.wxiwei.office.system.LayoutInfo
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener
@@ -179,7 +180,7 @@ class PptxEditLabActivity : AppCompatActivity(), IMainFrame {
             if (result is EditResult.Ok && reopen) open(result.file, index) else report(result.toString())
         }
     }
-    override fun completeLayout() = Unit
+    override fun completeLayout(info: LayoutInfo) = Unit
     override fun onEventMethod(v: View?, e1: MotionEvent?, e2: MotionEvent?, xValue: Float, yValue: Float, eventMethodType: Byte): Boolean = busy
     override fun onDestroy() { dispose(); super.onDestroy() }
     override fun getActivity(): Activity = this
@@ -203,7 +204,7 @@ class PptxEditLabActivity : AppCompatActivity(), IMainFrame {
     override fun getWordDefaultView() = WPViewConstant.PAGE_ROOT.toByte()
     override fun getLocalString(resName: String): String? = ResKit.instance().getLocalString(resName)
     override fun changeZoom() { overlay?.invalidate() }
-    override fun changePage() { overlay?.invalidate() }
+    override fun changePage(pageNumber: Int, pageCount: Int) { overlay?.invalidate() }
     override fun error(errorCode: Int) { runOnUiThread { setBusy(false); report("Open error: $errorCode") } }
     override fun fullScreen(fullscreen: Boolean) = Unit
     override fun showProgressBar(visible: Boolean) = Unit

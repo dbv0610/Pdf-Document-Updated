@@ -37,13 +37,13 @@ import com.azg.pdf8.base.BaseActivity
 import com.azg.pdf8.databinding.ActivityReadPdfBinding
 import com.azg.pdf8.databinding.PopupMoreActionBinding
 import com.azg.pdf8.dialog.DialogProcess
+import com.azg.pdf8.model.ContentWithPage
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.ui.main.MainActivity
 import com.azg.pdf8.utils.Constant
 import com.azg.pdf8.utils.Constant.ARG_MEDIA_MODEL
 import com.azg.pdf8.utils.Constant.ARG_SEARCH_RESULT_PAGE
 import com.azg.pdf8.utils.Constant.ARG_SEARCH_WITH_PAGE
-import com.azg.pdf8.viewmodel.DataResponse
 import com.dong.baselib.api.parcelable
 import com.dong.baselib.base.PopupHelper
 import com.dong.baselib.base.SystemUtil
@@ -53,7 +53,6 @@ import com.dong.baselib.widget.gone
 import com.dong.baselib.widget.navigationBarHeight
 import com.dong.baselib.widget.paddingRight
 import com.dong.baselib.widget.visible
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -93,7 +92,10 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
     }
     val popupHerper = PopupHelper.with(this@ReadPdfActivity, PopupMoreActionBinding::inflate)
     private var adapter: PdfPreviewAdapter =
-        PdfPreviewAdapter() {
+        PdfPreviewAdapter(
+            thumbnailScope = lifecycleScope,
+            loadThumbnail = { viewModel.thumbnail(it) }
+        ) {
             jumpToPageWhenReady(it.index)
         }.attachLifecycle(this@ReadPdfActivity)
 
@@ -160,7 +162,6 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
     }
 
     override fun ActivityReadPdfBinding.setData() {
-        PDFBoxResourceLoader.init(this@ReadPdfActivity)
         lifecycleScope.launch {
             viewModel.pageViewState
                 .map { it == PageViewType.Thumbnail }
@@ -169,25 +170,6 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
                     TransitionManager.beginDelayedTransition(lnPdfRead, AutoTransition())
                     rcvFrameData.isVisible = show
                 }
-        }
-        lifecycleScope.launch(Dispatchers.Main) {
-            viewModel.searchQuery.collect { state ->
-                if (state is DataResponse.DataError) {
-                    loadingDialog.dismiss()
-                    toastShort(getString(R.string.search_error_occurred))
-                } else if (state is DataResponse.DataSuccess) {
-                    if (state.data.isNotEmpty()) {
-                        loadingDialog.dismiss()
-                        binding.pdfRead.setSearchQuery(lastSearchQuery)
-                        val intent = Intent(this@ReadPdfActivity, SearchResultActivity::class.java)
-                        intent.putExtra(ARG_SEARCH_WITH_PAGE, ArrayList(state.data))
-                        searchResultLauncher.launch(intent)
-                    } else {
-                        loadingDialog.dismiss()
-                        toastShort(getString(R.string.not_found_search))
-                    }
-                }
-            }
         }
     }
 
@@ -229,10 +211,27 @@ class ReadPdfActivity : BaseActivity<ActivityReadPdfBinding>(ActivityReadPdfBind
     }
 
     private fun startSearch(query: String) {
+        if (!pdfLoaded || readerDisposed) return
         loadingDialog.show()
         lastSearchQuery = query
-        viewModel.pdfPath?.let { path ->
-            viewModel.getSearchQuery(path, query)
+        lifecycleScope.launch {
+            val results = runCatching { binding.pdfRead.searchDocument(query) }
+                .onFailure { Log.e("ReadPdfActivity", "Search failed", it) }
+            loadingDialog.dismiss()
+            val matches = results.getOrElse {
+                toastShort(getString(R.string.search_error_occurred))
+                return@launch
+            }
+            if (matches.isEmpty()) {
+                toastShort(getString(R.string.not_found_search))
+                return@launch
+            }
+            binding.pdfRead.setSearchQuery(query)
+            // Search results are 1-based page numbers
+            val data = matches.map { ContentWithPage(it.page + 1, it.content) }
+            val intent = Intent(this@ReadPdfActivity, SearchResultActivity::class.java)
+            intent.putExtra(ARG_SEARCH_WITH_PAGE, ArrayList(data))
+            searchResultLauncher.launch(intent)
         }
     }
 

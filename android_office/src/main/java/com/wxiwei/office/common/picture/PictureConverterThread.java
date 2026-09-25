@@ -1,6 +1,6 @@
 package com.wxiwei.office.common.picture;
 
-import com.wxiwei.office.system.OfficeCoroutineExecutor;
+import com.wxiwei.office.system.DocumentCoroutines;
 import kotlinx.coroutines.Job;
 
 public class PictureConverterThread implements PictureConversionTask
@@ -19,7 +19,7 @@ public class PictureConverterThread implements PictureConversionTask
     @Override public Job start()
     {
         if (job != null && job.isActive()) return job;
-        job = OfficeCoroutineExecutor.launch(new Runnable()
+        job = DocumentCoroutines.launch(converterMgr.getControl(), new Runnable()
         {
             @Override public void run()
             {

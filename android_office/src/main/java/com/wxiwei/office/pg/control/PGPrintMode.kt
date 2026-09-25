@@ -264,10 +264,12 @@ class PGPrintMode : FrameLayout, IPageListViewListener {
             y -= paint.ascent().toInt()
             canvas.drawText(pn, x.toFloat(), y.toFloat(), paint)
         }
-        if (preShowPageIndex != getCurrentPageNumber()) { changePage(); preShowPageIndex = getCurrentPageNumber() }
+        val pageNumber = getCurrentPageNumber()
+        if (preShowPageIndex != pageNumber) {
+            control?.getMainFrame()?.changePage(pageNumber, pgModel?.getRealSlideCount() ?: 0)
+            preShowPageIndex = pageNumber
+        }
     }
-
-    fun changePage() { control?.getMainFrame()?.changePage() }
     override fun isChangePage(): Boolean = control?.getMainFrame()?.isChangePage() ?: false
     fun dispose() { control = null; listView?.dispose(); listView = null; pgModel = null; pageSize = Rect() }
 }

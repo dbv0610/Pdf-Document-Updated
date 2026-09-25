@@ -3,10 +3,7 @@ package com.wxiwei.office.system
 import com.wxiwei.office.constant.EventConstant
 
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -18,7 +15,7 @@ class BackReaderThread(
     private var reader: IReader?,
     private var control: IControl?
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = DocumentCoroutines.childScope(control)
     private var job: Job? = null
 
     @Synchronized

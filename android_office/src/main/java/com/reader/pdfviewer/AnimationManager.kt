@@ -133,12 +133,14 @@ internal class AnimationManager(private val pdfView: PDFView) {
         }
 
         override fun onAnimationCancel(animation: Animator) {
+            pdfView.onScrollAnimationFinished()
             pdfView.loadPages()
             pageFlinging = false
             hideHandle()
         }
 
         override fun onAnimationEnd(animation: Animator) {
+            pdfView.onScrollAnimationFinished()
             pdfView.loadPages()
             pageFlinging = false
             hideHandle()
@@ -153,12 +155,14 @@ internal class AnimationManager(private val pdfView: PDFView) {
         }
 
         override fun onAnimationCancel(animation: Animator) {
+            pdfView.onScrollAnimationFinished()
             pdfView.loadPages()
             pageFlinging = false
             hideHandle()
         }
 
         override fun onAnimationEnd(animation: Animator) {
+            pdfView.onScrollAnimationFinished()
             pdfView.loadPages()
             pageFlinging = false
             hideHandle()

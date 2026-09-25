@@ -29,6 +29,11 @@ import com.reader.pdfviewer.link.LinkHandler
 import com.reader.pdfviewer.listener.*
 import com.reader.pdfviewer.model.PdfAnnotationInfo
 import com.reader.pdfviewer.model.PagePart
+import com.reader.pdfviewer.model.SearchResult
+import com.reader.pdfviewer.search.DetachedPageSource
+import com.reader.pdfviewer.search.DisplayedPageSource
+import com.reader.pdfviewer.search.DocumentTextIndex
+import com.reader.pdfviewer.search.OcrLine
 import com.reader.pdfviewer.scroll.ScrollHandle
 import com.reader.pdfviewer.source.*
 import com.reader.pdfviewer.util.*
@@ -39,10 +44,13 @@ import com.reader.pdfviewer.pdfium.util.SizeF
 import java.io.File
 import java.io.InputStream
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import kotlin.math.max
 import kotlin.math.min
 
@@ -126,6 +134,13 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         private set
 
     /**
+     * True while an animated [jumpTo] is running. The current page stays on the target
+     * page so the pages passed on the way do not fire page changes.
+     */
+    internal var isJumping = false
+        private set
+
+    /**
      * If you picture all the pages side by side in their optimal width,
      * and taking into account the zoom level, the current offset is the
      * position of the left border of the screen in this big picture
@@ -201,6 +216,22 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
     private var searchFocusPage = -1
     private var searchIgnoreCase = true
     private var searchHighlightCornerRadius = 0f
+
+    /** Text of the pages of the loaded document, for [searchDocument] */
+    private var textIndex: DocumentTextIndex? = null
+    private var textIndexJob: Job? = null
+
+    /** Source of the loaded document, the text index opens its own instance from it */
+    private var loadedDocSource: DocumentSource? = null
+    private var loadedPassword: String? = null
+
+    /**
+     * Whether the text of every page is read in the background once the document is loaded,
+     * so the first [searchDocument] doesn't wait for it. Only done for documents of at most
+     * [PRELOAD_SEARCH_TEXT_MAX_PAGES] pages, larger ones are read when searched.
+     * Pages needing OCR are only recognized when searched.
+     */
+    var preloadSearchText = true
 
     private val selectionHandlePaint: Paint
 
@@ -471,6 +502,8 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         check(this.isRecycled) { "Don't call load on a PDF View without recycling it first." }
 
         this.isRecycled = false
+        loadedDocSource = docSource
+        loadedPassword = password
         // Start decoding document
         documentDecoder = DocumentDecoder(
             requireNotNull(docSource) { "docSource == null" },
@@ -513,7 +546,13 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
                 moveTo(offset, currentYOffset, false)
             }
         }
+        // Set after starting: starting cancels the previous animation, which ends any earlier jump.
+        isJumping = withAnimation
         showPage(page)
+    }
+
+    internal fun onScrollAnimationFinished() {
+        isJumping = false
     }
 
     fun showPage(pageNb: Int) {
@@ -640,6 +679,12 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         if (scrollHandle != null && isScrollHandleInit) {
             scrollHandle!!.destroyLayout()
         }
+
+        // Close the index before the document, it stops reading pages
+        textIndexJob?.cancel()
+        textIndexJob = null
+        textIndex?.close()
+        textIndex = null
 
         if (pdfFile != null) {
             pdfFile!!.dispose()
@@ -1302,6 +1347,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         }
 
         pageRenderer = PageRenderer(this, viewScope).also { it.start() }
+        startTextIndex(pdfFile)
 
         if (scrollHandle != null) {
             scrollHandle!!.setupLayout(this)
@@ -1461,6 +1507,10 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
 
     fun loadPageByOffset() {
         if (0 == pdfFile!!.pagesCount) {
+            return
+        }
+        if (isJumping) {
+            loadPages()
             return
         }
 
@@ -2513,6 +2563,76 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
     }
 
     /**
+     * Find the lines of the document containing [query], page by page, on a background thread.
+     * Page text is read once and cached for the next searches. With [useOcr], pages without a usable
+     * text layer are recognized with OCR, which takes about a second per page the first time.
+     * Stops after [maxResults] lines, long lines are cut to a snippet around the match.
+     * Returns an empty list when no document is loaded or the query is blank.
+     */
+    suspend fun searchDocument(
+        query: String,
+        ignoreCase: Boolean = searchIgnoreCase,
+        maxResults: Int = DEFAULT_SEARCH_MAX_RESULTS,
+        useOcr: Boolean = true
+    ): List<SearchResult> {
+        val file = pdfFile ?: return emptyList()
+        val index = textIndex ?: return emptyList()
+        if (query.isBlank()) {
+            return emptyList()
+        }
+        var recognizedPages = false
+        val results = withContext(Dispatchers.Default) {
+            val result = ArrayList<SearchResult>()
+            try {
+                pages@ for (page in 0 until file.pagesCount) {
+                    ensureActive()
+                    if (index.isClosed) {
+                        break
+                    }
+                    if (useOcr && !index.isIndexed(page, true)) {
+                        recognizedPages = true
+                    }
+                    val text = runCatching { index.pageText(page, useOcr) }
+                        .onFailure { Log.e(TAG, "Cannot read text of page $page", it) }
+                        .getOrNull()
+                    if (text.isNullOrEmpty() || !text.contains(query, ignoreCase)) {
+                        continue
+                    }
+                    for (line in text.lineSequence()) {
+                        val matchStart = line.indexOf(query, 0, ignoreCase)
+                        if (matchStart < 0) {
+                            continue
+                        }
+                        result.add(SearchResult(page, searchSnippet(line, matchStart, query.length)))
+                        if (result.size >= maxResults) {
+                            break@pages
+                        }
+                    }
+                }
+            } finally {
+                index.releaseSource()
+            }
+            result
+        }
+        if (recognizedPages && pdfFile === file) {
+            // Highlights computed before OCR missed the recognized pages
+            invalidateSearchHighlights()
+        }
+        return results
+    }
+
+    private fun searchSnippet(line: String, matchStart: Int, matchLength: Int): String {
+        if (line.length <= SEARCH_SNIPPET_LENGTH) {
+            return line.trim()
+        }
+        val start = (matchStart - (SEARCH_SNIPPET_LENGTH - matchLength) / 2).coerceIn(0, line.length - SEARCH_SNIPPET_LENGTH)
+        val end = start + SEARCH_SNIPPET_LENGTH
+        val prefix = if (start > 0) "…" else ""
+        val suffix = if (end < line.length) "…" else ""
+        return prefix + line.substring(start, end).trim() + suffix
+    }
+
+    /**
      * Highlight [query] and go to [page], scrolling to its first match once it is known.
      */
     fun jumpToSearchResult(page: Int, query: String) {
@@ -2528,6 +2648,44 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
         } else {
             requestSearchHighlights(validPage)
         }
+    }
+
+    private fun startTextIndex(file: PdfFile) {
+        val docSource = loadedDocSource
+        val core = pdfiumCore
+        // An input stream is consumed by the first load
+        val source = if (docSource != null && core != null && docSource !is InputStreamSource) {
+            DetachedPageSource(file, core, docSource, context, loadedPassword)
+        } else {
+            DisplayedPageSource(file)
+        }
+        val index = runCatching { DocumentTextIndex(file, source, context.cacheDir) }
+            .onFailure {
+                Log.e(TAG, "Cannot create text index", it)
+                source.close()
+            }
+            .getOrNull() ?: return
+        textIndex = index
+        if (!preloadSearchText || file.pagesCount > PRELOAD_SEARCH_TEXT_MAX_PAGES) {
+            return
+        }
+        textIndexJob = viewScope.launch(Dispatchers.Default) {
+            for (page in 0 until file.pagesCount) {
+                if (index.isClosed) {
+                    break
+                }
+                runCatching { index.pageText(page, false) }
+                    .onFailure { Log.e(TAG, "Cannot index page $page", it) }
+                yield()
+            }
+        }.also { job -> job.invokeOnCompletion { index.releaseSource() } }
+    }
+
+    private fun invalidateSearchHighlights() {
+        searchGeneration++
+        searchHighlights.clear()
+        searchPendingPages.clear()
+        redraw()
     }
 
     private fun resetSearch() {
@@ -2607,6 +2765,7 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
     }
 
     private fun findSearchRects(file: PdfFile, page: Int, query: String, ignoreCase: Boolean): List<RectF> {
+        textIndex?.ocrLines(page)?.let { return findOcrSearchRects(it, query, ignoreCase) }
         val text = file.getPageText(page)
         if (text.isNullOrEmpty()) {
             return emptyList()
@@ -2643,6 +2802,35 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
                 )
             }
             start = text.indexOf(query, start + query.length, ignoreCase)
+        }
+        return result
+    }
+
+    /**
+     * Match rects on a page recognized by OCR, the part of a word covered by the match is estimated
+     * from its share of the word characters.
+     */
+    private fun findOcrSearchRects(lines: List<OcrLine>, query: String, ignoreCase: Boolean): List<RectF> {
+        val result = ArrayList<RectF>()
+        for (line in lines) {
+            var start = line.text.indexOf(query, 0, ignoreCase)
+            while (start >= 0) {
+                val end = start + query.length
+                var rect: RectF? = null
+                for (word in line.words) {
+                    if (word.end <= start || word.start >= end) {
+                        continue
+                    }
+                    val box = word.box
+                    val length = (word.end - word.start).toFloat()
+                    val left = box.left + box.width() * (max(start, word.start) - word.start) / length
+                    val right = box.left + box.width() * (min(end, word.end) - word.start) / length
+                    val part = RectF(left, box.top, right, box.bottom)
+                    if (rect == null) rect = part else rect.union(part)
+                }
+                rect?.let { result.add(it) }
+                start = line.text.indexOf(query, end, ignoreCase)
+            }
         }
         return result
     }
@@ -3854,5 +4042,9 @@ class PDFView(context: Context, set: AttributeSet?) : RelativeLayout(context, se
          * Page width in pixels used to map search matches, big enough to keep rounding errors invisible when zoomed
          */
         private const val SEARCH_MAPPING_WIDTH = 4096f
+        /** Keeps the results small enough to pass in an Intent */
+        const val DEFAULT_SEARCH_MAX_RESULTS = 500
+        const val PRELOAD_SEARCH_TEXT_MAX_PAGES = 1000
+        private const val SEARCH_SNIPPET_LENGTH = 160
     }
 }

@@ -6,6 +6,8 @@
  */
 package com.wxiwei.office.macro
 
+import com.wxiwei.office.system.LayoutInfo
+
 /**
  * update status listener
  */
@@ -22,14 +24,14 @@ interface UpdateStatusListener {
     fun changeZoom()
 
     /**
-     *
+     * @see com.wxiwei.office.system.IMainFrame.changePage
      */
-    fun changePage()
+    fun changePage(pageNumber: Int, pageCount: Int)
 
     /**
-     *
+     * @see com.wxiwei.office.system.IMainFrame.completeLayout
      */
-    fun completeLayout()
+    fun completeLayout(info: LayoutInfo)
 
     /**
      * @param views

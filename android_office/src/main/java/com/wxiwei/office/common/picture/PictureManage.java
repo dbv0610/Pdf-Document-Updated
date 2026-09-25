@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,12 @@ import android.os.Environment;
 public class PictureManage
 {
     //
-    private final int CACHE_SIZE = 8 * 1024 * 1024;
+    /**
+     * Budget of the decoded picture cache, in bytes: a quarter of the heap, capped at 128 MB.
+     * The old fixed 8M pixels could not hold a single 12 MP photo, so the pictures on screen
+     * were evicted and decoded again while drawing.
+     */
+    private static final long CACHE_BYTES = Math.min(Runtime.getRuntime().maxMemory() / 4, 128L * 1024 * 1024);
     
     //
     public PictureManage(IControl control)
@@ -287,14 +293,21 @@ public class PictureManage
      */
     public synchronized void addBitmap(String key, Bitmap bitmap)
     {
-        if (bitmapTotalCacheSize > CACHE_SIZE)
+        Bitmap replaced = bitmaps.remove(key);
+        if (replaced != null)
         {
-            String str = bitmaps.entrySet().iterator().next().getKey();
-            Bitmap b = bitmaps.get(str);
-            bitmapTotalCacheSize -= b.getWidth() * b.getHeight();
-            bitmaps.remove(str).recycle();
+            bitmapTotalCacheSize -= replaced.getAllocationByteCount();
         }
-        bitmapTotalCacheSize += bitmap.getHeight() * bitmap.getHeight();
+        // Least recently drawn first (access-ordered map), so the pictures on screen stay.
+        // Evicted bitmaps are not recycled: another thread (UI, thumbnails, converters) may be
+        // drawing one right now. Since API 26 the pixels live with the Bitmap and the GC frees them.
+        Iterator<Map.Entry<String, Bitmap>> eldest = bitmaps.entrySet().iterator();
+        while (bitmapTotalCacheSize + bitmap.getAllocationByteCount() > CACHE_BYTES && eldest.hasNext())
+        {
+            bitmapTotalCacheSize -= eldest.next().getValue().getAllocationByteCount();
+            eldest.remove();
+        }
+        bitmapTotalCacheSize += bitmap.getAllocationByteCount();
         bitmaps.put(key, bitmap);
     }
     
@@ -391,10 +404,7 @@ public class PictureManage
      */
     public synchronized void clearBitmap()
     {
-        for (Bitmap bitmap : bitmaps.values())
-        {
-            bitmap.recycle();
-        }
+        // Not recycled, see addBitmap.
         bitmaps.clear();
         bitmapTotalCacheSize = 0;
     }
@@ -403,7 +413,7 @@ public class PictureManage
      * has stored bitmap
      * @return
      */
-    public boolean hasBitmap()
+    public synchronized boolean hasBitmap()
     {
         return bitmaps.size() > 0;
     }
@@ -522,9 +532,9 @@ public class PictureManage
     //
     private IControl control;
     //
-    private static int bitmapTotalCacheSize;
+    private static long bitmapTotalCacheSize;
     //
-    private static Map<String, Bitmap> bitmaps = new LinkedHashMap<String, Bitmap>(10);
+    private static Map<String, Bitmap> bitmaps = new LinkedHashMap<String, Bitmap>(16, 0.75f, true);
     
     private PictureConverterMgr picConverterMgr;
 }

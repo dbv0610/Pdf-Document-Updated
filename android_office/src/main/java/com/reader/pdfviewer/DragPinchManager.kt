@@ -193,7 +193,8 @@ internal class DragPinchManager(private val pdfView: PDFView, private val animat
         ) {
             return false // Let onTouch handle the selection handles
         }
-        animationManager.stopFling()
+        // A touch during an animated jump takes over from it.
+        if (pdfView.isJumping) animationManager.stopAll() else animationManager.stopFling()
         return true
     }
 

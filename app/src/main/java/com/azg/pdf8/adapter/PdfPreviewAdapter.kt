@@ -1,5 +1,6 @@
 package com.azg.pdf8.adapter
 
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,8 +13,15 @@ import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.widget.mainColor
 import com.dong.baselib.widget.click
 import com.dong.baselib.widget.transparent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
-class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
+class PdfPreviewAdapter(
+    private val thumbnailScope: CoroutineScope? = null,
+    private val loadThumbnail: (suspend (Int) -> Bitmap?)? = null,
+    val currentSelPage: (DocumentPage) -> Unit = {}
+) :
     RecyclerView.Adapter<PdfPreviewAdapter.PdfPageViewHolder>() {
     private var pages = emptyList<DocumentPage>()
 
@@ -53,7 +61,13 @@ class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
 
     inner class PdfPageViewHolder(private val binding: ItemPdfThumbBinding) :
         RecyclerView.ViewHolder(binding.root) {
+        private var thumbnailJob: Job? = null
+        private var boundIndex: Int? = null
+
         fun bind(page: DocumentPage) {
+            thumbnailJob?.cancel()
+            boundIndex = page.index
+            binding.imagePreview.setImageDrawable(null)
             lifecycle?.let { lf ->
                 currentPage.observe(lf) {
                     binding.root.strokeColor(if (it == adapterPosition) mainColor else transparent)
@@ -61,7 +75,7 @@ class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
             }
             binding.apply {
                 when {
-                    page.isLoading -> {
+                    loadThumbnail != null || page.isLoading -> {
                         imagePreview.visibility = View.GONE
                         progressBar.visibility = View.VISIBLE
                         errorText.visibility = View.GONE
@@ -71,7 +85,7 @@ class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
                         imagePreview.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         errorText.visibility = View.VISIBLE
-                        errorText.text = "Error: ${page.error?.message}"
+                        errorText.text = "Error: ${page.error.message}"
                     }
                     else -> {
                         progressBar.visibility = View.GONE
@@ -85,12 +99,31 @@ class PdfPreviewAdapter(val currentSelPage: (DocumentPage) -> Unit = {}) :
                     }
                 }
             }
+            val loader = loadThumbnail
+            if (loader != null) {
+                thumbnailJob = thumbnailScope?.launch {
+                    val bitmap = loader(page.index)
+                    if (boundIndex == page.index) {
+                        binding.progressBar.visibility = View.GONE
+                        binding.errorText.visibility = View.GONE
+                        binding.imagePreview.visibility = View.VISIBLE
+                        if (bitmap != null) {
+                            binding.imagePreview.setImageBitmap(bitmap)
+                        } else {
+                            binding.imagePreview.setImageResource(R.drawable.img_no_permission)
+                        }
+                    }
+                }
+            }
             binding.root.click {
                 currentSelPage.invoke(page)
             }
         }
 
         fun clear() {
+            thumbnailJob?.cancel()
+            thumbnailJob = null
+            boundIndex = null
             binding.imagePreview.setImageDrawable(null)
         }
     }

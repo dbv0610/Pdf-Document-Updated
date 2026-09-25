@@ -379,15 +379,13 @@ class PrintWord : FrameLayout, IPageListViewListener {
             canvas.drawText(pn, x.toFloat(), y.toFloat(), paint)
         }
 
-        if (preShowPageIndex != listView.currentPageNumber || prePageCount != getPageCount()) {
-            changePage()
-            preShowPageIndex = listView.currentPageNumber
-            prePageCount = getPageCount()
+        val pageNumber = listView.currentPageNumber
+        val pageCount = getPageCount()
+        if (preShowPageIndex != pageNumber || prePageCount != pageCount) {
+            control?.getMainFrame()?.changePage(pageNumber, pageCount)
+            preShowPageIndex = pageNumber
+            prePageCount = pageCount
         }
-    }
-
-    fun changePage() {
-        control?.getMainFrame()?.changePage()
     }
 
     fun dispose() {

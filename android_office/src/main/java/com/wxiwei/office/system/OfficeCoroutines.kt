@@ -1,129 +1,60 @@
 package com.wxiwei.office.system
 
-import android.util.Log
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
- * Coroutine boundary for the legacy Java readers.
- * Parsing is kept off the main thread; only lifecycle callbacks are delivered on Main.
+ * Entry points onto a document's [SysKit.coroutineScope] for code that only holds an [IControl],
+ * including the Java readers. Work launched here is cancelled when the document is disposed.
  */
-class OfficeFileLoader @JvmOverloads constructor(
-    private val control: IControl,
-    private val callback: Callback,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) {
-    interface Callback {
-        fun onLoading(loading: Boolean)
-        fun onReaderCreated(reader: IReader)
-        fun onSuccess(model: Any?)
-        fun onFailure(error: OpenFileException)
-    }
+object DocumentCoroutines {
+    /** Already cancelled: work for a document that is gone must not start. */
+    private val disposedScope = CoroutineScope(Job().apply { cancel() })
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private var job: Job? = null
-    private var activeReader: IReader? = null
-
-    fun start(filePath: String, encoding: String? = null) {
-        OpenTrace.d("alternate loader started path=$filePath encoding=$encoding")
-        cancel()
-        job = scope.launch {
-            callback.onLoading(true)
-            try {
-                val model = withContext(ioDispatcher) {
-                    val reader = createReader(filePath, encoding)
-                    activeReader = reader
-                    OpenTrace.d("alternate loader reader picked=${reader.javaClass.name} path=$filePath")
-                    withContext(Dispatchers.Main.immediate) {
-                        OpenTrace.d("alternate loader reader delivered main=${Thread.currentThread().name}")
-                        callback.onReaderCreated(reader)
-                    }
-                    OpenTrace.d("alternate loader getModel started reader=${reader.javaClass.name}")
-                    reader.getModel().also {
-                        if (it == null) OpenTrace.e("alternate loader returned NULL model reader=${reader.javaClass.name}")
-                        else OpenTrace.d("alternate loader read succeeded model=${it.javaClass.name} reader=${reader.javaClass.name}")
-                        OpenTrace.d("alternate loader getModel finished reader=${reader.javaClass.name}")
-                    }
-                }
-                // SUCCESS handles dismissing the loading UI. Sending DISMISS first
-                // would call MainControl.dismissProgressDialog(), which removes
-                // the queued SUCCESS message as well.
-                OpenTrace.d("alternate loader read succeeded callback main=${Thread.currentThread().name}")
-                if (model == null) throw IllegalStateException("Document with password")
-                callback.onSuccess(model)
-            } catch (cancelled: CancellationException) {
-                OpenTrace.d("alternate loader cancelled path=$filePath")
-                activeReader?.abortReader()
-                callback.onLoading(false)
-            } catch (error: Throwable) {
-                if (OpenFileErrors.isCancellation(error)) {
-                    callback.onLoading(false)
-                    return@launch
-                }
-                OpenTrace.e("alternate loader read failed path=$filePath", error)
-                callback.onLoading(false)
-                callback.onFailure(OpenFileErrors.wrap(error, filePath))
-            }
-        }
-    }
-
-    fun cancel() {
-        activeReader?.abortReader()
-        job?.cancel()
-        job = null
-        activeReader = null
-    }
-
-    fun dispose() {
-        cancel()
-        scope.coroutineContext[Job]?.cancel()
-    }
-
-    private fun createReader(filePath: String, encoding: String?): IReader {
-        return OfficeReaderFactory.createReader(control, filePath, encoding)
-    }
-
-    private companion object {
-        const val TAG = "OfficeFileLoader"
-    }
-}
-
-/** Replaces the legacy polling Thread used for incremental slide loading. */
-object ReaderCoroutineDispatcher {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /** The document scope of [control]; a cancelled one once the document is disposed. */
+    @JvmStatic
+    fun scopeOf(control: IControl?): CoroutineScope =
+        try {
+            control?.getSysKit()?.coroutineScope
+        } catch (_: Exception) {
+            // getSysKit() throws on a disposed control (mainControl!!).
+            null
+        } ?: disposedScope
 
     @JvmStatic
-    fun start(reader: IReader, control: IControl): Job = scope.launch {
-        control.actionEvent(com.wxiwei.office.constant.EventConstant.SYS_START_BACK_READER_ID, true)
-        try {
-            while (currentCoroutineContext().isActive && !reader.isReaderFinish()) {
-                reader.backReader()
-                delay(50)
-            }
-        } catch (cancelled: CancellationException) {
-            reader.abortReader()
-        } catch (error: Throwable) {
-            if (!reader.isAborted()) {
-                control.getSysKit().getErrorKit().writerLog(error, true)
-            }
-        } finally {
-            if (currentCoroutineContext().isActive) {
-                control.actionEvent(com.wxiwei.office.constant.EventConstant.SYS_READER_FINSH_ID, true)
-            }
+    fun launch(control: IControl?, task: Runnable): Job = scopeOf(control).launch { task.run() }
+
+    fun launchSuspend(control: IControl?, block: suspend CoroutineScope.() -> Unit): Job =
+        scopeOf(control).launch(block = block)
+
+    /**
+     * A scope of its own for a component (reader, layout) under [control]'s document scope:
+     * cancelling it stops only that component, disposing the document stops it too. Without a
+     * document to hang under it stands alone, as these scopes did before, rather than never
+     * running: the component still cancels it itself in dispose().
+     */
+    fun childScope(control: IControl?, dispatcher: CoroutineDispatcher = Dispatchers.Default): CoroutineScope {
+        val parent = scopeOf(control).coroutineContext
+        if (parent[Job]?.isActive != true) {
+            OpenTrace.e("no live document scope for ${control?.javaClass?.simpleName}; using a standalone one")
+            return CoroutineScope(
+                SupervisorJob() + dispatcher +
+                    CoroutineExceptionHandler { _, error -> OpenTrace.e("standalone coroutine failed", error) }
+            )
         }
+        return CoroutineScope(parent + SupervisorJob(parent[Job]) + dispatcher)
     }
 }
 
-/** Shared executor for legacy Java callbacks that still need background work. */
+/**
+ * Process-wide background work that must outlive a document, e.g. deleting its temp files while
+ * it is being disposed, or searching the file system. Document work goes to [DocumentCoroutines].
+ */
 object OfficeCoroutineExecutor {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 

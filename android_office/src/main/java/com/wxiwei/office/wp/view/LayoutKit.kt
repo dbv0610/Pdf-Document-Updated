@@ -47,22 +47,23 @@ class LayoutKit private constructor() {
             return
         }
         val word = root.getContainer() as Word
-        var dx = WPViewConstant.PAGE_SPACE.toInt()
-        var dy = WPViewConstant.PAGE_SPACE.toInt()
+        val space = word.getPageSpacing()
+        var dx = space
+        var dy = space
         var pv = root.getChildView()
         val width = pv!!.getWidth()
         var visibleWidth = word.getWidth()
         visibleWidth = if (visibleWidth == 0) word.getWordWidth() else visibleWidth
         if (visibleWidth > width * zoom) {
-            dx += ((visibleWidth / zoom - width - WPViewConstant.PAGE_SPACE * 2) / 2).toInt()
+            dx += ((visibleWidth / zoom - width - space * 2) / 2).toInt()
         }
         while (pv != null) {
             pv.setLocation(dx, dy)
-            dy += pv.getHeight() + WPViewConstant.PAGE_SPACE
+            dy += pv.getHeight() + space
             pv = pv.getNextView()
         }
-        root.setSize(width + WPViewConstant.PAGE_SPACE * 2, dy)
-        (root.getContainer() as Word).setSize(width + WPViewConstant.PAGE_SPACE * 2, dy)
+        root.setSize(width + space * 2, dy)
+        word.setSize(width + space * 2, dy)
     }
 
     /**

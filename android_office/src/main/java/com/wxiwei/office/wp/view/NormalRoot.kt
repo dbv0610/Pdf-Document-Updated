@@ -96,11 +96,11 @@ class NormalRoot(private var word: Word?) : AbstractView(), IRoot {
         val areaEnd = doc!!.getAreaEnd(WPModelConstant.MAIN)
         while (count < LAYOUT_PARA && currentLayoutOffset < areaEnd && relayout) {
             var elem = doc!!.getParagraph(currentLayoutOffset) ?: break
-            var para: ParagraphView = if (AttrManage.instance().hasAttribute(elem.getAttribute(), AttrIDConstant.PARA_LEVEL_ID)) {
+            val para: ParagraphView = if (AttrManage.instance().hasAttribute(elem.getAttribute(), AttrIDConstant.PARA_LEVEL_ID)) {
                 elem = (doc as WPDocument).getParagraph0(currentLayoutOffset)!!
-                ViewFactory.createView(localWord.getControl()!!, elem, null, WPViewConstant.TABLE_VIEW.toInt()) as ParagraphView
+                ViewFactory.createView(localWord.getControl(), elem, null, WPViewConstant.TABLE_VIEW.toInt()) as ParagraphView
             } else {
-                ViewFactory.createView(localWord.getControl()!!, elem, null, WPViewConstant.PARAGRAPH_VIEW.toInt()) as ParagraphView
+                ViewFactory.createView(localWord.getControl(), elem, null, WPViewConstant.PARAGRAPH_VIEW.toInt()) as ParagraphView
             }
             para.setParentView(this)
             val start = elem.getStartOffset()
@@ -112,7 +112,7 @@ class NormalRoot(private var word: Word?) : AbstractView(), IRoot {
             }
             para.setLocation(dx, dy)
             if (para.getType() == WPViewConstant.TABLE_VIEW) {
-                tableLayout.layoutTable(localWord.getControl()!!, doc!!, this, docAttr, pageAttr, paraAttr, para as TableView, currentLayoutOffset, dx, dy, spanW, spanH, flag, false)
+                tableLayout.layoutTable(localWord.getControl(), doc!!, this, docAttr, pageAttr, paraAttr, para as TableView, currentLayoutOffset, dx, dy, spanW, spanH, flag, false)
             } else {
                 tableLayout.clearBreakPages()
                 AttrManage.instance().fillParaAttr(localWord.getControl()!!, paraAttr, elem.getAttribute())

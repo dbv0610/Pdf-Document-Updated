@@ -8,16 +8,15 @@ import com.wxiwei.office.simpletext.view.IRoot
 import com.wxiwei.office.simpletext.view.IView
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class LayoutThread(private var root: IRoot?) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /** Made on first start: the root is not attached to its document when this is constructed. */
+    private var scope: CoroutineScope? = null
     private var layoutJob: Job? = null
 
     @Synchronized
@@ -26,6 +25,7 @@ class LayoutThread(private var root: IRoot?) {
             Log.d("OfficePageLayout", "layout coroutine already active")
             return
         }
+        val scope = scope ?: DocumentCoroutines.childScope((root as? IView)?.getControl()).also { scope = it }
         layoutJob = scope.launch {
             try {
                 while (isActive) {
@@ -61,7 +61,8 @@ class LayoutThread(private var root: IRoot?) {
         Log.d("OfficePageLayout", "dispose layout coroutine")
         layoutJob?.cancel()
         layoutJob = null
-        scope.cancel()
+        scope?.cancel()
+        scope = null
         root = null
     }
 }

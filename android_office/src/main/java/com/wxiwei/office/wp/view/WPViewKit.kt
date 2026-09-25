@@ -38,9 +38,10 @@ class WPViewKit : ViewKit() {
         if (root == null) {
             return null
         }
+        val space = (root.getContainer() as? Word)?.getPageSpacing() ?: WPViewConstant.PAGE_SPACE.toInt()
         var view = root.getChildView()
         while (view != null) {
-            if (y > view.getY() && y < view.getY() + view.getHeight() + WPViewConstant.PAGE_SPACE) {
+            if (y > view.getY() && y < view.getY() + view.getHeight() + space) {
                 break
             }
             view = view.getNextView()

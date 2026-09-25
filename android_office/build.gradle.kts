@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
+    // On-device OCR for searching pages without a usable text layer
+    implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation(libs.gson)
     implementation(libs.lottie)
     implementation(libs.material)

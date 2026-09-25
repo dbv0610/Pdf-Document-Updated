@@ -24,6 +24,7 @@ import com.wxiwei.office.editor.docx.DocxEditor
 import com.wxiwei.office.editor.docx.DocxSourceMap
 import com.wxiwei.office.editor.word.WordSelection
 import com.wxiwei.office.res.ResKit
+import com.wxiwei.office.system.LayoutInfo
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener
@@ -152,7 +153,7 @@ class DocxEditLabActivity : AppCompatActivity(), IMainFrame {
         }
     }
     private var reopenScroll: Pair<Int, Int>? = null
-    override fun completeLayout() {
+    override fun completeLayout(info: LayoutInfo) {
         reopenScroll?.let { (x, y) -> (control?.getView() as? Word)?.post { (control?.getView() as? Word)?.scrollTo(x, y) }; reopenScroll = null }
     }
     override fun onEventMethod(v: View?, e1: MotionEvent?, e2: MotionEvent?, xValue: Float, yValue: Float, eventMethodType: Byte): Boolean {
@@ -161,7 +162,7 @@ class DocxEditLabActivity : AppCompatActivity(), IMainFrame {
         val word = control?.getView() as? Word ?: return false
         if (eventMethodType == IMainFrame.ON_LONG_PRESS && e1 != null) {
             val offset = helper.offsetAtScreen(e1.rawX, e1.rawY)
-            if (offset < 0 || offset >= 0x1000000000000000L) return false
+            if (offset !in 0..<0x1000000000000000L) return false
             val range = helper.wordAt(offset)
             if (!range.isEmpty()) { anchor = range.first; anchorEnd = range.last + 1; helper.setSelection(range.first, range.last + 1); word.getStatus().setSelectTextStatus(true); report(helper.selectedText()) }
             return true
@@ -198,7 +199,7 @@ class DocxEditLabActivity : AppCompatActivity(), IMainFrame {
     override fun getWordDefaultView() = WPViewConstant.PAGE_ROOT.toByte()
     override fun getLocalString(resName: String): String? = ResKit.instance().getLocalString(resName)
     override fun changeZoom() = Unit
-    override fun changePage() = Unit
+    override fun changePage(pageNumber: Int, pageCount: Int) = Unit
     override fun error(errorCode: Int) { runOnUiThread { setBusy(false); report("Open error: $errorCode") } }
     override fun fullScreen(fullscreen: Boolean) = Unit
     override fun showProgressBar(visible: Boolean) = Unit

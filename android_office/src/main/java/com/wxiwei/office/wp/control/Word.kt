@@ -470,10 +470,11 @@ class Word : LinearLayout, IWord {
             y = (y - paint.ascent()).toInt()
             canvas.drawText(pn, x.toFloat(), y.toFloat(), paint)
         }
-        if (preShowPageIndex != currentNumber || prePageCount != getPageCount()) {
-            control.getMainFrame().changePage()
+        val pageCount = getPageCount()
+        if (preShowPageIndex != currentNumber || prePageCount != pageCount) {
+            control.getMainFrame().changePage(currentNumber, pageCount)
             preShowPageIndex = currentNumber
-            prePageCount = getPageCount()
+            prePageCount = pageCount
         }
     }
 
@@ -542,6 +543,10 @@ class Word : LinearLayout, IWord {
         }
     }
 
+    /** Gap between pages and around them in page view, in px at zoom 1; see [IMainFrame.getWordPageSpacing]. */
+    fun getPageSpacing(): Int =
+        control?.getMainFrame()?.getWordPageSpacing()?.coerceAtLeast(0) ?: WPViewConstant.PAGE_SPACE.toInt()
+
     fun getWordWidth(): Int {
         return when (getCurrentRootType()) {
             WPViewConstant.PAGE_ROOT.toInt() -> mWidth
@@ -580,6 +585,59 @@ class Word : LinearLayout, IWord {
         canvas.drawColor(Color.WHITE)
         (view as PageView).draw(canvas, 0, 0, 1f)
         return bitmap
+    }
+
+    /** Current layout state, handed to [IMainFrame.completeLayout]. */
+    fun layoutInfo(): LayoutInfo {
+        val size = getPageBounds(1)?.let { it.width() to it.height() }
+            ?: getPageSize(1)?.let { it.width to it.height }
+            ?: (0 to 0)
+        return LayoutInfo(
+            pageNumber = getCurrentPageNumber(),
+            pageCount = getPageCount(),
+            pageWidth = size.first,
+            pageHeight = size.second,
+            zoom = getZoom(),
+            fitZoom = getFitZoom(),
+            viewMode = getCurrentRootType(),
+        )
+    }
+
+    /** Page size in layout pixels (zoom 1), or null when the page is not laid out. */
+    fun getPageBounds(pageNumber: Int): Rect? {
+        val pageRoot = pageRoot
+        if (pageNumber <= 0 || pageNumber > getPageCount() || pageRoot == null ||
+            pageRoot.getChildView() == null || getCurrentRootType() == WPViewConstant.NORMAL_ROOT.toInt()
+        ) {
+            return null
+        }
+        val view = pageRoot.getPageView(pageNumber - 1) ?: return null
+        return Rect(0, 0, view.getWidth(), view.getHeight())
+    }
+
+    /**
+     * Draws a page as vector content onto [canvas] (e.g. a PdfDocument page) at zoom 1,
+     * so text stays sharp instead of being rasterized.
+     */
+    fun drawPage(pageNumber: Int, canvas: Canvas): Boolean {
+        val pageRoot = pageRoot
+        if (pageNumber <= 0 || pageNumber > getPageCount() || pageRoot == null ||
+            pageRoot.getChildView() == null || getCurrentRootType() == WPViewConstant.NORMAL_ROOT.toInt()
+        ) {
+            return false
+        }
+        val view = pageRoot.getPageView(pageNumber - 1) as? PageView ?: return false
+        val forced = PictureKit.instance().setForceDrawOnCurrentThread(true)
+        val saved = canvas.save()
+        try {
+            canvas.drawColor(Color.WHITE)
+            canvas.translate(-view.getX().toFloat(), -view.getY().toFloat())
+            view.draw(canvas, 0, 0, 1f)
+        } finally {
+            canvas.restoreToCount(saved)
+            PictureKit.instance().setForceDrawOnCurrentThread(forced)
+        }
+        return true
     }
 
     fun pageAreaToImage(pageNumber: Int, srcLeft: Int, srcTop: Int, srcWidth: Int, srcHeight: Int, desWidth: Int, desHeight: Int): Bitmap? {
@@ -658,7 +716,8 @@ class Word : LinearLayout, IWord {
             if (viewWidth == 0) {
                 viewWidth = (parent as View).width
             }
-            z = (viewWidth - WPViewConstant.PAGE_SPACE).toFloat() / pageWidth
+            // Fit the page with its side gaps, so they match the gaps between pages.
+            z = viewWidth.toFloat() / (pageWidth + getPageSpacing() * 2)
         }
         return min(z, if (pageWidth == -1) 1f else getDefaultZoom(pageWidth))
     }

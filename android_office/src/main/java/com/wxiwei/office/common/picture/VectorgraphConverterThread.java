@@ -23,7 +23,7 @@ package com.wxiwei.office.common.picture;
  * <p>
  * <p>
  */
-import com.wxiwei.office.system.OfficeCoroutineExecutor;
+import com.wxiwei.office.system.DocumentCoroutines;
 import kotlinx.coroutines.Job;
 
 public class VectorgraphConverterThread implements PictureConversionTask
@@ -44,7 +44,7 @@ public class VectorgraphConverterThread implements PictureConversionTask
     @Override public Job start()
     {
         if (job != null && job.isActive()) return job;
-        job = OfficeCoroutineExecutor.INSTANCE.launch(new Runnable()
+        job = DocumentCoroutines.launch(converterMgr.getControl(), new Runnable()
         {
             @Override public void run()
             {

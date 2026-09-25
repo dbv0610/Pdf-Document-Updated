@@ -27,6 +27,7 @@ import com.wxiwei.office.simpletext.model.IDocument
 import com.wxiwei.office.ss.control.SSControl
 import com.wxiwei.office.ss.model.baseModel.Workbook
 import com.wxiwei.office.wp.control.WPControl
+import kotlinx.coroutines.cancel
 
 open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
     private var frame: IMainFrame = frameValue!!
@@ -41,7 +42,6 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
     private var handler: Handler
     private var appControl: IControl? = null
     @JvmField var sysKit: SysKit
-    private var uncaught: AUncaughtExceptionHandler? = null
     private var onOpenFileListener: OnOpenFileListener? = null
     private var isDispose = false
     private var isCancel = false
@@ -50,8 +50,6 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
     private var filePath: String? = null
 
     init {
-        uncaught = AUncaughtExceptionHandler(this)
-        Thread.setDefaultUncaughtExceptionHandler(uncaught)
         sysKit = SysKit(this)
         handler = Handler(Looper.getMainLooper()) { message ->
             if (isCancel) return@Handler true
@@ -65,7 +63,7 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
                         try {
                             if (frame.isShowProgressBar()) dismissProgressDialog() else customDialog?.dismissDialog(ICustomDialog.DIALOGTYPE_LOADING)
                             createApplication(model)
-                            onOpenFileListener?.onOpenFileSuccess()
+                            onOpenFileListener?.onOpenFileSuccess(OfficeFileType.fromPath(filePath))
                         } catch (e: Throwable) {
                             OpenTrace.e("creating application/view failed", e)
                             handleOpenFailure(e)
@@ -84,7 +82,10 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
                         progressDialog?.setOnKeyListener(onKeyListener)
                     } else customDialog?.showDialog(ICustomDialog.DIALOGTYPE_LOADING)
                 }
-                MainConstant.HANDLER_MESSAGE_DISMISS_PROGRESS -> handler.post { dismissProgressDialog() }
+                MainConstant.HANDLER_MESSAGE_DISMISS_PROGRESS -> handler.post {
+                    dismissProgressDialog()
+                    customDialog?.dismissDialog(ICustomDialog.DIALOGTYPE_LOADING)
+                }
                 MainConstant.HANDLER_MESSAGE_SEND_READER_INSTANCE -> {
                     reader = message.obj as? IReader
                     OpenTrace.d("reader instance delivered reader=${reader?.javaClass?.name}")
@@ -248,6 +249,9 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
 
     override fun dispose() {
         isDispose = true
+        // Stop the background work first (reading, layout, conversions, timers, thumbnails),
+        // so none of it keeps running on the model disposed below.
+        sysKit.coroutineScope.cancel()
         fileReader?.dispose()
         fileReader = null
         appControl?.dispose()
@@ -258,8 +262,6 @@ open class MainControl(frameValue: IMainFrame?) : AbstractControl() {
         officeToPicture = null
         dismissProgressDialog()
         handler.removeCallbacksAndMessages(null)
-        uncaught?.dispose()
-        uncaught = null
         toast?.cancel()
         toast = null
         sysKit.dispose()

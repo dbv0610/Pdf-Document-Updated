@@ -58,6 +58,7 @@ import com.wxiwei.office.ss.sheetbar.SheetBar;
 import com.wxiwei.office.system.FileKit;
 import com.wxiwei.office.system.IControl;
 import com.wxiwei.office.system.IMainFrame;
+import com.wxiwei.office.system.LayoutInfo;
 import com.wxiwei.office.system.MainControl;
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener;
 import com.wxiwei.office.utils.RealPathUtil;
@@ -1118,7 +1119,7 @@ public class AppActivity extends AppCompatActivity implements IMainFrame {
     }
 
 
-    public void changePage() {
+    public void changePage(int pageNumber, int pageCount) {
     }
 
     /**
@@ -1362,7 +1363,7 @@ public class AppActivity extends AppCompatActivity implements IMainFrame {
 //        return null;
 //    }
     @Override
-    public void completeLayout() {
+    public void completeLayout(LayoutInfo info) {
         // TODO Auto-generated method stub
 
     }

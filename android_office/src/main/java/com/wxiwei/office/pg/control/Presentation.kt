@@ -295,7 +295,7 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
                 }
             }
             if (preShowSlideIndex != currentIndex) {
-                control!!.getMainFrame().changePage()
+                control!!.getMainFrame().changePage(currentIndex + 1, getRealSlideCount())
                 preShowSlideIndex = currentIndex
             }
         } catch (ex: NullPointerException) {
@@ -385,6 +385,26 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
             return null
         }
         return SlideDrawKit.instance().slideToImage(pgModel!!, editor, pgModel!!.getSlide(slideNumber - 1))
+    }
+
+    /**
+     * Draws a slide (base 1) as vector content onto [canvas] (e.g. a PdfDocument page)
+     * at zoom 1, so text stays sharp instead of being rasterized.
+     */
+    fun drawSlide(slideNumber: Int, canvas: Canvas): Boolean {
+        if (slideNumber <= 0 || slideNumber > getRealSlideCount()) {
+            return false
+        }
+        val slide = pgModel!!.getSlide(slideNumber - 1) ?: return false
+        val forced = PictureKit.instance().setForceDrawOnCurrentThread(true)
+        val saved = canvas.save()
+        try {
+            SlideDrawKit.instance().drawSlide(canvas, pgModel!!, editor, slide, 1f)
+        } finally {
+            canvas.restoreToCount(saved)
+            PictureKit.instance().setForceDrawOnCurrentThread(forced)
+        }
+        return true
     }
 
     /**
@@ -803,7 +823,7 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
             postInvalidate()
 
             if (isChangedSlide && getControl()!!.getMainFrame() != null) {
-                getControl()!!.getMainFrame().changePage()
+                getControl()!!.getMainFrame().changePage(slideIndex_SlideShow + 1, getRealSlideCount())
             }
 
             // to picture
@@ -896,7 +916,7 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
                 if (slideIndex_SlideShow >= 0) {
                     slideView!!.initSlideShow(pgModel!!.getSlide(slideIndex_SlideShow), true)
                     if (getControl()!!.getMainFrame() != null) {
-                        getControl()!!.getMainFrame().changePage()
+                        getControl()!!.getMainFrame().changePage(slideIndex_SlideShow + 1, getRealSlideCount())
                     }
                 }
 //                else
@@ -927,7 +947,7 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
 //                                }
 
                             if (getControl()!!.getMainFrame() != null) {
-                                getControl()!!.getMainFrame().changePage()
+                                getControl()!!.getMainFrame().changePage(slideIndex_SlideShow + 1, getRealSlideCount())
                             }
                         } else {
                             slideView!!.previousActionSlideShow()
@@ -938,7 +958,7 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
                         if (slideView!!.gotoNextSlide()) {
                             slideView!!.initSlideShow(pgModel!!.getSlide(++slideIndex_SlideShow), true)
                             if (getControl()!!.getMainFrame() != null) {
-                                getControl()!!.getMainFrame().changePage()
+                                getControl()!!.getMainFrame().changePage(slideIndex_SlideShow + 1, getRealSlideCount())
                             }
                         } else {
                             slideView!!.nextActionSlideShow()
@@ -948,7 +968,7 @@ open class Presentation(activity: Activity, pgModel: PGModel?, control: IControl
                     ISlideShow.SlideShow_NextSlide -> if (hasNextSlide_Slideshow()) {
                         slideView!!.initSlideShow(pgModel!!.getSlide(++slideIndex_SlideShow), true)
                         if (getControl()!!.getMainFrame() != null) {
-                            getControl()!!.getMainFrame().changePage()
+                            getControl()!!.getMainFrame().changePage(slideIndex_SlideShow + 1, getRealSlideCount())
                         }
                     }
                 }

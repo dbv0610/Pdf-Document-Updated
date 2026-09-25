@@ -351,6 +351,24 @@ class PdfFile(
         return pdfiumCore!!.getPageText(pdfDocument, docPage)
     }
 
+    /** Text of page for a one-off read such as a document search, without keeping the page open */
+    fun readPageText(pageIndex: Int): String? {
+        val docPage = documentPage(pageIndex)
+        if (docPage < 0) {
+            return ""
+        }
+        return pdfiumCore!!.readPageText(pdfDocument, docPage)
+    }
+
+    /** Render the whole page into [bitmap] for OCR, without keeping the page open */
+    fun renderPageForOcr(pageIndex: Int, bitmap: Bitmap): Boolean {
+        val docPage = documentPage(pageIndex)
+        if (docPage < 0) {
+            return false
+        }
+        return pdfiumCore!!.renderPageBitmapOnce(pdfDocument, bitmap, docPage)
+    }
+
     fun getPageText(pageIndex: Int, start: Int, count: Int): String? {
         val docPage = documentPage(pageIndex)
         if (docPage < 0 || count <= 0) {

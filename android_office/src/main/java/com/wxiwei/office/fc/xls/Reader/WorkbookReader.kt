@@ -13,7 +13,7 @@ import com.wxiwei.office.system.IControl
 import com.wxiwei.office.system.IReader
 import com.wxiwei.office.system.ReaderHandler
 import com.wxiwei.office.system.sysKit
-import com.wxiwei.office.system.OfficeCoroutineExecutor
+import com.wxiwei.office.system.DocumentCoroutines
 import com.wxiwei.office.system.OpenTrace
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -72,7 +72,7 @@ class WorkbookReader private constructor() {
                 when (msg.what) {
                     MainConstant.HANDLER_MESSAGE_SUCCESS -> {
                         val previous = sheetJob
-                        sheetJob = OfficeCoroutineExecutor.launchSuspend {
+                        sheetJob = DocumentCoroutines.launchSuspend(control) {
                             val job = coroutineContext[Job]
                             try {
                                 // Preserve the join chain even when another sheet replaces this job.

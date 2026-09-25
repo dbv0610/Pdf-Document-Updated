@@ -19,6 +19,12 @@ import com.wxiwei.office.pg.animate.AnimationManager
 import com.wxiwei.office.pg.model.PGBulletText
 import com.wxiwei.office.system.beans.CalloutView.CalloutManager
 import com.wxiwei.office.wp.control.WPShapeManage
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import java.io.File
 import kotlin.jvm.JvmName
 
@@ -34,6 +40,23 @@ class SysKit(control: IControl) {
     private var control: IControl? = control
     private var animationMgr: AnimationManager? = null
     private var calloutMgr: CalloutManager? = null
+
+    /**
+     * Scope of everything this document runs in the background: reading, Word layout, picture
+     * conversion, timers, thumbnails. [dispose] cancels it, which stops all of them together.
+     * Failures are logged instead of reaching the thread's uncaught-exception handler; the library
+     * no longer installs a process-wide one, so anything outside this scope crashes as usual.
+     */
+    val coroutineScope: CoroutineScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default + CoroutineName("office-document") +
+            CoroutineExceptionHandler { _, error ->
+                OpenTrace.e("document coroutine failed", error)
+                try {
+                    errorKitInstance?.writerLog(error)
+                } catch (_: Exception) {
+                }
+            }
+    )
 
     fun getSDPath(): File? {
         if (File("/mnt/extern_sd").exists() || File("/mnt/usbhost1").exists()) {
@@ -163,6 +186,7 @@ class SysKit(control: IControl) {
         get() = getCalloutManager()
 
     fun dispose() {
+        coroutineScope.cancel()
         control = null
         errorKitInstance?.dispose()
         errorKitInstance = null

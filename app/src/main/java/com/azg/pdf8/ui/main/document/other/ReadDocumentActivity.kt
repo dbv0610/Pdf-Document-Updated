@@ -66,11 +66,13 @@ import com.wxiwei.office.pg.control.Presentation
 import com.wxiwei.office.res.ResKit
 import com.wxiwei.office.ss.control.ExcelView
 import com.wxiwei.office.ss.view.SheetView
+import com.wxiwei.office.system.LayoutInfo
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
 import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.DocumentPasswords
 import com.wxiwei.office.system.OpenFileException
+import com.wxiwei.office.system.OfficeFileType
 import com.wxiwei.office.system.OnOpenFileListener
 import com.wxiwei.office.system.view
 import com.wxiwei.office.system.find
@@ -97,8 +99,8 @@ class ReadDocumentActivity :
     private var openErrorDialog: OpenFileErrorDialog? = null
     private var passwordDialog: DocumentPasswordDialog? = null
 
-    override fun onOpenFileSuccess() {
-        mainControl?.jumpToPage(0)
+    override fun onOpenFileSuccess(fileType: OfficeFileType) {
+        mainControl?.jumpToPage(1)
     }
 
     override fun onOpenFileFailure(error: OpenFileException): Boolean {
@@ -311,10 +313,13 @@ class ReadDocumentActivity :
                             newName,
                             model = doc,
                             excelSheetView = (mainControl?.view as? ExcelView)?.getSheetView(),
+                            wordView = mainControl?.view as? Word,
+                            presentation = mainControl?.view as? Presentation,
                             onNameExit = {
                                 toastShort(getString(R.string.file_have_exit_file))
                             },
                             onStart = { processDialog.show() },
+                            onProgress = { page, total -> processDialog.setProgress(page, total) },
                             onFinish = { file ->
                                 runOnUiThread {
                                     toastShort(getString(R.string.pdf_file_was_create))
@@ -432,7 +437,7 @@ class ReadDocumentActivity :
     private var adapter: PdfPreviewAdapter =
         PdfPreviewAdapter() {
             try {
-                mainControl?.jumpToPage(it.index)
+                mainControl?.jumpToPage(it.index + 1)
                 binding.txtNumberPage.text = "${it.index + 1}/${mainControl?.getPageCount()}"
             } catch (e: Exception) {
                 toastShort(getString(R.string.error_go_to_page))
@@ -697,11 +702,11 @@ class ReadDocumentActivity :
 
     override fun changeZoom() = Unit
     @SuppressLint("SetTextI18n")
-    override fun changePage() {
+    override fun changePage(pageNumber: Int, pageCount: Int) {
         OpenTrace.mark("activity.changePage.begin current=${mainControl?.getCurrentViewIndex()} count=${mainControl?.getPageCount()}")
         binding.txtNumberPage.text =
-            "${mainControl?.getCurrentViewIndex() ?: 0}/${mainControl?.getPageCount() ?: 0}"
-        val page = (mainControl?.getCurrentViewIndex() ?: 0) - 1
+            "$pageNumber/$pageCount"
+        val page = pageNumber - 1
         adapter.setCurrentPage(if (page <= 0) 0 else page)
         mainControl?.view?.let { view ->
             when (view) {
@@ -723,7 +728,7 @@ class ReadDocumentActivity :
 
     private var lastRenderPptFile = 0
 
-    override fun completeLayout() {
+    override fun completeLayout(info: LayoutInfo) {
         mainControl?.view?.let { view ->
             when (view) {
                 is Word -> {
@@ -731,13 +736,12 @@ class ReadDocumentActivity :
                     lifecycleScope.launch(Dispatchers.IO) {
                         slideViewModel.initDocSlide(view)
                     }
-                    mainControl?.jumpToPage(0)
                 }
                 else -> Unit
             }
 
             binding.txtNumberPage.text =
-                "${mainControl?.getCurrentViewIndex() ?: 0}/${mainControl?.getPageCount() ?: 0}"
+                "${info.pageNumber}/${info.pageCount}"
         }
     }
 

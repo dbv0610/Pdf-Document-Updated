@@ -21,7 +21,7 @@ import com.wxiwei.office.constant.wp.WPViewConstant
 import com.wxiwei.office.simpletext.model.IDocument
 import com.wxiwei.office.system.AbstractControl
 import com.wxiwei.office.system.IControl
-import com.wxiwei.office.system.OfficeCoroutineExecutor
+import com.wxiwei.office.system.DocumentCoroutines
 import com.wxiwei.office.system.OpenTrace
 import com.wxiwei.office.system.IFind
 import com.wxiwei.office.system.IMainFrame
@@ -71,7 +71,7 @@ class WPControl(private var mainControl: IControl?, doc: IDocument, filePath: St
                         }
                     }
                 } else {
-                    OfficeCoroutineExecutor.launch {
+                    DocumentCoroutines.launchSuspend(mainControl) {
                         if (!isDispose) {
                             @Suppress("UNCHECKED_CAST")
                             mainControl.getMainFrame().updateViewImages(obj as List<Int>)
@@ -190,9 +190,9 @@ class WPControl(private var mainControl: IControl?, doc: IDocument, filePath: St
             EventConstant.WP_LAYOUT_COMPLETED -> {
                 wpView.updateFieldText()
                 if (wpView.parent == null) {
-                    getMainFrame().completeLayout()
+                    getMainFrame().completeLayout(wpView.layoutInfo())
                 } else {
-                    wpView.post { getMainFrame().completeLayout() }
+                    wpView.post { if (!isDispose) getMainFrame().completeLayout(wpView.layoutInfo()) }
                 }
             }
 

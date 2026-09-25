@@ -1,7 +1,9 @@
 package com.azg.pdf8.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.SystemClock
 import android.util.Log
@@ -16,6 +18,7 @@ import com.dong.baselib.string.fileName
 import com.dong.baselib.widget.pink
 import com.wxiwei.office.pg.control.Presentation
 import com.wxiwei.office.constant.SSConstant
+import com.wxiwei.office.ss.model.baseModel.Cell
 import com.wxiwei.office.ss.view.SheetView
 import com.wxiwei.office.wp.control.Word
 import com.wxiwei.office.system.OpenFileErrors
@@ -101,7 +104,7 @@ class ConvertViewModel : ViewModel() {
                                 val scaledBitmap = bitmap.scale(scaledWidth, scaledHeight)
 
                                 if (scaledBitmap != null && !scaledBitmap.isRecycled) {
-                                    val slide = DocumentPage((i+1), bitmap = scaledBitmap)
+                                    val slide = DocumentPage(i, bitmap = scaledBitmap)
                                     listSlide.add(slide)
                                     successfulCount++
                                     Log.i(TAG, "Successfully added scaled slide $i to list")
@@ -157,9 +160,9 @@ class ConvertViewModel : ViewModel() {
             val totalPages = view.getPageCount()
             if (totalPages <= 10) {
                 val accumulator = mutableListOf<DocumentPage>()
-                for (i in 0..totalPages) {
+                for (i in 0 until totalPages) {
                     try {
-                        val raw = view.pageToImage(i)
+                        val raw = view.pageToImage(i + 1)
                         if (raw != null && !raw.isRecycled) {
                             try {
                                 val scaled =
@@ -199,7 +202,7 @@ class ConvertViewModel : ViewModel() {
                     for (i in batchStart until batchEnd) {
                         processed++
                         try {
-                            val raw = view.pageToImage(i)
+                            val raw = view.pageToImage(i + 1)
                             if (raw != null && !raw.isRecycled) {
                                 try {
                                     val scaled =
@@ -245,7 +248,10 @@ class ConvertViewModel : ViewModel() {
         onStart: () -> Unit,
         onFinish: (File) -> Unit,
         onError: (OpenFileException) -> Unit,
-        excelSheetView: SheetView? = null
+        excelSheetView: SheetView? = null,
+        wordView: Word? = null,
+        presentation: Presentation? = null,
+        onProgress: (page: Int, total: Int) -> Unit = { _, _ -> }
     ) {
         Log.d(TAG, "convertToPdf: start for ${model.path}")
         // Capture the selected sheet before starting the background conversion.
@@ -258,9 +264,17 @@ class ConvertViewModel : ViewModel() {
                 }
                 when (model.type) {
                     DocumentType.Doc, DocumentType.Ppt, DocumentType.Txt -> {
-                        val bitmaps = listSlide.value.map { it.bitmap }
-                        check(bitmaps.any { it != null }) { "No rendered pages to convert" }
-                        createPdfFromBitmaps(bitmaps, outputFile)
+                        // Vector pages stay sharp; the halved preview bitmaps are the fallback.
+                        val vectorDone = if (model.type == DocumentType.Ppt) {
+                            presentation != null && createPdfFromSlides(presentation, outputFile)
+                        } else {
+                            wordView != null && createPdfFromWord(wordView, outputFile)
+                        }
+                        if (!vectorDone) {
+                            val bitmaps = listSlide.value.map { it.bitmap }
+                            check(bitmaps.any { it != null }) { "No rendered pages to convert" }
+                            createPdfFromBitmaps(bitmaps, outputFile)
+                        }
                     }
                     DocumentType.Excel -> {
                         try {
@@ -270,7 +284,9 @@ class ConvertViewModel : ViewModel() {
                                 while (!excelSheet.isAccomplished()) delay(100)
                                 true
                             } == true) { "Timed out waiting for Excel sheet" }
-                            createPdfFromExcel(excelSheetView, excelSheet, outputFile)
+                            createPdfFromExcel(excelSheetView, excelSheet, outputFile) { page, total ->
+                                viewModelScope.launch(Dispatchers.Main) { onProgress(page, total) }
+                            }
                         } catch (error: Throwable) {
                             deleteExcelPdfFile(outputFile)
                             throw error
@@ -297,70 +313,109 @@ class ConvertViewModel : ViewModel() {
     private suspend fun createPdfFromExcel(
         sheetView: SheetView,
         sheet: com.wxiwei.office.ss.model.baseModel.Sheet,
-        outputFile: File
+        outputFile: File,
+        onProgress: (page: Int, total: Int) -> Unit
     ) {
         val startedAt = SystemClock.elapsedRealtime()
-        var lastColumn = 0
-        var totalHeight = 0.0
+        // Bound the export by cells that hold data (plus merges and shapes), not by
+        // row.lastCol, which also counts styled-but-empty cells and pads the PDF
+        // with blank columns and rows.
+        var lastColumn = -1
+        var lastRow = -1
         for (index in 0..sheet.getLastRowNum()) {
             currentCoroutineContext().ensureActive()
             val row = sheet.getRow(index) ?: continue
-            lastColumn = maxOf(lastColumn, row.getLastCol())
-            totalHeight += row.getRowPixelHeight()
+            for (cell in row.cellCollection()) {
+                if (cell.getCellType() == Cell.CELL_TYPE_BLANK) continue
+                lastColumn = maxOf(lastColumn, cell.getColNumber())
+                lastRow = maxOf(lastRow, index)
+            }
+        }
+        for (index in 0 until sheet.getMergeRangeCount()) {
+            val range = sheet.getMergeRange(index) ?: continue
+            val anchor = sheet.getRow(range.getFirstRow())?.getCell(range.getFirstColumn(), false)
+            if (anchor == null || anchor.getCellType() == Cell.CELL_TYPE_BLANK) continue
+            lastColumn = maxOf(lastColumn, range.getLastColumn())
+            lastRow = maxOf(lastRow, range.getLastRow())
+        }
+        var shapeRight = 0
+        var shapeBottom = 0
+        for (index in 0 until sheet.getShapeCount()) {
+            val bounds = sheet.getShape(index)?.getBounds() ?: continue
+            shapeRight = maxOf(shapeRight, bounds.x + bounds.width)
+            shapeBottom = maxOf(shapeBottom, bounds.y + bounds.height)
+        }
+        var totalHeight = 0.0
+        for (index in 0..lastRow) {
+            totalHeight += sheet.getRow(index)?.getRowPixelHeight() ?: sheet.getDefaultRowHeight().toFloat()
         }
         var totalWidth = 0.0
-        // Preserve the old thumbnail's trailing column allowance.
-        for (column in 0..lastColumn + 1) {
+        for (column in 0..lastColumn) {
             totalWidth += sheet.getColumnPixelWidth(column)
         }
+        Log.d(TAG, "Excel bounds: lastRowNum=${sheet.getLastRowNum()} lastRow=$lastRow lastColumn=$lastColumn " +
+            "cellsH=$totalHeight shapeBottom=$shapeBottom shapeRight=$shapeRight merges=${sheet.getMergeRangeCount()}")
+        totalWidth = maxOf(totalWidth, shapeRight.toDouble())
+        totalHeight = maxOf(totalHeight, shapeBottom.toDouble())
         require(totalWidth > 0 && totalWidth < Int.MAX_VALUE &&
-            totalHeight > 0 && totalHeight < Int.MAX_VALUE) { "Invalid sheet bounds" }
-        val width = totalWidth.toInt().coerceAtLeast(1)
+            totalHeight > 0 && totalHeight < Int.MAX_VALUE) { "Sheet has no data" }
+        // Cells are drawn right of the row-number header, which RowHeader sizes from
+        // the widest row number (text + 10px padding, min DEFAULT_ROW_HEADER_WIDTH).
+        val rowHeaderWidth = maxOf(
+            SSConstant.DEFAULT_ROW_HEADER_WIDTH,
+            Paint().apply { textSize = SSConstant.HEADER_TEXT_FONTSZIE.toFloat() }
+                .measureText((lastRow + 1).toString()).roundToInt() + 10
+        )
+        val width = (totalWidth + rowHeaderWidth).toInt().coerceAtLeast(1)
         val height = totalHeight.toInt().coerceAtLeast(1)
-        val contentHeightPx = (842 * 1.55f).roundToInt() - 20 * 2
         val headerHeight = SSConstant.DEFAULT_COLUMN_HEADER_HEIGHT
-        val bodyHeightPx = contentHeightPx - headerHeight
+        // Fit the sheet width to the page, then fill the whole page height at that
+        // scale; narrow sheets are capped at the old ~1.55 px/pt density.
+        val scale = minOf(555f / width, 802f / ((842 * 1.55f).roundToInt() - 20 * 2))
+        val bodyHeightPx = ((802f / scale).toInt() - headerHeight).coerceAtLeast(1)
+        val drawStart = SystemClock.elapsedRealtime()
         val tempFile = File.createTempFile("xlsx-pdf-", ".tmp", outputFile.absoluteFile.parentFile)
         var pageCount = 0
         try {
             val pdf = PdfDocument()
             try {
+                val pageTotal = (height + bodyHeightPx - 1) / bodyHeightPx
+                val left = 20f + (555f - width * scale) / 2f
+                var drawMs = 0L
+                // Draws one sheet band; getClipBounds() is local to the current matrix, so
+                // headers and rows see sheet pixels, not the 595 x 842 PDF page bounds.
+                fun drawBand(canvas: Canvas, top: Int, regionHeight: Int) {
+                    canvas.clipRect(0, 0, width, regionHeight)
+                    sheetView.drawRegion(sheet, 0, top, 1f, canvas)
+                }
+                fun startPage(pageNumber: Int): PdfDocument.Page =
+                    pdf.startPage(PdfDocument.PageInfo.Builder(595, 842, pageNumber).create()).also {
+                        it.canvas.translate(left, 20f)
+                        it.canvas.scale(scale, scale)
+                    }
                 var top = 0
-                var pageNumber = 1
                 while (top < height) {
                     currentCoroutineContext().ensureActive()
+                    val pageStart = SystemClock.elapsedRealtime()
                     val bodyHeight = minOf(bodyHeightPx, height - top)
-                    val regionHeight = bodyHeight + headerHeight
-                    val scale = minOf(555f / width, 802f / regionHeight)
-                    val page = pdf.startPage(PdfDocument.PageInfo.Builder(595, 842, pageNumber).create())
+                    val page = startPage(pageCount + 1)
                     try {
-                        val canvas = page.canvas
-                        val saved = canvas.save()
-                        try {
-                            canvas.translate(
-                                20f + (555f - width * scale) / 2f,
-                                20f + (802f - regionHeight * scale) / 2f
-                            )
-                            canvas.scale(scale, scale)
-                            // getClipBounds() is local to the current matrix: headers and
-                            // rows see sheet pixels, not the 595 x 842 PDF page bounds.
-                            canvas.clipRect(0, 0, width, regionHeight)
-                            sheetView.drawRegion(sheet, 0, top, 1f, canvas)
-                        } finally {
-                            canvas.restoreToCount(saved)
-                        }
-                        currentCoroutineContext().ensureActive()
+                        drawBand(page.canvas, top, bodyHeight + headerHeight)
                     } finally {
                         pdf.finishPage(page)
                     }
                     pageCount++
+                    drawMs += SystemClock.elapsedRealtime() - pageStart
+                    onProgress(pageCount, pageTotal)
                     top += bodyHeight
-                    pageNumber++
                     // No SheetView monitor is held while yielding or writing the PDF.
                     yield()
                 }
                 currentCoroutineContext().ensureActive()
+                val writeStart = SystemClock.elapsedRealtime()
                 FileOutputStream(tempFile).use { pdf.writeTo(it) }
+                Log.d(TAG, "Excel PDF timing: boundsMs=${drawStart - startedAt}, drawMs=$drawMs, " +
+                    "writeMs=${SystemClock.elapsedRealtime() - writeStart}, size=${width}x$height")
             } finally {
                 pdf.close()
             }
@@ -369,6 +424,85 @@ class ConvertViewModel : ViewModel() {
             Log.d(TAG, "Excel PDF complete: pages=$pageCount, elapsedMs=${SystemClock.elapsedRealtime() - startedAt}")
         } finally {
             deleteExcelPdfFile(tempFile)
+        }
+    }
+
+    /**
+     * Draws each Word page as vector content, keeping the document's own page size
+     * (layout px are 96 dpi, PDF points are 72 dpi). Returns false to fall back to bitmaps.
+     */
+    private suspend fun createPdfFromWord(word: Word, outputFile: File): Boolean {
+        val pageCount = word.getPageCount()
+        if (pageCount <= 0) return false
+        val pdf = PdfDocument()
+        try {
+            var written = 0
+            for (pageNumber in 1..pageCount) {
+                currentCoroutineContext().ensureActive()
+                val size = word.getPageBounds(pageNumber) ?: continue
+                val pxToPt = 72f / 96f
+                val info = PdfDocument.PageInfo.Builder(
+                    (size.width() * pxToPt).roundToInt().coerceAtLeast(1),
+                    (size.height() * pxToPt).roundToInt().coerceAtLeast(1),
+                    written + 1
+                ).create()
+                val page = pdf.startPage(info)
+                try {
+                    page.canvas.scale(pxToPt, pxToPt)
+                    if (word.drawPage(pageNumber, page.canvas)) written++
+                } finally {
+                    pdf.finishPage(page)
+                }
+            }
+            if (written == 0) return false
+            FileOutputStream(outputFile).use { pdf.writeTo(it) }
+            Log.d(TAG, "Word PDF complete: pages=$written")
+            return true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "createPdfFromWord failed, falling back to bitmaps", e)
+            return false
+        } finally {
+            pdf.close()
+        }
+    }
+
+    /** Draws each slide as vector content at the deck's own slide size. */
+    private suspend fun createPdfFromSlides(presentation: Presentation, outputFile: File): Boolean {
+        val slideCount = presentation.getRealSlideCount()
+        val size = presentation.getPageSize() ?: return false
+        if (slideCount <= 0 || size.width <= 0 || size.height <= 0) return false
+        val pxToPt = 72f / 96f
+        val pdf = PdfDocument()
+        try {
+            var written = 0
+            for (slideNumber in 1..slideCount) {
+                currentCoroutineContext().ensureActive()
+                val info = PdfDocument.PageInfo.Builder(
+                    (size.width * pxToPt).roundToInt().coerceAtLeast(1),
+                    (size.height * pxToPt).roundToInt().coerceAtLeast(1),
+                    written + 1
+                ).create()
+                val page = pdf.startPage(info)
+                try {
+                    page.canvas.scale(pxToPt, pxToPt)
+                    if (presentation.drawSlide(slideNumber, page.canvas)) written++
+                } finally {
+                    pdf.finishPage(page)
+                }
+            }
+            if (written == 0) return false
+            FileOutputStream(outputFile).use { pdf.writeTo(it) }
+            Log.d(TAG, "Slides PDF complete: pages=$written")
+            return true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "createPdfFromSlides failed, falling back to bitmaps", e)
+            return false
+        } finally {
+            pdf.close()
         }
     }
 

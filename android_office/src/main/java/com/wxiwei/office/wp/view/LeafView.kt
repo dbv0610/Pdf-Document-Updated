@@ -29,9 +29,20 @@ import com.wxiwei.office.simpletext.view.ViewKit
  */
 open class LeafView : AbstractView {
 
-    companion object {
-        private val title = StringBuffer()
+    private class DrawWidths(
+        val text: String,
+        val start: Int,
+        val end: Int,
+        val textSize: Float,
+        val widths: FloatArray
+    ) {
+        fun matches(text: String, start: Int, end: Int, textSize: Float): Boolean {
+            return this.text == text && this.start == start && this.end == end && this.textSize == textSize
+        }
     }
+
+    private var drawWidths: DrawWidths? = null
+    private var alternateDrawWidths: DrawWidths? = null
 
     // 字符属性
     @JvmField
@@ -58,8 +69,11 @@ open class LeafView : AbstractView {
     /**
      * 初始化leaf属性
      */
+    @Synchronized
     open fun initProperty(elem: IElement, paraElem: IElement) {
         this.elem = elem
+        drawWidths = null
+        alternateDrawWidths = null
         if (paint == null) {
             paint = Paint()
         } else {
@@ -170,7 +184,7 @@ open class LeafView : AbstractView {
     private fun getFieldTextReplacedByPage(text: String?, page: Int): String? {
         if (text != null) {
             val chars = text.toCharArray()
-            title.delete(0, title.length)
+            val title = StringBuilder()
 
             for (i in chars.indices) {
                 if (Character.isDigit(chars[i])) {
@@ -202,6 +216,27 @@ open class LeafView : AbstractView {
         }
 
         return 0
+    }
+
+    private fun getDrawWidths(text: String, start: Int, end: Int, paint: Paint): FloatArray {
+        val cached = drawWidths
+        if (cached != null && cached.matches(text, start, end, paint.textSize)) {
+            return cached.widths
+        }
+        val alternate = alternateDrawWidths
+        if (alternate != null && alternate.matches(text, start, end, paint.textSize)) {
+            alternateDrawWidths = cached
+            drawWidths = alternate
+            return alternate.widths
+        }
+        // Measure the same shaping context, but retain only this leaf's range.
+        val widths = FloatArray(text.length)
+        paint.getTextWidths(text, widths)
+        val measured = DrawWidths(text, start, end, paint.textSize, widths.copyOfRange(start, end))
+        // Keep thumbnail and screen zooms from evicting each other; draw holds the leaf monitor.
+        alternateDrawWidths = cached
+        drawWidths = measured
+        return measured.widths
     }
 
     @Synchronized
@@ -269,17 +304,16 @@ open class LeafView : AbstractView {
             e = text!!.length
         }
 
-        val widths = FloatArray(text!!.length)
-        paint.getTextWidths(text, widths)
+        val widths = getDrawWidths(text!!, s, e, paint)
         var extX = 0f
-        if (!adjustFieldText && zoom != 1.0f) {
+        if (!adjustFieldText && zoom != 1.0f && e > s) {
             var cw = 0f
             for (i in s until e) {
-                cw += widths[i]
+                cw += widths[i - s]
             }
             val ch = text[e - 1]
             if (ch == '\u0007' || ch == '\n' || ch == '\r') {
-                cw -= widths[e - 1]
+                cw -= widths[e - s - 1]
             }
             var extW = 0f
             val nextView = getNextView()
@@ -287,7 +321,7 @@ open class LeafView : AbstractView {
                 && (nextView.getType() == WPViewConstant.LEAF_VIEW
                         || (nextView.getType() == WPViewConstant.SHAPE_VIEW && (nextView as ShapeView).isInline()))
             ) {
-                val nextX = getNextView()!!.getX() * zoom
+                val nextX = nextView.getX() * zoom
                 extW = cw - ((nextX + originX) - dX)
             } else {
                 extW = cw - getLayoutSpan(WPViewConstant.X_AXIS) * zoom
@@ -304,20 +338,20 @@ open class LeafView : AbstractView {
             if (c == '\n' || c == '\r' || c == '\u0007' || c == '\u000B'
                 || c == '\u000C' || c == '\t' || c == ' ' || c == '\u0002'
             ) {
-                drawX += widths[i] - extX
+                drawX += widths[i - s] - extX
                 i++
                 continue
             }
             // 处理连字符问题
             var skip = 0
             for (j in i + 1 until e) {
-                if (widths[j] != 0f) {
+                if (widths[j - s] != 0f) {
                     break
                 }
                 skip++
             }
             canvas.drawText(text, i, i + 1 + skip, drawX, drawY, paint)
-            drawX += widths[i] - extX
+            drawX += widths[i - s] - extX
             i += skip
             i++
         }
@@ -422,9 +456,12 @@ open class LeafView : AbstractView {
         }
     }
 
+    @Synchronized
     override fun dispose() {
         super.dispose()
         paint = null
         charAttr = null
+        drawWidths = null
+        alternateDrawWidths = null
     }
 }

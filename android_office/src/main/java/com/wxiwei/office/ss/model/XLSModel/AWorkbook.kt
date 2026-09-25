@@ -31,7 +31,7 @@ import com.wxiwei.office.ss.model.style.CellStyle
 import com.wxiwei.office.ss.util.ColorUtil
 import com.wxiwei.office.system.AbstractReader
 import com.wxiwei.office.system.IControl
-import com.wxiwei.office.system.OfficeCoroutineExecutor
+import com.wxiwei.office.system.DocumentCoroutines
 import com.wxiwei.office.system.ReaderHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -56,7 +56,7 @@ open class AWorkbook : Workbook, com.wxiwei.office.fc.ss.usermodel.Workbook {
     ) {
         private var control: IControl? = iAbortListener!!.getControl()
 
-        fun start(): Job = OfficeCoroutineExecutor.launchSuspend {
+        fun start(): Job = DocumentCoroutines.launchSuspend(control) {
             try {
                 if (sheetIndex >= 0 && iAbortListener != null) {
                     iAbortListener!!.abortCurrentReading()

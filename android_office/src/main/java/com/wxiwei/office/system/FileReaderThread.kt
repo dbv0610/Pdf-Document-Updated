@@ -5,10 +5,8 @@ import android.util.Log
 import com.wxiwei.office.constant.MainConstant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -22,7 +20,7 @@ class FileReaderThread @JvmOverloads constructor(
     private var encoding: String?,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val scope = DocumentCoroutines.childScope(control, Dispatchers.Main.immediate)
     private var readJob: Job? = null
     private var activeReader: IReader? = null
 

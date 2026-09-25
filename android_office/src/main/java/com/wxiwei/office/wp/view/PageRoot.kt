@@ -81,10 +81,12 @@ class PageRoot(private var word: Word?) : AbstractView(), IRoot {
     override fun viewToModel(x: Int, y: Int, isBack: Boolean): Long {
         var xx = x - getX()
         var yy = y - getY()
+        // A point in the gap below a page belongs to that page.
+        val gap = maxOf(MainConstant.GAP / 2, word?.getPageSpacing() ?: 0)
         var view = getChildView()
         if (view != null && yy > view.getY()) {
             while (view != null) {
-                if (yy >= view.getY() && yy <= view.getY() + view.getHeight() + MainConstant.GAP / 2) break
+                if (yy >= view.getY() && yy <= view.getY() + view.getHeight() + gap) break
                 view = view.getNextView()
             }
         }

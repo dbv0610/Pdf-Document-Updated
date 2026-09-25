@@ -24,11 +24,6 @@
 -keep class com.aspose.** { *; }
 -dontwarn com.aspose.**
 
--dontwarn com.tom_roush.pdfbox.filter.JPXFilter
--dontwarn com.gemalto.jp2.**
--assumenosideeffects class com.tom_roush.pdfbox.filter.JPXFilter {
-    *;
-}
 -keep class androidx.room.** { *; }
 -keep interface androidx.room.* { *; }
 
@@ -54,8 +49,6 @@
 
 -keep @androidx.annotation.Keep class * { *; }
 
--dontwarn com.gemalto.jp2.**
--keep class com.tom_roush.pdfbox.filter.JPXFilter { *; }
 
 -keep class android.util.Log {
     public static *** d(...);

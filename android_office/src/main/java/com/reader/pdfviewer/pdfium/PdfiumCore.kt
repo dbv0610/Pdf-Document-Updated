@@ -591,6 +591,64 @@ class PdfiumCore(ctx: Context) {
         }
     }
 
+    /**
+     * Render the whole page into [bitmap] without keeping the page open, for one-off uses such as OCR.
+     * @return false when the page cannot be loaded
+     */
+    fun renderPageBitmapOnce(doc: PdfDocument, bitmap: Bitmap, pageIndex: Int): Boolean {
+        synchronized(lock) {
+            if (doc.mNativeDocPtr == 0L) {
+                return false
+            }
+            doc.mNativePagesPtr[pageIndex]?.let { pagePtr ->
+                nativeRenderPageBitmap(pagePtr, bitmap, mCurrentDpi, 0, 0, bitmap.width, bitmap.height, false)
+                return true
+            }
+            val pagePtr = nativeLoadPage(doc.mNativeDocPtr, pageIndex)
+            if (pagePtr == 0L) {
+                return false
+            }
+            try {
+                nativeRenderPageBitmap(pagePtr, bitmap, mCurrentDpi, 0, 0, bitmap.width, bitmap.height, false)
+                return true
+            } finally {
+                nativeClosePage(pagePtr)
+            }
+        }
+    }
+
+    /**
+     * Get whole text of page without keeping it open, for one-off reads such as a document search.
+     * An opened page is read as usual, any other page is loaded, read and closed right away.
+     */
+    fun readPageText(doc: PdfDocument, pageIndex: Int): String? {
+        synchronized(lock) {
+            if (doc.mNativeDocPtr == 0L) {
+                return null
+            }
+            if (doc.mNativePagesPtr.containsKey(pageIndex)) {
+                return getPageText(doc, pageIndex)
+            }
+            val pagePtr = nativeLoadPage(doc.mNativeDocPtr, pageIndex)
+            if (pagePtr == 0L) {
+                return null
+            }
+            try {
+                val textPagePtr = nativeLoadTextPage(pagePtr)
+                if (textPagePtr == 0L) {
+                    return null
+                }
+                try {
+                    return nativeTextGetText(textPagePtr, 0, nativeTextCountChars(textPagePtr))
+                } finally {
+                    nativeCloseTextPage(textPagePtr)
+                }
+            } finally {
+                nativeClosePage(pagePtr)
+            }
+        }
+    }
+
     /** Get [count] characters of page text starting at [startIndex]. Page must be opened before.  */
     fun getPageText(doc: PdfDocument, pageIndex: Int, startIndex: Int, count: Int): String? {
         synchronized(lock) {

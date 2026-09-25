@@ -8,6 +8,7 @@
 package com.wxiwei.office.common.picture;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import com.wxiwei.office.common.pictureefftect.PictureCroppedInfo;
@@ -239,6 +240,10 @@ public class PictureKit
        try
        {
            Bitmap sBitmap = control.getSysKit().getPictureManage().getBitmap(path);
+           // Off-screen renders (thumbnails) decode at the size they draw and keep it out of the
+           // shared cache: full-size decodes there evicted the pictures on screen, which then
+           // vanished while flinging and were decoded again on the UI thread.
+           boolean offscreen = forceDrawOnThread.get() == Boolean.TRUE;
            if (sBitmap == null)
            {
                if (!isDrawPictrue())
@@ -249,6 +254,7 @@ public class PictureKit
                if(control.getSysKit().getPictureManage().isConverting(path))
                {
             	   control.getSysKit().getPictureManage().appendViewIndex(path, viewIndex);
+                   markPendingPicture();
                    return null;
                }
                
@@ -274,6 +280,10 @@ public class PictureKit
                    
                    String dst = control.getSysKit().getPictureManage().convertVectorgraphToPng(viewIndex, imageType, path, 
                 		   w, h, control.isSlideShow());
+                   if(!control.isSlideShow())
+                   {
+                	   markPendingPicture();
+                   }
                    
                    if(control.isSlideShow())
             	   {
@@ -288,8 +298,9 @@ public class PictureKit
                {
             	   try
             	   {
-            		   InputStream in = new FileInputStream(path);
-                       sBitmap = BitmapFactory.decodeStream(in, null, options);
+                       sBitmap = offscreen
+                           ? decodeSampled(path, canvas, destWidth, destHeight)
+                           : decodeFile(path, options);
                        if(sBitmap == null)
                        {
                     	   //load fail, so call library to convert it to normal png image
@@ -317,6 +328,10 @@ public class PictureKit
                         	   
                         	   control.actionEvent(EventConstant.TEST_REPAINT_ID, null);           		   
                     	   }
+                           else
+                           {
+                        	   markPendingPicture();
+                           }
 
                            return dst;
                        }
@@ -331,7 +346,10 @@ public class PictureKit
                    return FAIL;
                }
                
-               control.getSysKit().getPictureManage().addBitmap(path, sBitmap);
+               if (!offscreen)
+               {
+                   control.getSysKit().getPictureManage().addBitmap(path, sBitmap);
+               }
            }           
            
            if(animation != null)
@@ -533,7 +551,90 @@ public class PictureKit
      */
     public boolean isDrawPictrue()
     {
-        return isDrawPictrue;
+        return isDrawPictrue || forceDrawOnThread.get() == Boolean.TRUE;
+    }
+
+    private static Bitmap decodeFile(String path, Options options) throws IOException
+    {
+        try (InputStream in = new FileInputStream(path))
+        {
+            return BitmapFactory.decodeStream(in, null, options);
+        }
+    }
+
+    /**
+     * Decodes [path] at the smallest power-of-two reduction still at least as large as it is
+     * drawn: [destWidth] x [destHeight] under the canvas' scale.
+     */
+    @SuppressWarnings("deprecation") // getMatrix: fine on the software canvas of an off-screen render
+    private static Bitmap decodeSampled(String path, Canvas canvas, float destWidth, float destHeight) throws IOException
+    {
+        Options bounds = new Options();
+        bounds.inJustDecodeBounds = true;
+        decodeFile(path, bounds);
+        float[] m = new float[9];
+        canvas.getMatrix().getValues(m);
+        int needW = Math.max(1, (int)Math.ceil(destWidth * Math.hypot(m[Matrix.MSCALE_X], m[Matrix.MSKEW_Y])));
+        int needH = Math.max(1, (int)Math.ceil(destHeight * Math.hypot(m[Matrix.MSKEW_X], m[Matrix.MSCALE_Y])));
+        int sample = 1;
+        while (bounds.outWidth / (sample * 2) >= needW && bounds.outHeight / (sample * 2) >= needH)
+        {
+            sample *= 2;
+        }
+        Options options = new Options();
+        options.inSampleSize = sample;
+        return decodeFile(path, options);
+    }
+
+    /**
+     * Starts recording, on the calling thread, pictures left out because they are still being
+     * converted (WMF/EMF, CMYK JPEG); the converter fires EventConstant.TEST_REPAINT_ID when one is ready.
+     */
+    public void startTrackingPendingPictures()
+    {
+        pendingOnThread.set(new boolean[1]);
+    }
+
+    /**
+     * Stops the recording started by {@link #startTrackingPendingPictures}.
+     *
+     * @return true when a picture was left out since then
+     */
+    public boolean stopTrackingPendingPictures()
+    {
+        boolean[] pending = pendingOnThread.get();
+        pendingOnThread.remove();
+        return pending != null && pending[0];
+    }
+
+    private void markPendingPicture()
+    {
+        boolean[] pending = pendingOnThread.get();
+        if (pending != null)
+        {
+            pending[0] = true;
+        }
+    }
+
+    /**
+     * Makes pictures always draw on the calling thread, whatever {@link #setDrawPictrue} says,
+     * without touching that shared flag: the UI turns it off while scrolling, and a background
+     * render (thumbnails, PDF export) toggling it would fight the UI thread.
+     *
+     * @return the previous value, to restore in a finally block
+     */
+    public boolean setForceDrawOnCurrentThread(boolean force)
+    {
+        boolean previous = forceDrawOnThread.get() == Boolean.TRUE;
+        if (force)
+        {
+            forceDrawOnThread.set(Boolean.TRUE);
+        }
+        else
+        {
+            forceDrawOnThread.remove();
+        }
+        return previous;
     }
 
     /**
@@ -547,7 +648,11 @@ public class PictureKit
     //
     private Paint paint = new Paint();
     //
-    private boolean isDrawPictrue = true;
+    private volatile boolean isDrawPictrue = true;
+    //
+    private final ThreadLocal<Boolean> forceDrawOnThread = new ThreadLocal<Boolean>();
+    //
+    private final ThreadLocal<boolean[]> pendingOnThread = new ThreadLocal<boolean[]>();
     //
     //private String filePath;    
 }

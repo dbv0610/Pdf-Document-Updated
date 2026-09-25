@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.view.MotionEvent
 import android.view.View
 import com.wxiwei.office.res.ResKit
+import com.wxiwei.office.system.LayoutInfo
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener
 import java.io.File
@@ -193,15 +194,15 @@ internal class MacroFrame(application: Application, activity: Activity) : IMainF
     /**
      * callback this method after zoom change
      */
-    override fun changePage() {
-        updateStatusListener?.changePage()
+    override fun changePage(pageNumber: Int, pageCount: Int) {
+        updateStatusListener?.changePage(pageNumber, pageCount)
     }
 
     /**
      * callback this method after layout completed
      */
-    override fun completeLayout() {
-        updateStatusListener?.completeLayout()
+    override fun completeLayout(info: LayoutInfo) {
+        updateStatusListener?.completeLayout(info)
     }
 
     /**

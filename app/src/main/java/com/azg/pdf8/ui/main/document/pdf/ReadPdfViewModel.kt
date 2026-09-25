@@ -2,25 +2,20 @@ package com.azg.pdf8.ui.main.document.pdf
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.azg.pdf8.model.ContentWithPage
 import com.azg.pdf8.model.RecentDocument
 import com.azg.pdf8.model.DocumentPage
 import com.azg.pdf8.viewmodel.AppDataRepo
 import com.azg.pdf8.viewmodel.DataResponse
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import androidx.core.graphics.createBitmap
+import kotlinx.coroutines.Job
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
-import kotlinx.coroutines.flow.update
 
 enum class PageViewType {
     PageByPage, Thumbnail
@@ -37,72 +32,27 @@ class ReadPdfViewModel(private val repository: AppDataRepo) : ViewModel() {
     private val _pagesState = MutableStateFlow<List<DocumentPage>>(emptyList())
     val pagesState: LiveData<List<DocumentPage>> = _pagesState.asLiveData()
 
+    private var thumbnailLoader: PdfThumbnailLoader? = null
+    private var renderJob: Job? = null
+    private var thumbnailUri: Uri? = null
+
     fun renderPdf(context: Context, pdfUri: Uri, thumbnailWidth: Int = 200) {
-        viewModelScope.launch {
-            try {
-                val pfd = context.contentResolver.openFileDescriptor(pdfUri, "r")
-                    ?: throw IllegalArgumentException("Cannot open PDF: $pdfUri")
-
-                PdfRenderer(pfd).use { renderer ->
-                    _pagesState.value = List(renderer.pageCount) { DocumentPage.loading(it) }
-
-                    withContext(Dispatchers.IO) {
-                        (0 until renderer.pageCount).forEach { index ->
-                            try {
-                                val page = renderer.openPage(index)
-                                val ratio = page.height.toFloat() / page.width
-                                val thumbHeight = (thumbnailWidth * ratio).toInt()
-                                val bitmap = try {
-                                    createBitmap(thumbnailWidth, thumbHeight).also { bmp ->
-                                        page.render(
-                                            bmp,
-                                            null,
-                                            null,
-                                            PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
-                                        )
-                                    }
-                                } catch (e: OutOfMemoryError) {
-                                    createBitmap(
-                                        thumbnailWidth / 2,
-                                        (thumbHeight / 2).coerceAtLeast(1),
-                                        Bitmap.Config.RGB_565
-                                    ).also { bmp ->
-                                        page.render(
-                                            bmp,
-                                            null,
-                                            null,
-                                            PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
-                                        )
-                                    }
-                                }
-
-                                page.close()
-                                _pagesState.update { current ->
-                                    current.map {
-                                        if (it.index == index) it.copy(
-                                            bitmap = bitmap,
-                                            isLoading = false
-                                        ) else it
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                _pagesState.update { current ->
-                                    current.map {
-                                        if (it.index == index) DocumentPage.error(index, e) else it
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                _pagesState.value = listOf(DocumentPage.error(0, e))
-            }
+        if (thumbnailUri == pdfUri && thumbnailLoader != null) return
+        renderJob?.cancel()
+        thumbnailLoader?.close()
+        thumbnailUri = pdfUri
+        val loader = PdfThumbnailLoader(context.applicationContext, pdfUri, thumbnailWidth)
+        thumbnailLoader = loader
+        renderJob = viewModelScope.launch {
+            val count = loader.pageCount()
+            _pagesState.value = List(count) { DocumentPage(it) }
         }
     }
 
+    suspend fun thumbnail(index: Int): Bitmap? = thumbnailLoader?.thumbnail(index)
+
     override fun onCleared() {
-        _pagesState.value.forEach { it.bitmap?.recycle() }
+        thumbnailLoader?.close()
         super.onCleared()
     }
 
@@ -182,30 +132,6 @@ class ReadPdfViewModel(private val repository: AppDataRepo) : ViewModel() {
     fun stateFavoriteCurrent(path: String?) {
         path?.let {
             viewModelScope.launch {
-            }
-        }
-    }
-
-    private val _textCopy =
-        MutableStateFlow<DataResponse<String?>>(DataResponse.DataIdle())
-    val textCopy: StateFlow<DataResponse<String?>> get() = _textCopy
-
-    fun getTextCopy(path: String) {
-        viewModelScope.launch {
-            repository.extractPdfTextFromPath(path).collect { state ->
-                _textCopy.value = state
-            }
-        }
-    }
-
-    private val _searchQuery =
-        MutableStateFlow<DataResponse<List<ContentWithPage>>>(DataResponse.DataIdle())
-    val searchQuery: StateFlow<DataResponse<List<ContentWithPage>>> get() = _searchQuery
-
-    fun getSearchQuery(pdfPath: String, query: String) {
-        viewModelScope.launch {
-            repository.getTextSearch(pdfPath, query).collect { state ->
-                _searchQuery.value = state
             }
         }
     }

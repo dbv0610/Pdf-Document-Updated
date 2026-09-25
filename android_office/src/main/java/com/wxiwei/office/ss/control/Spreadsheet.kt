@@ -375,7 +375,7 @@ class Spreadsheet(context: Context, filepath: String?, book: Workbook?, control:
                 invalidate()
             }
             if (preShowSheetIndex != currentSheetIndex) {
-                control!!.getMainFrame().changePage()
+                control!!.getMainFrame().changePage(currentSheetIndex + 1, workbook?.getSheetCount() ?: 0)
                 preShowSheetIndex = currentSheetIndex
             }
         } catch (e: Exception) {

@@ -16,6 +16,7 @@ import com.wxiwei.office.editor.xlsx.A1FormulaShifter
 import com.wxiwei.office.editor.xlsx.SheetEditSession
 import com.wxiwei.office.res.ResKit
 import com.wxiwei.office.ss.control.ExcelView
+import com.wxiwei.office.system.LayoutInfo
 import com.wxiwei.office.system.IMainFrame
 import com.wxiwei.office.system.MainControl
 import com.wxiwei.office.system.beans.pagelist.IPageListViewListener
@@ -179,8 +180,8 @@ class XlsxEditLabActivity : AppCompatActivity(), IMainFrame {
     override fun getWordDefaultView() = WPViewConstant.PAGE_ROOT.toByte()
     override fun getLocalString(resName: String): String? = ResKit.instance().getLocalString(resName)
     override fun changeZoom() = Unit
-    override fun changePage() = Unit
-    override fun completeLayout() = Unit
+    override fun changePage(pageNumber: Int, pageCount: Int) = Unit
+    override fun completeLayout(info: LayoutInfo) = Unit
     override fun error(errorCode: Int) { runOnUiThread { setBusy(false); report("Open error: $errorCode") } }
     override fun fullScreen(fullscreen: Boolean) = Unit
     override fun showProgressBar(visible: Boolean) = Unit

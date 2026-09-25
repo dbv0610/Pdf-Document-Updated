@@ -33,7 +33,7 @@ import com.wxiwei.office.fc.ss.util.CellReference;
  *
  * @author Josh Micich
  */
-final class LazyAreaEval extends AreaEvalBase {
+public final class LazyAreaEval extends AreaEvalBase {
 
 	private final SheetRefEvaluator _evaluator;
 
@@ -46,6 +46,11 @@ final class LazyAreaEval extends AreaEvalBase {
 			int lastColumnIndex, SheetRefEvaluator evaluator) {
 		super(firstRowIndex, firstColumnIndex, lastRowIndex, lastColumnIndex);
 		_evaluator = evaluator;
+	}
+
+	/** Index of the sheet this area reads (used to key lookup indexes). */
+	public int getSheetIndex() {
+		return _evaluator.getSheetIndex();
 	}
 
 	public ValueEval getRelativeValue(int relativeRowIndex, int relativeColumnIndex) {

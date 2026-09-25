@@ -45,6 +45,10 @@ final class SheetRefEvaluator {
 		_sheetIndex = sheetIndex;
 	}
 
+	public int getSheetIndex() {
+		return _sheetIndex;
+	}
+
 	public String getSheetName() {
 		return _bookEvaluator.getSheetName(_sheetIndex);
 	}

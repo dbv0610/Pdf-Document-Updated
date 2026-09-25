@@ -648,6 +648,10 @@ public final class WorkbookEvaluator {
 
 			throw new RuntimeException("Don't now how to evalate name '" + nameRecord.getNameText() + "'");
 		}
+		if (ptg instanceof NameXPtg && !(_workbook instanceof HSSFEvaluationWorkbook)) {
+		    // XLSX (XlsxEvaluationWorkbook): a function name for UserDefinedFunction to resolve
+		    return ec.getNameXEval((NameXPtg) ptg);
+		}
 		if (ptg instanceof NameXPtg) {
 		    NameXPtg nameXPtg = (NameXPtg) ptg;
             EvaluationName nameRecord = ((HSSFEvaluationWorkbook)_workbook).getName(nameXPtg);

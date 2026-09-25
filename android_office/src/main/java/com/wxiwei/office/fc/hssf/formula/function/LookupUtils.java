@@ -18,6 +18,10 @@
 package com.wxiwei.office.fc.hssf.formula.function;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.wxiwei.office.fc.hssf.formula.LazyAreaEval;
 import com.wxiwei.office.fc.hssf.formula.TwoDEval;
 import com.wxiwei.office.fc.hssf.formula.WorkbookEvaluator;
 import com.wxiwei.office.fc.hssf.formula.eval.AreaEval;
@@ -123,6 +127,53 @@ final class LookupUtils {
 		public int getSize() {
 			return _size;
 		}
+	}
+
+	/** Case folding that matches {@link String#compareToIgnoreCase} equality. */
+	/* package */ static String foldCase(String s) {
+		char[] chars = s.toCharArray();
+		for (int i = 0; i < chars.length; i++) {
+			chars[i] = Character.toLowerCase(Character.toUpperCase(chars[i]));
+		}
+		return new String(chars);
+	}
+
+	private static Object itemKey(ValueEval item) {
+		if (item instanceof StringEval) return foldCase(((StringEval) item).getStringValue());
+		if (item instanceof NumberEval) return Double.valueOf(((NumberEval) item).getNumberValue());
+		if (item instanceof BoolEval) return Boolean.valueOf(((BoolEval) item).getBooleanValue());
+		return null; // blanks and errors never match
+	}
+
+	private static Map<Object, Integer> exactIndex(ValueVector vector) {
+		Map<String, Map<Object, Integer>> indexes = ExactLookupIndexes.ACTIVE.get();
+		if (indexes == null) return null;
+		TwoDEval table;
+		String key;
+		if (vector instanceof ColumnVector) {
+			table = ((ColumnVector) vector)._tableArray;
+			if (!(table instanceof LazyAreaEval)) return null;
+			LazyAreaEval area = (LazyAreaEval) table;
+			key = "C" + area.getSheetIndex() + ":" + area.getFirstRow() + ":" + area.getLastRow() + ":" + (area.getFirstColumn() + ((ColumnVector) vector)._columnIndex);
+		} else if (vector instanceof RowVector) {
+			table = ((RowVector) vector)._tableArray;
+			if (!(table instanceof LazyAreaEval)) return null;
+			LazyAreaEval area = (LazyAreaEval) table;
+			key = "R" + area.getSheetIndex() + ":" + area.getFirstColumn() + ":" + area.getLastColumn() + ":" + (area.getFirstRow() + ((RowVector) vector)._rowIndex);
+		} else {
+			return null;
+		}
+		Map<Object, Integer> index = indexes.get(key);
+		if (index == null) {
+			index = new HashMap<Object, Integer>();
+			int size = vector.getSize();
+			for (int i = 0; i < size; i++) {
+				Object itemKey = itemKey(vector.getItem(i));
+				if (itemKey != null && !index.containsKey(itemKey)) index.put(itemKey, Integer.valueOf(i));
+			}
+			indexes.put(key, index);
+		}
+		return index;
 	}
 
 	public static ValueVector createRowVector(TwoDEval tableArray, int relativeRowIndex) {
@@ -261,6 +312,9 @@ final class LookupUtils {
 			return sb.toString();
 		}
 		protected abstract CompareResult compareSameType(ValueEval other);
+
+		/** Hash key equal for exactly the values {@link #compareTo} finds equal. */
+		protected abstract Object indexKey();
 		/** used only for debug purposes */
 		protected abstract String getValueAsString();
 	}
@@ -276,6 +330,9 @@ final class LookupUtils {
 			StringEval se = (StringEval) other;
 			return CompareResult.valueOf(_value.compareToIgnoreCase(se.getStringValue()));
 		}
+		protected Object indexKey() {
+			return foldCase(_value);
+		}
 		protected String getValueAsString() {
 			return _value;
 		}
@@ -290,6 +347,9 @@ final class LookupUtils {
 		protected CompareResult compareSameType(ValueEval other) {
 			NumberEval ne = (NumberEval) other;
 			return CompareResult.valueOf(Double.compare(_value, ne.getNumberValue()));
+		}
+		protected Object indexKey() {
+			return Double.valueOf(_value);
 		}
 		protected String getValueAsString() {
 			return String.valueOf(_value);
@@ -313,6 +373,9 @@ final class LookupUtils {
 				return CompareResult.GREATER_THAN;
 			}
 			return CompareResult.LESS_THAN;
+		}
+		protected Object indexKey() {
+			return Boolean.valueOf(_value);
 		}
 		protected String getValueAsString() {
 			return String.valueOf(_value);
@@ -485,7 +548,12 @@ final class LookupUtils {
 	 * 	tableArray. For HLOOKUP this is the first row of the tableArray.
 	 * @return zero based index into the vector, -1 if value cannot be found
 	 */
-	private static int lookupIndexOfExactValue(LookupValueComparer lookupComparer, ValueVector vector) {
+	/* package */ static int lookupIndexOfExactValue(LookupValueComparer lookupComparer, ValueVector vector) {
+		Map<Object, Integer> index = exactIndex(vector);
+		if (index != null && lookupComparer instanceof LookupValueComparerBase) {
+			Integer found = index.get(((LookupValueComparerBase) lookupComparer).indexKey());
+			return found == null ? -1 : found.intValue();
+		}
 
 		// find first occurrence of lookup value
 		int size = vector.getSize();

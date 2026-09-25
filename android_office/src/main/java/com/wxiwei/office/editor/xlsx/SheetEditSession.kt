@@ -56,7 +56,7 @@ class SheetEditSession internal constructor(
 
     private fun inputOf(cell: Cell?): String {
         if (cell == null) return ""
-        cell.formula?.let { return "=$it" }
+        cell.formula?.let { return "=" + XlfnNames.stripPrefix(it) }
         return when (cell.getCellType()) {
             Cell.CELL_TYPE_NUMERIC -> cell.getNumberValue().let { if (it == Math.rint(it) && Math.abs(it) < 1e15) it.toLong().toString() else it.toString() }
             Cell.CELL_TYPE_STRING -> engine.adapter.stringOf(cell)
@@ -95,7 +95,7 @@ class SheetEditSession internal constructor(
         val sheet = book.getSheet(key.sheet) ?: return fail(Reason.NOT_FOUND, "Sheet ${key.sheet} not found")
         if (key.row < 0 || key.col < 0 || key.row >= 1048576 || key.col >= 16384) return fail(Reason.INVALID_ARGUMENT, "Cell out of range")
         val text = input.trim()
-        val formula = if (text.startsWith("=") && text.length > 1) text.substring(1) else null
+        val formula = if (text.startsWith("=") && text.length > 1) XlfnNames.addPrefix(text.substring(1)) else null
         if (formula != null) {
             try { engine.adapter.parse(formula, key.sheet) } catch (e: Exception) {
                 return fail(Reason.INVALID_ARGUMENT, "Formula error: ${e.message}")

@@ -79,6 +79,15 @@ class XlsxEditLabActivity : AppCompatActivity(), IMainFrame {
             val changed = s.engine.recalc(warnings)
             val ms = (System.nanoTime() - t0) / 1_000_000
             val sample = changed.take(12).joinToString("\n") { c -> A1FormulaShifter.address(c.cell.getRowNumber(), c.cell.getColNumber()) + " " + s.getInput(c.sheetIndex, c.cell.getRowNumber(), c.cell.getColNumber()) + " saved=" + before[c.cell] + " ours=" + show(c.cell) }
+            // Full list for offline analysis: adb shell run-as com.azg.pdf8 cat files/recalc.tsv
+            java.io.File(filesDir, "recalc.tsv").bufferedWriter().use { out ->
+                for (c in changed) out.append(book.getSheet(c.sheetIndex)?.getSheetName()).append('\t')
+                    .append(A1FormulaShifter.address(c.cell.getRowNumber(), c.cell.getColNumber())).append('\t')
+                    .append(s.getInput(c.sheetIndex, c.cell.getRowNumber(), c.cell.getColNumber()).replace('\n', ' ')).append('\t')
+                    .append(before[c.cell].orEmpty().replace("\n", "\\n").replace("\r", "\\r")).append('\t')
+                    .append(show(c.cell).replace("\n", "\\n").replace("\r", "\\r")).append('\n')
+                for (w in warnings) out.append("WARN\t").append(w).append('\n')
+            }
             android.util.Log.d("XLSXLAB", "recalc ${ms}ms changed=${changed.size} warnings=${warnings.size} ${warnings.take(8)} sample=$sample")
             report("Recalc ${ms} ms: ${changed.size} differ from saved values, ${warnings.size} warnings\n$sample")
         }

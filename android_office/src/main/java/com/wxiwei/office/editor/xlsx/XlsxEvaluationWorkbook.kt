@@ -7,6 +7,7 @@ import com.wxiwei.office.fc.hssf.formula.EvaluationWorkbook
 import com.wxiwei.office.fc.hssf.formula.FormulaParser
 import com.wxiwei.office.fc.hssf.formula.FormulaParsingWorkbook
 import com.wxiwei.office.fc.hssf.formula.FormulaType
+import com.wxiwei.office.fc.hssf.formula.function.ModernFunctions
 import com.wxiwei.office.fc.hssf.formula.ptg.NamePtg
 import com.wxiwei.office.fc.hssf.formula.ptg.NameXPtg
 import com.wxiwei.office.fc.hssf.formula.ptg.Ptg
@@ -75,13 +76,24 @@ class XlsxEvaluationWorkbook(val book: Workbook) : EvaluationWorkbook, FormulaPa
         for (i in 0 until book.getSheetCount()) if (book.getSheet(i)?.getSheetName().equals(sheetName, ignoreCase = true)) return i
         return -1
     }
-    override fun getSheet(sheetIndex: Int): EvaluationSheet? = sheetAdapter(sheetIndex)
+    /**
+     * The viewer loads sheets lazily: rows of a sheet still loading are missing, so a formula
+     * reading it would compute from blanks (and IFERROR/lookups would hide that). Failing here
+     * makes the engine keep the formula's saved value and report a warning instead.
+     */
+    override fun getSheet(sheetIndex: Int): EvaluationSheet? {
+        val sheet = book.getSheet(sheetIndex)
+        if (sheet != null && sheet.getState() != Sheet.State_Accomplished) {
+            throw IllegalStateException("Sheet ${sheet.getSheetName()} is still loading")
+        }
+        return sheetAdapter(sheetIndex)
+    }
     override fun getExternalSheet(externSheetIndex: Int): EvaluationWorkbook.ExternalSheet? = null
     override fun convertFromExternSheetIndex(externSheetIndex: Int) = externSheetIndex
     override fun getExternalName(externSheetIndex: Int, externNameIndex: Int): EvaluationWorkbook.ExternalName? = null
     override fun getName(namePtg: NamePtg): EvaluationName? = null
     override fun getName(name: String, sheetIndex: Int): EvaluationName? = null
-    override fun resolveNameXText(ptg: NameXPtg): String? = null
+    override fun resolveNameXText(ptg: NameXPtg): String? = udfNames.getOrNull(ptg.getNameIndex())
     override fun getFormulaTokens(cell: EvaluationCell): Array<Ptg> {
         val model = (cell as CellAdapter).cell
         val formula = model.formula ?: return emptyArray()
@@ -122,10 +134,28 @@ class XlsxEvaluationWorkbook(val book: Workbook) : EvaluationWorkbook, FormulaPa
     /** Parsed tokens of a formula cell (cached), for dependency analysis. */
     fun tokensOf(sheetIndex: Int, cell: Cell): Array<Ptg>? = cellAdapter(sheetIndex, cell)?.let { getFormulaTokens(it) }
     // Own instance: WorkbookEvaluator adds finders into it, and doing that to the shared
-    // UDFFinder.DEFAULT made it contain itself (endless lookup for unknown functions)
-    private val udf = com.wxiwei.office.fc.hssf.formula.udf.AggregatingUDFFinder(com.wxiwei.office.fc.hssf.formula.atp.AnalysisToolPak.instance)
+    // UDFFinder.DEFAULT made it contain itself (endless lookup for unknown functions).
+    // ModernFunctions first: the tool pak lists AVERAGEIF/COUNTIFS... only as stubs.
+    private val udf = com.wxiwei.office.fc.hssf.formula.udf.AggregatingUDFFinder(
+        ModernFunctions.finder, com.wxiwei.office.fc.hssf.formula.atp.AnalysisToolPak.instance
+    )
     override fun getUDFFinder(): UDFFinder = udf
-    override fun getNameXPtg(name: String): NameXPtg? = null
+
+    /** Function names handed out as NameXPtg indexes; [resolveNameXText] maps them back. */
+    private val udfNames = ArrayList<String>()
+
+    /**
+     * Called by the parser for a function it does not know. Names we can evaluate (without
+     * Excel's "_xlfn." prefix) become a NameXPtg the evaluator passes to UserDefinedFunction;
+     * anything else stays unknown, so the formula keeps its saved value.
+     */
+    override fun getNameXPtg(name: String): NameXPtg? {
+        val bare = name.uppercase().removePrefix("_XLFN.")
+        val function = udf.findFunction(bare) ?: return null
+        if (function.javaClass.simpleName == "NotImplemented") return null // AnalysisToolPak stub
+        val index = udfNames.indexOf(bare).takeIf { it >= 0 } ?: udfNames.size.also { udfNames += bare }
+        return NameXPtg(0, index)
+    }
     override fun getExternalSheetIndex(sheetName: String): Int = getSheetIndex(sheetName)
     override fun getExternalSheetIndex(workbookName: String?, sheetName: String): Int = -1
     override fun getSpreadsheetVersion(): SpreadsheetVersion = SpreadsheetVersion.EXCEL2007

@@ -1,6 +1,7 @@
 package com.wxiwei.office.editor.xlsx
 
 import com.wxiwei.office.fc.hssf.formula.WorkbookEvaluator
+import com.wxiwei.office.fc.hssf.formula.function.ExactLookupIndexes
 import com.wxiwei.office.fc.hssf.formula.eval.BlankEval
 import com.wxiwei.office.fc.hssf.formula.eval.BoolEval
 import com.wxiwei.office.fc.hssf.formula.eval.ErrorEval
@@ -45,7 +46,14 @@ class XlsxFormulaEngine(val book: Workbook) {
 
     /** A plain value changed (or a cell was created/cleared) at [cell]. */
     fun valueChanged(sheetIndex: Int, cell: Cell) {
-        adapter.cellAdapter(sheetIndex, cell)?.let { evaluator.notifyUpdateCell(it) }
+        if (lookupIndexes.isNotEmpty()) {
+            // Formulas answered from a lookup index never read the column through the evaluator,
+            // so its dependency tracking cannot tell which cached results this edit affects.
+            lookupIndexes.clear()
+            evaluator.clearAllCachedResultValues()
+        } else {
+            adapter.cellAdapter(sheetIndex, cell)?.let { evaluator.notifyUpdateCell(it) }
+        }
     }
 
     /** [cell]'s formula text was set, changed or removed. */
@@ -55,11 +63,22 @@ class XlsxFormulaEngine(val book: Workbook) {
         if (cell.formula != null) set.add(cell) else set.remove(cell)
         dropIndex()
         // Dependency links of the old formula are stale: start the cache over
+        lookupIndexes.clear()
         evaluator.clearAllCachedResultValues()
     }
 
     /** Evaluate one formula cell without storing the result. */
-    fun evaluate(sheetIndex: Int, cell: Cell): ValueEval = evaluator.evaluate(adapter.cellAdapter(sheetIndex, cell)!!)
+    fun evaluate(sheetIndex: Int, cell: Cell): ValueEval {
+        ExactLookupIndexes.ACTIVE.set(lookupIndexes)
+        try {
+            return evaluator.evaluate(adapter.cellAdapter(sheetIndex, cell)!!)
+        } finally {
+            ExactLookupIndexes.ACTIVE.remove()
+        }
+    }
+
+    /** Exact-match lookup indexes (see ExactLookupIndexes); valid until a cell changes. */
+    private val lookupIndexes = HashMap<String, Map<Any, Int>>()
 
     // ---- Dependency index: which formulas read a given cell -------------------------------
     private class Dep(val r1: Int, val r2: Int, val c1: Int, val c2: Int, val sheet: Int, val cell: Cell)
@@ -128,7 +147,7 @@ class XlsxFormulaEngine(val book: Workbook) {
      * results. Returns the cells whose displayed value changed.
      */
     fun recalcAfter(sheetIndex: Int, cell: Cell, warnings: MutableList<String> = ArrayList()): List<Changed> {
-        if (adapter.rowTouched(sheetIndex, cell.getRowNumber())) { dropIndex(); evaluator.clearAllCachedResultValues() }
+        if (adapter.rowTouched(sheetIndex, cell.getRowNumber())) { dropIndex(); lookupIndexes.clear(); evaluator.clearAllCachedResultValues() }
         val targets = dependents(sheetIndex, cell.getRowNumber(), cell.getColNumber(), warnings)
         targets.addAll(always)
         if (cell.formula != null) targets.add(sheetIndex to cell)

@@ -193,12 +193,11 @@ public final class Match extends Var2or3ArgFunction {
 
 		int size = lookupRange.getSize();
 		if(matchExact) {
-			for (int i = 0; i < size; i++) {
-				if(lookupComparer.compareTo(lookupRange.getItem(i)).isEqual()) {
-					return i;
-				}
+			int index = LookupUtils.lookupIndexOfExactValue(lookupComparer, lookupRange);
+			if (index < 0) {
+				throw new EvaluationException(ErrorEval.NA);
 			}
-			throw new EvaluationException(ErrorEval.NA);
+			return index;
 		}
 
 		if(findLargestLessThanOrEqual) {
